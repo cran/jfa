@@ -19,8 +19,7 @@ adjustedConfidence <- 1 - ((1 - confidence) / (ir * cr))
 
 ## -----------------------------------------------------------------------------
 # Step 0: Create a prior distribution according to the audit risk model.
-priorResult <- auditPrior(materiality = materiality, confidence = confidence, expectedError = expectedError,
-                          method = "arm", ir = ir, cr = cr, likelihood = "binomial")
+priorResult <- auditPrior(confidence = confidence, likelihood = "binomial", method = "arm", expectedError = expectedError, materiality = materiality, ir = ir, cr = cr)
 
 ## -----------------------------------------------------------------------------
 print(priorResult)
@@ -30,8 +29,7 @@ plot(priorResult)
 
 ## -----------------------------------------------------------------------------
 # Step 1: Calculate the required sample size.
-planningResult <- planning(materiality = materiality, confidence = confidence, expectedError = expectedError, 
-                          prior = priorResult)
+planningResult <- planning(confidence = confidence, expectedError = expectedError, materiality = materiality, prior = priorResult)
 
 ## -----------------------------------------------------------------------------
 print(planningResult)
@@ -41,8 +39,7 @@ plot(planningResult)
 
 ## -----------------------------------------------------------------------------
 # Step 2: Draw a sample from the financial statements.
-samplingResult <- sampling(population = BuildIt, sampleSize = planningResult, units = "mus", bookValues = "bookValue",
-                           seed = 999)
+samplingResult <- selection(population = BuildIt, sampleSize = planningResult, units = "mus", bookValues = "bookValue", seed = 999)
 
 ## -----------------------------------------------------------------------------
 print(samplingResult)
@@ -59,8 +56,7 @@ sample <- samplingResult$sample
 
 ## -----------------------------------------------------------------------------
 # Step 4: Evaluate the sample.
-evaluationResult <- evaluation(sample = sample, materiality = materiality, prior = priorResult, 
-                               bookValues = "bookValue", auditValues = "auditValue")
+evaluationResult <- evaluation(sample = sample, materiality = materiality, prior = priorResult, bookValues = "bookValue", auditValues = "auditValue")
 
 ## -----------------------------------------------------------------------------
 print(evaluationResult)
