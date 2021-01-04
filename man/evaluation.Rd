@@ -15,7 +15,7 @@ evaluation(confidence = 0.95, method = "binomial", N = NULL,
 \arguments{
 \item{confidence}{the required confidence level for the bound. Default is 0.95 for 95\% confidence.}
 
-\item{method}{the method that is used to evaluate the sample. This can be either one of \code{poisson}, \code{binomial}, \code{hypergeometric}, \code{stringer}, \code{stringer-meikle}, \code{stringer-lta}, \code{stringer-pvz}, \code{rohrbach}, \code{moment}, \code{direct}, \code{difference}, \code{quotient}, or \code{regression}.}
+\item{method}{the method that is used to evaluate the sample. This can be either one of \code{poisson}, \code{binomial}, \code{hypergeometric}, \code{mpus}, \code{stringer}, \code{stringer-meikle}, \code{stringer-lta}, \code{stringer-pvz}, \code{rohrbach}, \code{moment}, \code{direct}, \code{difference}, \code{quotient}, or \code{regression}.}
 
 \item{N}{an integer specifying the total number of units (transactions or monetary units) in the population.}
 
@@ -43,7 +43,7 @@ evaluation(confidence = 0.95, method = "binomial", N = NULL,
 
 \item{rohrbachDelta}{a value specifying \eqn{\Delta} in Rohrbach's augmented variance bound (Rohrbach, 1993).}
 
-\item{momentPoptype}{a character specifying the type of population for the modified moment method (Dworin and Grimlund, 1986). Can be either one of \code{accounts} or \code{inventory}. Options result in different methods for calculating the central moments.}
+\item{momentPoptype}{a character specifying the type of population for the modified moment method (Dworin and Grimlund, 1984). Can be either one of \code{accounts} or \code{inventory}. Options result in different methods for calculating the central moments.}
 
 \item{populationBookValue}{a value specifying the total value of the transactions in the population. Required when \code{method} is one of \code{direct}, \code{difference}, \code{quotient}, or \code{regression}, but optional otherwise.}
 
@@ -75,9 +75,13 @@ An object of class \code{jfaEvaluation} containing:
 \item{populationK}{the assumed total errors in the population. Used in inferences with \code{hypergeometric} method.}
 \item{prior}{an object of class 'jfaPrior' to represents the prior distribution.}
 \item{posterior}{an object of class 'jfaPosterior' to represents the posterior distribution.}
+\item{data}{a data frame containing the relevant columns from the \code{sample} input.}
 }
 \description{
-This function takes a data frame (using \code{sample}, \code{bookValue}, and \code{auditValues}) or summary statistics (using \code{nSumstats} and \code{kSumstats}) and evaluates the audit sample according to the specified method. The returned object is of class \code{jfaEvaluation} and can be used with associated \code{print()} and \code{plot()} methods.
+This function takes a data frame (using \code{sample}, \code{bookValues}, and \code{auditValues}) or summary statistics (using \code{nSumstats} and \code{kSumstats}) and evaluates the audit sample according to the specified method. The returned object is of class \code{jfaEvaluation} and can be used with associated \code{print()} and \code{plot()} methods.
+
+For more details on how to use this function see the package vignette:
+\code{vignette("jfa", package = "jfa")}
 }
 \details{
 This section lists the available options for the \code{methods} argument.
@@ -86,12 +90,13 @@ This section lists the available options for the \code{methods} argument.
  \item{\code{poisson}:          The confidence bound taken from the Poisson distribution. If combined with \code{prior = TRUE}, performs Bayesian evaluation using a \emph{gamma} prior and posterior.}
  \item{\code{binomial}:         The confidence bound taken from the binomial distribution. If combined with \code{prior = TRUE}, performs Bayesian evaluation using a \emph{beta} prior and posterior.}
  \item{\code{hypergeometric}:   The confidence bound taken from the hypergeometric distribution. If combined with \code{prior = TRUE}, performs Bayesian evaluation using a \emph{beta-binomial} prior and posterior.}
+\item{\code{mpu}}:			   Mean per unit estimator using the observed sample taints.
  \item{\code{stringer}:         The Stringer bound (Stringer, 1963).}
  \item{\code{stringer-meikle}:  Stringer bound with Meikle's correction for understatements (Meikle, 1972).}
  \item{\code{stringer-lta}:     Stringer bound with LTA correction for understatements (Leslie, Teitlebaum, and Anderson, 1979).}
  \item{\code{stringer-pvz}:     Stringer bound with Pap and van Zuijlen's correction for understatements (Pap and van Zuijlen, 1996).}
  \item{\code{rohrbach}:         Rohrbach's augmented variance bound (Rohrbach, 1993).}
- \item{\code{moment}:           Modified moment bound (Dworin and Grimlund, 1986).}
+ \item{\code{moment}:           Modified moment bound (Dworin and Grimlund, 1984).}
  \item{\code{coxsnell}:         Cox and Snell bound (Cox and Snell, 1979).}
  \item{\code{direct}:           Confidence interval using the direct method (Touw and Hoogduin, 2011).}
  \item{\code{difference}:       Confidence interval using the difference method (Touw and Hoogduin, 2011).}
@@ -173,7 +178,7 @@ print(e2)
 \references{
 Cox, D. and Snell, E. (1979). On sampling and the estimation of rare errors. \emph{Biometrika}, 66(1), 125-132.
 
-Dworin, L., and Grimlund, R. A. (1986). Dollar-unit sampling: A comparison of the quasi-Bayesian and moment bounds. \emph{Accounting Review}, 36-57.
+Dworin, L. D. and Grimlund, R. A. (1984). Dollar-unit Sampling for accounts receivable and inventory. \emph{The Accounting Review}, 59(2), 218–241
 
 Leslie, D. A., Teitlebaum, A. D., & Anderson, R. J. (1979). \emph{Dollar-unit sampling: a practical guide for auditors}. Copp Clark Pitman; Belmont, Calif.: distributed by Fearon-Pitman.
 

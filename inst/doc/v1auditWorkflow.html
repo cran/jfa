@@ -13,7 +13,7 @@
 <meta name="author" content="Koen Derks" />
 
 
-<title>jfa: The audit sampling workflow</title>
+<title>The audit sampling workflow</title>
 
 <script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
 // v0.0.1
@@ -31,6 +31,54 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+<style type="text/css">
+a.anchor-section {margin-left: 10px; visibility: hidden; color: inherit;}
+a.anchor-section::before {content: '#';}
+.hasAnchor:hover a.anchor-section {visibility: visible;}
+</style>
+<script>// Anchor sections v1.0 written by Atsushi Yasumoto on Oct 3rd, 2020.
+document.addEventListener('DOMContentLoaded', function() {
+  // Do nothing if AnchorJS is used
+  if (typeof window.anchors === 'object' && anchors.hasOwnProperty('hasAnchorJSLink')) {
+    return;
+  }
+
+  const h = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+  // Do nothing if sections are already anchored
+  if (Array.from(h).some(x => x.classList.contains('hasAnchor'))) {
+    return null;
+  }
+
+  // Use section id when pandoc runs with --section-divs
+  const section_id = function(x) {
+    return ((x.classList.contains('section') || (x.tagName === 'SECTION'))
+            ? x.id : '');
+  };
+
+  // Add anchors
+  h.forEach(function(x) {
+    const id = x.id || section_id(x.parentElement);
+    if (id === '') {
+      return null;
+    }
+    let anchor = document.createElement('a');
+    anchor.href = '#' + id;
+    anchor.classList = ['anchor-section'];
+    x.classList.add('hasAnchor');
+    x.appendChild(anchor);
+  });
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -315,8 +363,9 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">jfa: The audit sampling workflow</h1>
+<h1 class="title toc-ignore">The audit sampling workflow</h1>
 <h4 class="author">Koen Derks</h4>
+<h4 class="date">last modified: 07-11-2020</h4>
 
 
 <div id="TOC">
@@ -324,7 +373,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li><a href="#introduction-and-scenario">Introduction and scenario</a></li>
 <li><a href="#setting-up-the-audit">Setting up the audit</a></li>
 <li><a href="#stage-1-planning-an-audit-sample">Stage 1: Planning an audit sample</a></li>
-<li><a href="#stage-2-sampling-from-the-financial-statements">Stage 2: Sampling from the financial statements</a></li>
+<li><a href="#stage-2-selecting-a-sample">Stage 2: Selecting a sample</a></li>
 <li><a href="#stage-3-executing-the-audit">Stage 3: Executing the audit</a></li>
 <li><a href="#stage-4-evaluating-the-sample">Stage 4: Evaluating the sample</a></li>
 <li><a href="#conclusion">Conclusion</a></li>
@@ -421,8 +470,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="kw">plot</span>(planningResult)</span></code></pre></div>
 <p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
 </div>
-<div id="stage-2-sampling-from-the-financial-statements" class="section level2">
-<h2>Stage 2: Sampling from the financial statements</h2>
+<div id="stage-2-selecting-a-sample" class="section level2">
+<h2>Stage 2: Selecting a sample</h2>
 <p>Laura is now ready to select the required 169 transactions from the financial statements. She can choose to do this according to one of two statistical methods. In <em>record sampling</em> (<code>units = &quot;records&quot;</code>), inclusion probabilities are assigned on the transaction level, treating transactions with a high value and a low value the same, a transaction of $5,000 is equally likely to be selected as a transaction of $1,000. In <em>monetary unit sampling</em> (<code>units = &quot;mus&quot;</code>), inclusion probabilities are assigned on the level of individual monetary units (e.g., a dollar). When a dollar is selected to be in the sample, the transaction that includes that dollar is selected. This favors higher transactions, as a transaction of $5,000 is five times more likely to be selected than a transaction of $1,000.</p>
 <p>Laura chooses to use <em>monetary unit sampling</em>, as she wants to include more high-valued transactions. The <code>selection()</code> function allows her to sample from the financial statements. She uses the <code>planningResult</code> object as an input for the <code>selection()</code> function.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># Step 2: Draw a sample from the financial statements.</span></span>

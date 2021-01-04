@@ -1,6 +1,9 @@
 #' Evaluation of Audit Samples using Confidence / Credible Bounds
 #'
-#' @description This function takes a data frame (using \code{sample}, \code{bookValue}, and \code{auditValues}) or summary statistics (using \code{nSumstats} and \code{kSumstats}) and evaluates the audit sample according to the specified method. The returned object is of class \code{jfaEvaluation} and can be used with associated \code{print()} and \code{plot()} methods.
+#' @description This function takes a data frame (using \code{sample}, \code{bookValues}, and \code{auditValues}) or summary statistics (using \code{nSumstats} and \code{kSumstats}) and evaluates the audit sample according to the specified method. The returned object is of class \code{jfaEvaluation} and can be used with associated \code{print()} and \code{plot()} methods.
+#'
+#' For more details on how to use this function see the package vignette:
+#' \code{vignette("jfa", package = "jfa")}
 #'
 #' @usage evaluation(confidence = 0.95, method = "binomial", N = NULL,
 #'             sample = NULL, bookValues = NULL, auditValues = NULL, counts = NULL, 
@@ -11,7 +14,7 @@
 #'             csA = 1, csB = 3, csMu = 0.5) 
 #'
 #' @param confidence    the required confidence level for the bound. Default is 0.95 for 95\% confidence.
-#' @param method        the method that is used to evaluate the sample. This can be either one of \code{poisson}, \code{binomial}, \code{hypergeometric}, \code{stringer}, \code{stringer-meikle}, \code{stringer-lta}, \code{stringer-pvz}, \code{rohrbach}, \code{moment}, \code{direct}, \code{difference}, \code{quotient}, or \code{regression}. 
+#' @param method        the method that is used to evaluate the sample. This can be either one of \code{poisson}, \code{binomial}, \code{hypergeometric}, \code{mpus}, \code{stringer}, \code{stringer-meikle}, \code{stringer-lta}, \code{stringer-pvz}, \code{rohrbach}, \code{moment}, \code{direct}, \code{difference}, \code{quotient}, or \code{regression}. 
 #' @param N             an integer specifying the total number of units (transactions or monetary units) in the population.
 #' @param sample        a data frame containing at least a column of Ist values and a column of Soll (true) values.
 #' @param bookValues    a character specifying the column name for the Ist values in the sample.
@@ -25,7 +28,7 @@
 #' @param nPrior        a value for the prior parameter \eqn{\beta} (number of transactions in the assumed prior sample).
 #' @param kPrior        a value for the prior parameter \eqn{\alpha} (total tainting in the assumed prior sample).
 #' @param rohrbachDelta a value specifying \eqn{\Delta} in Rohrbach's augmented variance bound (Rohrbach, 1993).
-#' @param momentPoptype a character specifying the type of population for the modified moment method (Dworin and Grimlund, 1986). Can be either one of \code{accounts} or \code{inventory}. Options result in different methods for calculating the central moments.
+#' @param momentPoptype a character specifying the type of population for the modified moment method (Dworin and Grimlund, 1984). Can be either one of \code{accounts} or \code{inventory}. Options result in different methods for calculating the central moments.
 #' @param populationBookValue a value specifying the total value of the transactions in the population. Required when \code{method} is one of \code{direct}, \code{difference}, \code{quotient}, or \code{regression}, but optional otherwise.
 #' @param csA           if \code{method = "coxsnell"}, the \eqn{\alpha} parameter of the prior distribution on the mean taint. Default is set to 1, as recommended by Cox and Snell (1979).
 #' @param csB           if \code{method = "coxsnell"}, the \eqn{\beta} parameter of the prior distribution on the mean taint. Default is set to 3, as recommended by Cox and Snell (1979).
@@ -37,12 +40,13 @@
 #'  \item{\code{poisson}:          The confidence bound taken from the Poisson distribution. If combined with \code{prior = TRUE}, performs Bayesian evaluation using a \emph{gamma} prior and posterior.}
 #'  \item{\code{binomial}:         The confidence bound taken from the binomial distribution. If combined with \code{prior = TRUE}, performs Bayesian evaluation using a \emph{beta} prior and posterior.}
 #'  \item{\code{hypergeometric}:   The confidence bound taken from the hypergeometric distribution. If combined with \code{prior = TRUE}, performs Bayesian evaluation using a \emph{beta-binomial} prior and posterior.}
+#'	\item{\code{mpu}}:			   Mean per unit estimator using the observed sample taints.
 #'  \item{\code{stringer}:         The Stringer bound (Stringer, 1963).}
 #'  \item{\code{stringer-meikle}:  Stringer bound with Meikle's correction for understatements (Meikle, 1972).}
 #'  \item{\code{stringer-lta}:     Stringer bound with LTA correction for understatements (Leslie, Teitlebaum, and Anderson, 1979).}
 #'  \item{\code{stringer-pvz}:     Stringer bound with Pap and van Zuijlen's correction for understatements (Pap and van Zuijlen, 1996).}
 #'  \item{\code{rohrbach}:         Rohrbach's augmented variance bound (Rohrbach, 1993).}
-#'  \item{\code{moment}:           Modified moment bound (Dworin and Grimlund, 1986).}
+#'  \item{\code{moment}:           Modified moment bound (Dworin and Grimlund, 1984).}
 #'  \item{\code{coxsnell}:         Cox and Snell bound (Cox and Snell, 1979).}
 #'  \item{\code{direct}:           Confidence interval using the direct method (Touw and Hoogduin, 2011).}
 #'  \item{\code{difference}:       Confidence interval using the difference method (Touw and Hoogduin, 2011).}
@@ -51,7 +55,7 @@
 #' }
 #' 
 #' @references Cox, D. and Snell, E. (1979). On sampling and the estimation of rare errors. \emph{Biometrika}, 66(1), 125-132. 
-#' @references Dworin, L., and Grimlund, R. A. (1986). Dollar-unit sampling: A comparison of the quasi-Bayesian and moment bounds. \emph{Accounting Review}, 36-57.
+#' @references Dworin, L. D. and Grimlund, R. A. (1984). Dollar-unit Sampling for accounts receivable and inventory. \emph{The Accounting Review}, 59(2), 218–241
 #' @references Leslie, D. A., Teitlebaum, A. D., & Anderson, R. J. (1979). \emph{Dollar-unit sampling: a practical guide for auditors}. Copp Clark Pitman; Belmont, Calif.: distributed by Fearon-Pitman.
 #' @references Meikle, G. R. (1972). \emph{Statistical Sampling in an Audit Context: An Audit Technique}. Canadian Institute of Chartered Accountants.
 #' @references Pap, G., and van Zuijlen, M. C. (1996). On the asymptotic behavior of the Stringer bound 1. \emph{Statistica Neerlandica}, 50(3), 367-389.
@@ -80,6 +84,7 @@
 #' \item{populationK}{the assumed total errors in the population. Used in inferences with \code{hypergeometric} method.}
 #' \item{prior}{an object of class 'jfaPrior' to represents the prior distribution.}
 #' \item{posterior}{an object of class 'jfaPosterior' to represents the posterior distribution.}
+#' \item{data}{a data frame containing the relevant columns from the \code{sample} input.}
 #'
 #' @author Koen Derks, \email{k.derks@nyenrode.nl}
 #'
@@ -183,13 +188,13 @@ evaluation <- function(confidence = 0.95, method = "binomial", N = NULL,
 	if(!is.null(minPrecision) && minPrecision == 0)
 		stop("The minimum required precision cannot be zero.")
 	
-	if(!(method %in% c("poisson", "binomial", "hypergeometric", "stringer", "stringer-meikle", "stringer-lta", "stringer-pvz", "rohrbach", "moment", "coxsnell", "direct", "difference", "quotient", "regression")) || length(method) != 1)
+	if(!(method %in% c("poisson", "binomial", "hypergeometric", "stringer", "stringer-meikle", "stringer-lta", "stringer-pvz", "rohrbach", "moment", "coxsnell", "direct", "difference", "quotient", "regression", "mpu")) || length(method) != 1)
 		stop("Specify a valid method for the evaluation.")
 
 	if(!is.null(counts) && any(counts < 1))
 		stop("When specified, your 'counts' must all be equal to, or larger than, 1.")          
 
-	if(((class(prior) == "logical" && prior == TRUE) || class(prior) == "jfaPrior") && method %in% c("stringer", "stringer-meikle", "stringer-lta", "stringer-pvz", "rohrbach", "moment", "direct", "difference", "quotient", "regression"))
+	if(((class(prior) == "logical" && prior == TRUE) || class(prior) == "jfaPrior") && method %in% c("stringer", "stringer-meikle", "stringer-lta", "stringer-pvz", "rohrbach", "moment", "direct", "difference", "quotient", "regression", "mpu"))
 		stop("To use a prior distribution, you must use either the poisson, the binomial, or the hypergeometric method.")  
 
  	if((class(prior) == "logical" && prior == TRUE) && kPrior < 0 || nPrior < 0)
@@ -204,7 +209,7 @@ evaluation <- function(confidence = 0.95, method = "binomial", N = NULL,
       		stop("Specify one value for nSumstat and kSumstat")
     	if(kSumstats > nSumstats)
       		stop("The sum of the errors is higher than the sample size")
-    	if(method %in% c("stringer", "stringer-meikle", "stringer-lta", "stringer-pvz", "coxsnell", "rohrbach", "moment", "direct", "difference", "quotient", "regression"))
+    	if(method %in% c("stringer", "stringer-meikle", "stringer-lta", "stringer-pvz", "coxsnell", "rohrbach", "moment", "direct", "difference", "quotient", "regression", "mpu"))
       		stop("The selected method requires raw observations, and does not accomodate summary statistics")
     
 		n <- nSumstats
@@ -216,7 +221,10 @@ evaluation <- function(confidence = 0.95, method = "binomial", N = NULL,
 		if(is.null(bookValues) || is.null(auditValues) || length(bookValues) != 1 || length(auditValues) != 1)
 			stop("Specify a valid book value column name and a valid audit value column name when using a sample")
 		
-    	sample <- stats::na.omit(sample)
+		missingValues <- unique(c(which(is.na(sample[, bookValues])), which(is.na(sample[, auditValues]))))
+		if(length(missingValues) == nrow(sample))
+			stop("Your sample has 0 rows after removing missing values.")
+		sample <- stats::na.omit(sample)
 		n <- nrow(sample)
 		if(!is.null(counts))
 			n <- sum(counts)
@@ -313,6 +321,11 @@ evaluation <- function(confidence = 0.95, method = "binomial", N = NULL,
 		bound 		<- out[["confBound"]]
 		mle 		<- out[["mle"]]
 		precision 	<- out[["precision"]]
+	} else if(method == "mpu"){
+		out 		<- .mpuMethod(taints, confidence, n)
+		bound 		<- out[["confBound"]]
+		mle 		<- out[["mle"]]
+		precision 	<- out[["precision"]]		
 	} else if(method == "direct"){
 		out 		<- .directMethod(bv, av, confidence, N, n, populationBookValue)
 		mle 		<- out[["pointEstimate"]]
@@ -352,10 +365,10 @@ evaluation <- function(confidence = 0.95, method = "binomial", N = NULL,
 		result[["mle"]]			<- as.numeric(mle)
 	if(!is.null(precision))
 		result[["precision"]]	<- as.numeric(precision)
+	if(!is.null(populationBookValue))
+		result[["popBookvalue"]]   <- as.numeric(populationBookValue)
 	if(method %in% c("direct", "difference", "quotient", "regression")){
 		# These methods yield an interval instead of a bound
-		result[["popBookvalue"]]   <- as.numeric(populationBookValue)
-		result[["pointEstimate"]]  <- as.numeric(out[["pointEstimate"]])
 		result[["lowerBound"]]     <- as.numeric(out[["lowerBound"]])
 		result[["upperBound"]]     <- as.numeric(out[["upperBound"]])
 	} else {
@@ -372,12 +385,17 @@ evaluation <- function(confidence = 0.95, method = "binomial", N = NULL,
 		result[["populationK"]]        		 <- as.numeric(populationK)
 	# Produce relevant conclusions conditional on the analysis result
 	approvePrecision <- TRUE
-	if(minPrecision != 1)
-		approvePrecision <- result[["precision"]] <= minPrecision
+	if(minPrecision != 1){
+		if(method %in% c("direct", "difference", "quotient", "regression")){
+			approvePrecision <- (result[["precision"]] / populationBookValue) < minPrecision
+		} else {
+			approvePrecision <- result[["precision"]] < minPrecision
+		}
+	}
 	approveMateriality <- TRUE
 	if(materiality != 1){
 		if(method %in% c("direct", "difference", "quotient", "regression")){
-			approveMateriality <- populationBookValue <= result[["upperBound"]] && populationBookValue >= result[["lowerBound"]]
+			approveMateriality <- (result[["upperBound"]] / populationBookValue) < materiality
 		} else {
 			approveMateriality <- result[["confBound"]] < materiality
 		}
@@ -460,6 +478,16 @@ evaluation <- function(confidence = 0.95, method = "binomial", N = NULL,
 		result[["posterior"]][["N"]] <- result[["N"]]
 		# Add class 'jfaPosterior' to the posterior distribution object.
 		class(result[["posterior"]]) <- "jfaPosterior"
+	}
+	if(!is.null(sample)){
+		indexa <- which(colnames(sample) == auditValues)
+		indexb <- which(colnames(sample) == bookValues)
+		frame <- as.data.frame(sample[, c(indexb, indexa)])
+		frame <- cbind(as.numeric(rownames(frame)), frame)
+		frame[["difference"]] <- frame[, 2] - frame[, 3]
+		frame[["taint"]] <- frame[, 4] / frame[, 2]
+		colnames(frame) <- c("Row", bookValues, auditValues, "Difference", "Taint")
+		result[["data"]] <- frame
 	}
 	# Add class 'jfaEvaluation' to the result.
 	class(result) <- "jfaEvaluation"

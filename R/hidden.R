@@ -180,10 +180,10 @@ print.jfaEvaluation <- function(x, digits = 2, ...){
 # ------------------------------------------------------------
 # Output:
 #
-# Most likely error:       ", round(x[["pointEstimate"]], digits), "
+# Most likely error:       ", round(x[["mle"]], digits), "
 # Lower bound:             ", round(x[["lowerBound"]], digits),"
 # Upper bound:             ", round(x[["upperBound"]], digits),"
-# Precision:               ", paste0(round(x[["precision"]] * 100, digits), "%"),"
+# Precision:               ", round(x[["precision"]], digits),"
 # Conclusion:              ", x[["conclusion"]], "
 # ------------------------------------------------------------ ")
   	} else {
@@ -302,10 +302,10 @@ plot.jfaPlanning <- function(x, ...){
 	if(limx > 51)
 		limx <- 51
 	if(!is.null(x[["prior"]])){
-		if(x$materiality == 0){
+		if(x[["materiality"]] == 1){
 			xlim <- 1
 		} else {
-			xlim <- x$materiality * 3
+			xlim <- x[["materiality"]] * 3
 		}
 		xseq <- seq(0, xlim, 0.00001)
 		mainLab <- ifelse(x[["prior"]][["description"]]$implicitk == 0 && x[["prior"]][["description"]]$implicitn == 0, yes = "Uninformed", no = "Informed")
@@ -382,13 +382,23 @@ plot.jfaEvaluation <- function(x, ...){
 	if(x[["method"]] %in% c("stringer", "stringer-meikle", "stringer-lta", "stringer-pvz", "rohrbach", "moment", "coxsnell"))
 		stop("No plotting method available for a confidence bound from this method.")
 	if(x[["method"]] %in% c("direct", "difference", "quotient", "regression")){
-		ymin <- x[["lowerBound"]] - (x[["pointEstimate"]] - x[["lowerBound"]])
-		ymax <- x[["upperBound"]] + (x[["upperBound"]] - x[["pointEstimate"]])
-		ticks <- pretty(ymin, ymax, min.n = 5)
-		graphics::plot(x = 0, y = x[["pointEstimate"]], bty = "n", cex = 2, pch = 19, xlab = "Population book value", ylab = "", ylim = c(min(ticks), max(ticks)), xlim = c(-0.1, 0.1), axes = FALSE)
-		graphics::arrows(x0 = 0, x1 = 0, y0 = x[["lowerBound"]], y1 = x[["upperBound"]], code = 3, lwd = 2, col = "black", angle = 90)
-		graphics::axis(2, at = ticks, las = 1)
-		graphics::abline(h = x[["popBookvalue"]], lty = 2)
+		ymin <- x[["mle"]] - 2 * x[["precision"]]
+		ymax <- x[["mle"]] + 2 * x[["precision"]]
+		graphics::plot(0, type = "n", ylim = c(ymin, ymax), ylab = expression(E), xlim = c(0, 1), bty = "n", xaxt = "n", xlab = "", yaxt = "n", main = paste0(round(x[["confidence"]] * 100, 2), "% Confidence interval"))
+  		yBreaks <- base::pretty(c(ymin, ymax), n = 6)
+  		graphics::axis(side = 2, at = yBreaks, labels = base::format(round(yBreaks), scientific = F, big.mark = ","), las = 1)
+		graphics::segments(x0 = 0, x1 = 1, y0 = 0, y1 = 0, lty = 2, col = "gray")
+  		if(x[["materiality"]] != 1)
+    		graphics::segments(x0 = 0, x1 = 1, y0 = (x[["popBookvalue"]] * x[["materiality"]]), y1 = (x[["popBookvalue"]] * x[["materiality"]]), lty = 2, col = "red")
+  		graphics::points(x = 0.5, y = x[["mle"]], pch = 19)
+		graphics::arrows(x0 = 0.5, x1 = 0.5, y0 = x[["lowerBound"]], y1 = x[["upperBound"]], code = 3, lwd = 2, col = "black", angle = 90)
+		graphics::text(x = 0.86, y = x[["mle"]], labels = paste0("Most likely error = ", format(round(x[["mle"]], 2), scientific = FALSE, big.mark = ",")), cex = 0.75, adj = c(1, 0.5))
+		graphics::text(x = 0.87, y = x[["lowerBound"]], labels = paste0("Lower bound = ", format(round(x[["lowerBound"]], 2), scientific = FALSE, big.mark = ",")), cex = 0.75, adj = c(1, 0.5))
+		graphics::text(x = 0.87, y = x[["upperBound"]], labels = paste0("Upper bound = ", format(round(x[["upperBound"]], 2), scientific = FALSE, big.mark = ",")), cex = 0.75, adj = c(1, 0.5))
+		graphics::segments(x0 = 0.40, x1 = 0.40, y0 = x[["mle"]], y1 = x[["upperBound"]], col = "black")
+		graphics::segments(x0 = 0.40, x1 = 0.42, y0 = x[["mle"]], y1 = x[["mle"]], col = "black")
+		graphics::segments(x0 = 0.40, x1 = 0.42, y0 = x[["upperBound"]], y1 = x[["upperBound"]], col = "black")
+		graphics::text(x = 0.15, y = (x[["upperBound"]] - x[["precision"]]/2), labels = paste0("Precision = ", format(round(x[["precision"]], 2), scientific = FALSE, big.mark = ",")), cex = 0.75, adj = c(0, 0.5))
 	} else {
 		limx <- length(0:x[["n"]])
 		if(limx > 51){
@@ -414,18 +424,12 @@ plot.jfaEvaluation <- function(x, ...){
 				d <- .dBetaBinom(x = xseq, N = x[["N"]], shape1 = x[["prior"]][["description"]]$alpha, shape2 = x[["prior"]][["description"]]$beta)
 				d1 <- .dBetaBinom(x = xseq, N = x[["N"]], shape1 = x[["posterior"]][["description"]]$alpha, shape2 = x[["posterior"]][["description"]]$beta)
 				bound <- .qBetaBinom(p = x[["confidence"]], N = x[["N"]], shape1 = x[["posterior"]][["description"]]$alpha, shape2 = x[["posterior"]][["description"]]$beta)
-			} else if(x[["method"]] == "coxsnell"){
-				d <- stats::dbeta(xseq, shape1 = x[["prior"]][["description"]]$alpha, shape2 =x[["prior"]][["description"]]$beta)
-				d1 <- .dCoxAndSnellF(xseq, x[["df1"]], x[["df2"]], x[["multiplicationFactor"]])
-				bound <- x[["multiplicationFactor"]] * stats::qf(p = x[["confidence"]], df1 = x[["df1"]], df2 = x[["df2"]])
 			}
-			if(x[["method"]] == "poisson" || x[["method"]] == "binomial" || x[["method"]] == "coxsnell"){
+			if(x[["method"]] == "poisson" || x[["method"]] == "binomial"){
 				if(x[["method"]] == "poisson")
 					mainLabPlus <- " gamma prior and posterior"
 				if(x[["method"]] == "binomial")
 					mainLabPlus <- " beta prior and posterior"
-				if(x[["method"]] == "coxsnell")
-					mainLabPlus <- " Cox and Snell prior and posterior"
 				graphics::plot(x = xseq, y = d1, type = "l", lwd = 2, bty = "n", xlab = expression(theta), ylab = "Probability density", las = 1, ylim = c(0, max(d1)),
 							main = paste0(mainLab, mainLabPlus), axes = FALSE)
 				graphics::polygon(x = c(0, xseq[xseq<=bound], xseq[xseq<=bound][length(xseq[xseq<=bound])]), y = c(0, d1[xseq<=bound], 0), col="lightgray", border = NA)
