@@ -1,7 +1,7 @@
 Package: jfa
 Title: Bayesian and Classical Audit Sampling
-Version: 0.5.1
-Date: 2021-03-02
+Version: 0.5.2
+Date: 2021-04-02
 Authors@R: 
     person(given = "Koen",
            family = "Derks",
@@ -19,8 +19,8 @@ LazyData: true
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2021-03-02 12:23:38 UTC; derksk
+Packaged: 2021-04-02 11:58:15 UTC; derksk
 Author: Koen Derks [aut, cre] (<https://orcid.org/0000-0002-5533-9349>)
 Maintainer: Koen Derks <k.derks@nyenrode.nl>
 Repository: CRAN
-Date/Publication: 2021-03-02 13:20:09 UTC
+Date/Publication: 2021-04-02 12:20:08 UTC
