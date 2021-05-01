@@ -1,4 +1,4 @@
-context("4. Consistency test for function planning()")
+context("4. Test consistency of function planning()")
 
 # jfa version 0.1.0
 
@@ -99,21 +99,21 @@ test_that(desc = "(id: f6-v0.1.0-t16) Frequentist hypergeometric 5% materiality 
 
 test_that(desc = "(id: f6-v0.1.0-t17) Bayesian hypergeometric 5% materiality 2.5% errors", {
   jfaRes <- planning(materiality = 0.05, confidence = 0.95, expectedError = 0.025, likelihood = "hypergeometric", N = 1000, prior = TRUE)
-  expect_equal(jfaRes[["sampleSize"]], 160)
-  expect_equal(jfaRes[["expectedSampleError"]], 4, tolerance = 0.001)
+  expect_equal(jfaRes[["sampleSize"]], 182)
+  expect_equal(jfaRes[["expectedSampleError"]], 5, tolerance = 0.001)
 })
 
 test_that(desc = "(id: f6-v0.1.0-t18) Bayesian hypergeometric 5% materiality 2.5% errors custom prior", {
   jfaRes <- planning(materiality = 0.05, confidence = 0.95, expectedError = 0.025, likelihood = "hypergeometric", N = 1000, prior = TRUE, kPrior = 1, nPrior = 7)
-  expect_equal(jfaRes[["sampleSize"]], 193)
+  expect_equal(jfaRes[["sampleSize"]], 196)
   expect_equal(jfaRes[["expectedSampleError"]], 5, tolerance = 0.001)
 })
 
 test_that(desc = "(id: f6-v0.1.0-t19) Bayesian binomial 2% precision 5% materiality 2.5% errors median prior", {
   jfaPrior <- auditPrior(materiality = 0.05, confidence = 0.95, method = "median", expectedError = 0.025)
   jfaRes <- planning(materiality = 0.05, minPrecision = 0.02, confidence = 0.95, expectedError = 0.025, likelihood = "binomial", N = 1000, prior = jfaPrior)
-  expect_equal(jfaRes[["sampleSize"]], 285)
-  expect_equal(jfaRes[["expectedSampleError"]], 7.12, tolerance = 0.001)
+  expect_equal(jfaRes[["sampleSize"]], 284)
+  expect_equal(jfaRes[["expectedSampleError"]], 7.1, tolerance = 0.001)
 })
 
 test_that(desc = "(id: f6-v0.1.0-t20) Bayesian binomial 5% materiality 1% errors hypotheses prior", {
@@ -179,7 +179,7 @@ test_that(desc = "(id: f6-v0.4.0-t1) Expected Bayes factors for zero expected er
   expect_equal(jfaRes[["expectedPosterior"]][["hypotheses"]]$expectedBf, 945.2848, tolerance = 0.001)
   
   jfaRes <- planning(confidence = 0.95, materiality = 0.02, expectedError = 0, likelihood = "hypergeometric", prior = T, N = 1000)
-  expect_equal(jfaRes[["expectedPosterior"]][["hypotheses"]]$expectedBf, 676.4327, tolerance = 0.001)
+  expect_equal(jfaRes[["expectedPosterior"]][["hypotheses"]]$expectedBf, 1247.05, tolerance = 0.001)
 })
 
 test_that(desc = "(id: f6-v0.4.0-t2) Expected Bayes factors for expected errors > 0", {
@@ -190,7 +190,7 @@ test_that(desc = "(id: f6-v0.4.0-t2) Expected Bayes factors for expected errors 
   expect_equal(jfaRes[["expectedPosterior"]][["hypotheses"]]$expectedBf, 933.3458, tolerance = 0.001)
   
   jfaRes <- planning(confidence = 0.95, materiality = 0.02, expectedError = 0.01, likelihood = "hypergeometric", prior = T, N = 1000)
-  expect_equal(jfaRes[["expectedPosterior"]][["hypotheses"]]$expectedBf, 191.7564, tolerance = 0.001)
+  expect_equal(jfaRes[["expectedPosterior"]][["hypotheses"]]$expectedBf, 1619.812, tolerance = 0.001)
 })
 
 test_that(desc = "(id: f6-v0.4.0-t3) Expected Bayes factors for median priors", {
@@ -269,3 +269,6 @@ test_that(desc = "(id: f6-v0.5.2-t1) Test for change in beta-binomial mode calcu
   expect_equal(jfaRes[["sampleSize"]], 58)
   expect_equal(modeDist, 0)
 })
+
+# jfa version 0.5.3
+# No changes to be benchmarked

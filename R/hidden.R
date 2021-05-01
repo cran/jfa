@@ -1,6 +1,6 @@
 #' @method print jfaPrior
 #' @export
-print.jfaPrior <- function(x, digits = 2, ...) {
+print.jfaPrior <- function(x, digits = 3, ...) {
   cat("# ------------------------------------------------------------
 #         jfa Prior Distribution Summary (Bayesian)
 # ------------------------------------------------------------
@@ -14,8 +14,9 @@ print.jfaPrior <- function(x, digits = 2, ...) {
                                     "median" = paste0("p(\u0398 < ",round(x[["materiality"]], digits),") = p(\u0398 > ", round(x[["materiality"]], digits),") = 0.5"),
                                     "hypotheses" = paste0("p(\u0398 < ",round(x[["materiality"]], digits),") = ",round(x[["specifics"]]$pHmin, digits),"; p(\u0398 > ", round(x[["materiality"]], digits),") = ", round(x[["specifics"]]$pHplus, digits)),
                                     "arm" = paste0("Inherent risk = ", round(x[["specifics"]]$ir, digits), "; Internal control risk = ", round(x[["specifics"]]$cr, digits), "; Detection risk = ", round((1 - x[["confidence"]]) / (x[["specifics"]]$ir * x[["specifics"]]$cr), digits)),
-                                    "sample" = paste0("Earlier sample of ", round(x[["specifics"]]$sampleN, digits), " transactions with ", round(x[["specifics"]]$sampleK, digits), " errors"),
-                                    "factor" = paste0("Earlier sample of ", round(x[["specifics"]]$sampleN, digits), " transactions with ", round(x[["specifics"]]$sampleK, digits), " errors weighted by ", round(x[["specifics"]]$factor, digits))), "
+                                    "bram" = paste0("Mode = ", round(x[["specifics"]]$mode, digits), "; Upper bound = ", round(x[["specifics"]]$ub, digits)),
+                                    "sample" = paste0("Earlier sample of ", round(x[["specifics"]]$sampleN, digits), " items with ", round(x[["specifics"]]$sampleK, digits), " errors"),
+                                    "factor" = paste0("Earlier sample of ", round(x[["specifics"]]$sampleN, digits), " items with ", round(x[["specifics"]]$sampleK, digits), " errors weighted by ", round(x[["specifics"]]$factor, digits))), "
 # ------------------------------------------------------------
 # Output: 
 #
@@ -36,7 +37,7 @@ print.jfaPrior <- function(x, digits = 2, ...) {
 
 #' @method print jfaPosterior
 #' @export 
-print.jfaPosterior <- function(x, digits = 2, ...) {
+print.jfaPosterior <- function(x, digits = 3, ...) {
   cat("# ------------------------------------------------------------
 #             jfa Posterior Distribution (Bayesian)
 # ------------------------------------------------------------
@@ -57,7 +58,7 @@ print.jfaPosterior <- function(x, digits = 2, ...) {
 
 #' @method print jfaPlanning
 #' @export
-print.jfaPlanning <- function(x, digits = 2, ...) {
+print.jfaPlanning <- function(x, digits = 3, ...) {
   if (class(x[["prior"]]) == "jfaPrior") {
     cat("# ------------------------------------------------------------
 #              jfa Planning Summary (Bayesian)
@@ -108,7 +109,7 @@ print.jfaPlanning <- function(x, digits = 2, ...) {
 
 #' @method print jfaSelection
 #' @export
-print.jfaSelection <- function(x, digits = 2, ...) {
+print.jfaSelection <- function(x, digits = 3, ...) {
   if (x$units == "mus") {
     cat("# ------------------------------------------------------------
 #                  jfa Selection Summary
@@ -163,7 +164,7 @@ print.jfaSelection <- function(x, digits = 2, ...) {
 
 #' @method print jfaEvaluation
 #' @export
-print.jfaEvaluation <- function(x, digits = 2, ...) {
+print.jfaEvaluation <- function(x, digits = 3, ...) {
   if (x[["method"]] %in% c("direct", "difference", "quotient", "regression")) {
     cat("# ------------------------------------------------------------ 
 #             jfa Evaluation Summary (Frequentist)
@@ -281,7 +282,7 @@ plot.jfaPosterior <- function(x, ...) {
   } else if (x[["description"]]$density == "beta-binomial") {
     xlim <- ceiling(xlim * x[["N"]])
     xseq <- seq(0, xlim, by = x[["N"]]/50)
-    d <- .dBetaBinom(x = xseq, N = x[["N"]], shape1 = x[["description"]]$alpha, shape2 = x[["description"]]$beta)
+    d <- .dBetaBinom(x = xseq, N = x[["N"]], shape1 = x[["description"]]$alpha, shape2 = x[["description"]]$beta) # x[["N"]] must be x[["N"]] - x[["n"]]
   }
   mainLab <- paste0(x[["description"]]$density, " posterior")
   if (x[["description"]]$density == "gamma" || x[["description"]]$density == "beta") {
@@ -320,9 +321,9 @@ plot.jfaPlanning <- function(x, ...) {
     } else if (x[["likelihood"]] == "hypergeometric") {
       xlim <- ceiling(xlim * x[["N"]])
       xseq <- seq(0, xlim, by = 1)
-      d <- .dBetaBinom(x = xseq, N = x[["N"]] - x[["sampleSize"]] + x[["expectedSampleError"]], shape1 = x[["prior"]][["description"]]$alpha, shape2 = x[["prior"]][["description"]]$beta)
-      d1 <- .dBetaBinom(x = xseq, N = x[["N"]] - x[["sampleSize"]] + x[["expectedSampleError"]], shape1 = x[["expectedPosterior"]][["description"]]$alpha, shape2 = x[["expectedPosterior"]][["description"]]$beta)
-      bound <- .qBetaBinom(p = x[["confidence"]], N = x[["N"]] - x[["sampleSize"]] + x[["expectedSampleError"]], shape1 = x[["expectedPosterior"]][["description"]]$alpha, shape2 = x[["expectedPosterior"]][["description"]]$beta)
+      d <- .dBetaBinom(x = xseq, N = x[["N"]] - x[["sampleSize"]], shape1 = x[["prior"]][["description"]]$alpha, shape2 = x[["prior"]][["description"]]$beta)
+      d1 <- .dBetaBinom(x = xseq, N = x[["N"]] - x[["sampleSize"]], shape1 = x[["expectedPosterior"]][["description"]]$alpha, shape2 = x[["expectedPosterior"]][["description"]]$beta)
+      bound <- .qBetaBinom(p = x[["confidence"]], N = x[["N"]] - x[["sampleSize"]], shape1 = x[["expectedPosterior"]][["description"]]$alpha, shape2 = x[["expectedPosterior"]][["description"]]$beta)
     }
     if (x$likelihood == "poisson" || x$likelihood == "binomial") {
       if (x$likelihood == "poisson")
@@ -422,8 +423,8 @@ plot.jfaEvaluation <- function(x, ...) {
         xlim <- ceiling(xlim * x[["N"]])
         xseq <- seq(0, xlim, by = 1)
         d <- .dBetaBinom(x = xseq, N = x[["N"]], shape1 = x[["prior"]][["description"]]$alpha, shape2 = x[["prior"]][["description"]]$beta)
-        d1 <- .dBetaBinom(x = xseq, N = x[["N"]], shape1 = x[["posterior"]][["description"]]$alpha, shape2 = x[["posterior"]][["description"]]$beta)
-        bound <- .qBetaBinom(p = x[["confidence"]], N = x[["N"]], shape1 = x[["posterior"]][["description"]]$alpha, shape2 = x[["posterior"]][["description"]]$beta)
+        d1 <- .dBetaBinom(x = xseq, N = x[["N"]] - x[["n"]], shape1 = x[["posterior"]][["description"]]$alpha, shape2 = x[["posterior"]][["description"]]$beta)
+        bound <- .qBetaBinom(p = x[["confidence"]], N = x[["N"]] - x[["n"]], shape1 = x[["posterior"]][["description"]]$alpha, shape2 = x[["posterior"]][["description"]]$beta)
       }
       if (x[["method"]] == "poisson" || x[["method"]] == "binomial") {
         if (x[["method"]] == "poisson")

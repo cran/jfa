@@ -1,3 +1,15 @@
+# jfa 0.5.3
+
+- Updated the documentation for all functions with more simple examples.
+- Removed the default value `confidence = 0.95` in all applicable functions. `confidence` currently has no default value so that the user is required to give an input.
+- Changed the default `likelihood = 'poisson'` in the `planning()` function to `likelihood = 'binomial'` to be consistent across all functions.
+- Changed the order of most function arguments so that `materiality` and `minPrecision` are among the first ones to be shown.
+- Made `expectedErrors > 0` available for `method = 'hypotheses'` in the `auditPrior()`.
+- Made `method = 'hypotheses'` and `method = 'median'` in the `auditPrior()` function available for `likelihood = 'hypergeometric'`.
+- Added `bram` as a method for the `auditPrior()` function. `method = 'bram'` computes a prior distribution with a given mode (`expectedError`) and upper bound (`ub`).
+- Fixed an error in the mode of the gamma posterior distribution from the `evaluation()` function in which `+1` was added to the beta parameter, resulting in slighly lower modes than the correct ones.
+- Made a correction to the calculation of the beta-binomial prior and posterior so that the posterior parameter `N` has the correct value of `N = N - n` (current) instead of `N - n + k` (before).
+
 # jfa 0.5.2
 
 - Update the poisson evaluation calculation so that it allows for fractional errors.
@@ -24,7 +36,7 @@
 - Added class `jfaPosterior` with `print()` and `plot()` methods.
 - Added `expectedPosterior` of class `jfaPosterior` to the output of the `planning()` function, includes `description`, `statistics` and `hypotheses`.
 - Added `posterior` of class `jfaPosterior` to the output of the `evaluation()` function, includes `description`, `statistics` and `hypotheses`.
-- Add a warning message to the `sampling()` function that it will be deprecated from 0.5.0 onwards. You can use `selection()` instead, since `sampling()` causes namespace issues with other packages.
+- Add a warning message to the `sampling()` function that it will be deprecated from 0.5.0 onward. You can use `selection()` instead, since `sampling()` causes namespace issues with other packages.
 - Changed the class `jfaSampling` to `jfaSelection`. This should not have any consequences. 
 
 # jfa 0.3.1
