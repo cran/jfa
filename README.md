@@ -26,7 +26,7 @@ For complete documentation of `jfa`, visit the [package website](https://koender
 
 ## 1. Installation
 
-The most recently released version of `jfa` can be downloaded from [CRAN](https://cran.r-project.org/package=jfa) by running the following command in R or RStudio:
+The most recently released version of `jfa` can be downloaded from [CRAN](https://cran.r-project.org/package=jfa) by running the following command in R:
 
 ```
 install.packages('jfa')
@@ -38,7 +38,7 @@ Alternatively, you can download the development version from GitHub using:
 devtools::install.github('koenderks/jfa')
 ```
 
-After installation the `jfa` package can be loaded in R or RStudio by typing:
+After installation, the `jfa` package can be loaded with:
 
 ```
 library(jfa)
@@ -46,7 +46,7 @@ library(jfa)
 
 ## 2. Cheat sheet
 
-The cheat sheet below can help you get started with the `jfa` package and its workflow. You can download a `pdf` version of the cheat sheet [here](https://github.com/koenderks/jfa/raw/master/man/figures/cheatsheet/cheatsheet.pdf).
+The cheat sheet below can help you get started with the `jfa` package and its intended workflow. You can download a `pdf` version of the cheat sheet [here](https://github.com/koenderks/jfa/raw/master/man/figures/cheatsheet/cheatsheet.pdf).
 
 <p align='center'><img src='https://github.com/koenderks/jfa/raw/master/man/figures/cheatsheet/cheatsheet.png' alt='cheatsheet' width='1000'></p>
 
@@ -56,33 +56,37 @@ To validate the statistical results, `jfa`'s automated [unit tests](https://gith
 
 - [Audit Sampling: Audit Guide](https://future.aicpa.org/cpe-learning/publication/audit-sampling-audit-guide-OPL) (Appendix A and Appendix C)
 - [AuditSampler](https://cplusglobal.wordpress.com/solutions/auditsampler-statistical-sampling-software/)
+- [MUS](https://cran.r-project.org/package=MUS) (R package version 0.1.6)
 - Touw, P., and Hoogduin, L. (2011). *Statistiek voor audit en controlling*. Boom uitgevers, Amsterdam. 
 - [SMASH21 + SMASH21-Bayes](https://steekproeven.eu/)
 
 ## 4. Statistical tables
 
-Below you can find several informative tables that contain statistical sample sizes, upper limits, and Bayes factors. These tables are created using the `planning()` and `evaluation()` functions provided by the package.
+Below you can find several informative tables that contain statistical sample sizes, upper limits, and Bayes factors. These tables are created using the `planning()` and `evaluation()` functions provided in the package.
 
 *Sample sizes*
 
 - [Sample sizes based on the binomial distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaBinomialSampleSizes.pdf)
 - [Sample sizes based on the Poisson distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaPoissonSampleSizes.pdf)
+- [Sample sizes based on the hypergeometric distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaHypergeometricSampleSizes.pdf)
 
 *Upper limits*
 
 - [Upper limits based on the binomial distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaBinomialUpperBounds.pdf)
 - [Upper limits based on the Poisson distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaPoissonUpperBounds.pdf)
+- [Upper limits based on the hypergeometric distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaHypergeometricUpperBounds.pdf)
 
 *Bayes factors*
 
 - [Bayes factors based on the beta distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaBinomialBayesFactors.pdf)
 - [Bayes factors based on the gamma distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaPoissonBayesFactors.pdf)
+- [Bayes factors based on the beta-binomial distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaHypergeometricBayesFactors.pdf)
 
 ## 5. Available functions
 
 <p align='center'><img src='https://github.com/koenderks/jfa/raw/master/man/figures/readme/banner/jfaBanner.png' alt='banner'/></p>
 
-Below you can find a enumeration and explanation of the functions in `jfa`, sorted by their occurrence in the standard audit sampling workflow.
+Below you can find an explanation of the available functions in `jfa`, sorted by their occurrence in the standard audit sampling workflow. For detailed examples of how to use these functions, visit the [Get started](https://koenderks.github.io/jfa/articles/jfa.html) section on the package website.
 
 * [`auditPrior()`](#create-a-prior-distribution-with-the-auditprior-function)
 * [`planning()`](#plan-a-sample-with-the-planning-function)
@@ -104,13 +108,13 @@ The `auditPrior()` function creates a prior distribution according to one of sev
 
 | `method` | Description | Required arguments | Reference |
 | :----------- | :----------- | :----------- | :----------- |
-| `none` | No prior information | | Derks et al. (2020) |
-| `arm` | Translates risk assessments (ARM) | `ir` and `cr` | Derks et al. (2020) |
+| `none` | No prior information | | Derks et al. (2021) |
+| `arm` | Translates risk assessments (ARM) | `ir` and `cr` | Derks et al. (2021) |
 | `bram` | Bayesian risk assessment model (BRAM) | `ub` | Touw and Hoogduin (2011) |
-| `median` | Equal prior probabilities for (in)tolerable misstatement | | Derks et al. (2020) |
-| `hypotheses` | Custom prior probabilities for (in)tolerable misstatement | `pHmin` or `pHplus` | Derks et al. (2020) |
-| `sample` | Earlier sample | `sampleN` and `sampleK` | Derks et al. (2020) |
-| `factor` | Weighted earlier sample | `sampleN`, `sampleK`, and `factor` | Derks et al. (2020) |
+| `median` | Equal prior probabilities for (in)tolerable misstatement | | Derks et al. (2021) |
+| `hypotheses` | Custom prior probabilities for (in)tolerable misstatement | `pHmin` or `pHplus` | Derks et al. (2021) |
+| `sample` | Earlier sample | `sampleN` and `sampleK` | Derks et al. (2021) |
+| `factor` | Weighted earlier sample | `sampleN`, `sampleK`, and `factor` | Derks et al. (2021) |
 
 *Supported options for the `likelihood` argument:*
 
@@ -124,7 +128,7 @@ The `auditPrior()` function creates a prior distribution according to one of sev
 
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 
-The `planning()` function calculates the minimum sample size for a statistical audit sample based on the Poisson, binomial, or hypergeometric likelihood. The function returns an object of class `jfaPlanning` which can be used with associated `print()` and a `plot()` methods. The input for the `prior` argument can be an object of class `jfaPrior` as returned by the `auditPrior()` function to perform Bayesian planning.
+The `planning()` function calculates the minimum sample size for a statistical audit sample based on the binomial, Poisson, or hypergeometric likelihood. The function returns an object of class `jfaPlanning` which can be used with associated `print()` and a `plot()` methods. To perform Bayesian planning, the input for the `prior` argument can be an object of class `jfaPrior` as returned by the `auditPrior()` function, or an object of class `jfaPosterior` as returned by the `evaluation()` function.
 
 *Full function with default arguments:*
 
@@ -167,7 +171,7 @@ The `selection()` function takes a data frame and performs statistical sampling 
 
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 
-The `evaluation()` function takes a sample or summary statistics of the sample and performs evaluation according to the specified method and sampling objectives. The function returns an object of class `jfaEvalution` which can be used with associated `print()` and `plot()` methods. The input for the `prior` argument can be an object of class `jfaPrior` to perform Bayesian evaluation.
+The `evaluation()` function takes a sample or summary statistics of the sample and performs evaluation according to the specified method and sampling objectives. The function returns an object of class `jfaEvalution` which can be used with associated `print()` and `plot()` methods. To perform Bayesian evaluation, the input for the `prior` argument can be an object of class `jfaPrior` as returned by the `auditPrior()` function, or an object of class `jfaPosterior` as returned by the `evaluation()` function.
 
 *Full function with default arguments:*
 
@@ -209,7 +213,7 @@ For an example report, see the following [link](https://github.com/koenderks/jfa
 - Bickel, P. J. (1992). Inference and auditing: The Stringer bound. *International Statistical Review*, 60(2), 197–209. - [View online](https://www.jstor.org/stable/1403650)
 - Cox, D. R., & Snell, E. J. (1979). On sampling and the estimation of rare errors. *Biometrika*, 66(1), 125-132. - [View online](https://doi.org/10.1093/biomet/66.1.125)
 - Derks, K. (2021). jfa: Bayesian and classical audit sampling. R package version 0.5.3. - [View online](https://cran.r-project.org/package=jfa)
-- Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J., & Wetzels, R. (2020). Priors in a Bayesian audit: How integration of existing information into the prior distribution can improve audit transparency and efficiency. *Under review*. - [View online](https://psyarxiv.com/8fhkp/)
+- Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J., & Wetzels, R. (2021). Priors in a Bayesian audit: How integration of existing information into the prior distribution can improve audit transparency and efficiency. *In Press*. - [View online](https://psyarxiv.com/8fhkp/)
 - Dworin, L. D. and Grimlund, R. A. (1984). Dollar-unit sampling for accounts receivable and inventory. *The Accounting Review*, 59(2), 218–241. - [View online](https://www.jstor.org/stable/247296)
 - Dyer, D., & Pierce, R. L. (1993). On the choice of the prior distribution in hypergeometric sampling. *Communications in Statistics - Theory and Methods*, 22(8), 2125-2146. - [View online](https://www.tandfonline.com/doi/abs/10.1080/03610929308831139)
 - Meikle, G. R. (1972). *Statistical Sampling in an Audit Context*. Canadian Institute of Chartered Accountants.
@@ -219,6 +223,7 @@ For an example report, see the following [link](https://github.com/koenderks/jfa
 - Steele, A. (1992). *Audit Risk and Audit Evidence: The Bayesian Approach to Statistical Auditing*. San Diego: Academic Press.
 - Stewart, T. R. (2012). *Technical Notes on the AICPA Audit Guide Audit Sampling*. American Institute of Certified Public Accountants, New York. - [View online](https://www.aicpa.org/content/dam/aicpa/publications/accountingauditing/keytopics/downloadabledocuments/sampling-guide-technical-notes.pdf)
 - Stewart, T. R. (2013). *A Bayesian Audit Assurance Model with Application to the Component Materiality problem in Group Audits.* VU University, Amsterdam. - [View online](https://research.vu.nl/en/publications/a-bayesian-audit-assurance-model-with-application-to-the-componen)
+- Talens, E. (2005). *Statistical Auditing and the AOQL-method*. University of Groningen, Groningen. - [View online](https://research.rug.nl/en/publications/statistical-auditing-and-the-aoql-method)
 - Touw, P., and Hoogduin, L. (2011). *Statistiek voor Audit en Controlling*. Boom uitgevers, Amsterdam.
 
 ## 7. Package statistics
@@ -227,6 +232,6 @@ For an example report, see the following [link](https://github.com/koenderks/jfa
 
 ## 8. Contributing
 
-`jfa` is an open-source project that aims to be useful for the audit community. Your help in benchmarking and extending `jfa` is therefore greatly appreciated. Contributing to `jfa` does not have to take much time or knowledge, and there is extensive information available about it on the [Wiki](https://github.com/koenderks/jfa/wiki) of this repository. 
+`jfa` is an open-source project that aims to be useful for the audit community. Your help in benchmarking and extending `jfa` is therefore greatly appreciated. Contributing to `jfa` does not have to take much time or knowledge, and there is extensive information available about it on the [Wiki](https://github.com/koenderks/jfa/wiki) of this repository.
 
-If you are willing to contribute to the improvement of the package by adding a benchmark, please check out the Wiki page on [how to contribute a benchmark to jfa](https://github.com/koenderks/jfa/wiki/Benchmarks). If you are willing to contribute to the improvement of the package by adding a new statistical method, please check the Wiki page on [how to contribute a new method to jfa](https://github.com/koenderks/jfa/wiki/Methods). 
+If you are willing to contribute to the improvement of the package by adding a benchmark, please check out the Wiki page on [how to contribute a benchmark to jfa](https://github.com/koenderks/jfa/wiki/Benchmarks). If you are willing to contribute to the improvement of the package by adding a new statistical method, please check the Wiki page on [how to contribute a new method to jfa](https://github.com/koenderks/jfa/wiki/Methods).

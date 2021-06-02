@@ -22,7 +22,7 @@ planning(confidence, materiality = NULL, minPrecision = NULL,
 
 \item{N}{an integer larger than 0 specifying the total population size. Only required when \code{likelihood = 'hypergeometric'}.}
 
-\item{prior}{a logical specifying whether to use a prior distribution when planning, or an object of class \code{jfaPrior} containing the prior distribution. Defaults to \code{FALSE} for frequentist planning. If \code{TRUE}, a negligible prior distribution is chosen by default, but can be adjusted using the \code{kPrior} and \code{nPrior} arguments. Chooses a conjugate gamma distribution for the Poisson likelihood, a conjugate beta distribution for the binomial likelihood, and a conjugate beta-binomial distribution for the hypergeometric likelihood.}
+\item{prior}{a logical specifying whether to use a prior distribution when planning, or an object of class \code{jfaPrior} or \code{jfaPosterior} containing the prior distribution. Defaults to \code{FALSE} for frequentist planning. If \code{TRUE}, a negligible prior distribution is chosen by default, but can be adjusted using the \code{kPrior} and \code{nPrior} arguments. Chooses a conjugate gamma distribution for the Poisson likelihood, a conjugate beta distribution for the binomial likelihood, and a conjugate beta-binomial distribution for the hypergeometric likelihood.}
 
 \item{nPrior}{if \code{prior = TRUE}, a numeric value larger than, or equal to, 0 specifying the sample size of the sample equivalent to the prior information.}
 
@@ -51,7 +51,7 @@ An object of class \code{jfaPlanning} containing:
 \item{expectedPosterior}{if a prior distribution is specified, an object of class \code{jfaPosterior} that contains information about the expected posterior distribution.}
 }
 \description{
-This function calculates the minimum sample size for a statistical audit sample based on the Poisson, binomial or hypergeometric likelihood. The function returns an object of class \code{jfaPlanning} which can be used with associated \code{print()} and \code{plot()} methods.
+This function calculates the minimum sample size for a statistical audit sample based on the binomial, Poisson, or hypergeometric likelihood. The function returns an object of class \code{jfaPlanning} which can be used with associated \code{print()} and \code{plot()} methods.
 
 For more details on how to use this function, see the package vignette:
 \code{vignette('jfa', package = 'jfa')}
