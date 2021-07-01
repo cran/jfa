@@ -1,7 +1,7 @@
 ---
 title: "The Bayesian audit sampling workflow"
 author: Koen Derks
-date: "last modified: 10-05-2021"
+date: "last modified: 29-06-2021"
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -61,13 +61,14 @@ However, in a Bayesian audit, Laura starts at step 0 by defining the prior distr
 
 ```{r}
 # Step 0: Create a prior distribution according to the audit risk model.
-prior <- auditPrior(confidence, materiality, expectedError, method = "arm", likelihood = "binomial", ir = ir, cr = cr)
+prior <- auditPrior(method = "arm", likelihood = "binomial", expectedError = expectedError,
+                    materiality = materiality, ir = ir, cr = cr)
 ```
 
-Laura can inspect the resulting prior distribution with the `print()` function.
+Laura can inspect the resulting prior distribution with the `summary()` function.
 
 ```{r}
-print(prior)
+summary(prior)
 ```
 
 The prior distribution can be shown by using the `plot()` function.
@@ -80,13 +81,14 @@ Now that the prior distribution is specified, Laura can calculate the required s
 
 ```{r}
 # Step 1: Calculate the required sample size.
-planningResult <- planning(confidence, materiality, expectedError = expectedError, prior = prior)
+planningResult <- planning(materiality = materiality, expectedError = expectedError,
+                           confidence = confidence, prior = prior)
 ```
 
-Laura can then inspect the result from her planning procedure by using the `print()` function. Her result tells her that, given her prior distribution she needs to audit a sample of 169 transactions so that, when at most 4.225 errors are found, she can conclude with 95% confidence that the maximum error in BuildIt's financial statements is lower the materiality of 5%. 
+Laura can then inspect the result from her planning procedure by using the `summary()` function. Her result tells her that, given her prior distribution she needs to audit a sample of 169 transactions so that, when at most 4.225 errors are found, she can conclude with 95% confidence that the maximum error in BuildIt's financial statements is lower the materiality of 5%. 
 
 ```{r}
-print(planningResult)
+summary(planningResult)
 ```
 
 Laura can inspect how the prior distribution compares to the expected posterior distribution by using the `plot()` function. The expected posterior distribution is the posterior distribution that would occur if Laura actually observed a sample of 169 transactions, from which 4.225 were in error.
@@ -103,13 +105,14 @@ Laura chooses to use *monetary unit sampling*, as she wants to include more high
 
 ```{r}
 # Step 2: Draw a sample from the financial statements.
-samplingResult <- selection(BuildIt, sampleSize = 164, units = "mus", bookValues = "bookValue")
+samplingResult <- selection(population = BuildIt, sampleSize = planningResult, 
+                            units = "mus", bookValues = "bookValue")
 ```
 
-Laura can inspect the outcomes of her sampling procedure by using the `print()` function.
+Laura can inspect the outcomes of her sampling procedure by using the `summary()` function.
 
 ```{r}
-print(samplingResult)
+summary(samplingResult)
 ```
 
 ## Stage 3: Executing the audit
@@ -127,7 +130,7 @@ sample <- samplingResult$sample
 # sample <- read.csv(file = "auditSample.csv")
 ```
 
-For this example, the audit values of the sample are already included in the `auditValue` column of the dataset .
+For this example, the audit values of the sample are already included in the `auditValue` column of the data set .
 
 ## Stage 4: Evaluating the sample
 
@@ -135,16 +138,18 @@ Using her annotated sample, Laura can perform her inference with the `evaluation
 
 ```{r}
 # Step 4: Evaluate the sample.
-evaluationResult <- evaluation(confidence, materiality, sample = sample, bookValues = "bookValue", auditValues = "auditValue", prior = prior)
+evaluationResult <- evaluation(materiality = materiality, confidence = confidence, 
+                               sample = sample, bookValues = "bookValue", 
+                               auditValues = "auditValue", prior = prior)
 ```
 
-Laura can inspect the outcomes of her inference by using the `print()` function. Her resulting upper bound is 2.378%, which is lower than the materiality of 5%. The output tells Laura the correct conclusion immediately.
+Laura can inspect the outcomes of her inference by using the `summary()` function. Her resulting upper bound is 2.325%, which is lower than the materiality of 5%. The output tells Laura the correct conclusion immediately.
 
 ```{r}
-print(evaluationResult)
+summary(evaluationResult)
 ```
 
-She can inspect the prior and posterior distribution by using the `plot()` function. The shaded area quantifies the area under the posterior distribution that contains 95% of the probability, which ends at 2.378%. Therefore, Laura can state that there is a 95% probability that the misstatement in BuildIt's statements is lower than 2.378%.
+She can inspect the prior and posterior distribution by using the `plot()` function. The shaded area quantifies the area under the posterior distribution that contains 95% of the probability, which ends at 2.325%. Therefore, Laura can state that there is a 95% probability that the misstatement in BuildIt's population is lower than 2.325%.
 
 ```{r fig.align="center", fig.height=4, fig.width=6}
 plot(evaluationResult)

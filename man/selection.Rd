@@ -39,7 +39,7 @@ An object of class \code{jfaSelection} containing:
 \item{bookValues}{if \code{bookValues} is specified, a character indicating the name of the book value column.}
 }
 \description{
-This function takes a data frame and performs statistical sampling according to one of three algorithms: random sampling, cell sampling, and fixed interval sampling. Sampling is done on the level of two possible sampling units: records or monetary units. The function returns an object of class \code{jfaSelection} which can be used with associated \code{print()} and a \code{plot()} methods.
+This function takes a data frame and performs statistical sampling according to one of three algorithms: random sampling, cell sampling, and fixed interval sampling. Sampling is done on the level of two possible sampling units: records or monetary units. The function returns an object of class \code{jfaSelection} which can be used with associated \code{summary()} and a \code{plot()} methods.
 
 For more details on how to use this function, see the package vignette:
 \code{vignette('jfa', package = 'jfa')}
@@ -75,7 +75,7 @@ Leslie, D. A., Teitlebaum, A. D., & Anderson, R. J. (1979). \emph{Dollar-unit Sa
 Wampler, B., & McEacharn, M. (2005). Monetary-unit sampling using Microsoft Excel. \emph{The CPA journal}, 75(5), 36.
 }
 \seealso{
-\code{\link{auditPrior}} \code{\link{planning}} \code{\link{evaluation}} \code{\link{report}}
+\code{\link{auditPrior}} \code{\link{planning}} \code{\link{evaluation}} \code{\link{report}} \code{\link{auditBF}}
 }
 \author{
 Koen Derks, \email{k.derks@nyenrode.nl}

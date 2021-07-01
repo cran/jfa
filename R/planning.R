@@ -1,20 +1,20 @@
 #' Plan a statistical audit sample
 #'
-#' @description This function calculates the minimum sample size for a statistical audit sample based on the binomial, Poisson, or hypergeometric likelihood. The function returns an object of class \code{jfaPlanning} which can be used with associated \code{print()} and \code{plot()} methods.
+#' @description This function calculates the minimum sample size for a statistical audit sample based on the binomial, Poisson, or hypergeometric likelihood. The function returns an object of class \code{jfaPlanning} which can be used with associated \code{summary()} and \code{plot()} methods.
 #'
 #' For more details on how to use this function, see the package vignette:
 #' \code{vignette('jfa', package = 'jfa')}
 #'
-#' @usage planning(confidence, materiality = NULL, minPrecision = NULL,
-#'          expectedError = 0, likelihood = 'binomial', N = NULL,
+#' @usage planning(materiality = NULL, minPrecision = NULL, expectedError = 0,
+#'          likelihood = 'binomial', confidence = 0.95, N = NULL,
 #'          prior = FALSE, nPrior = 0, kPrior = 0,
 #'          increase = 1, maxSize = 5000)
 #'
-#' @param confidence    a numeric value between 0 and 1 specifying the confidence level used in the planning.
 #' @param materiality   a numeric value between 0 and 1 specifying the performance materiality (i.e., maximum upper limit) as a fraction of the total population size. Can be \code{NULL}, but \code{minPrecision} should be specified in that case.
 #' @param minPrecision  a numeric value between 0 and 1 specifying the minimum precision (i.e., upper bound minus most likely error) as a fraction of the total population size. Can be \code{NULL}, but \code{materiality} should be specified in that case.
 #' @param expectedError a numeric value between 0 and 1 specifying the expected errors in the sample relative to the total sample size, or a number (>= 1) that represents the number of expected errors in the sample. It is advised to set this value conservatively to minimize the probability of the observed errors exceeding the expected errors, which would imply that insufficient work has been done in the end.
 #' @param likelihood    a character specifying the likelihood assumed in the calculation. This can be either \code{binomial} for the binomial likelihood, \code{poisson} for the Poisson likelihood, or \code{hypergeometric} for the hypergeometric likelihood. See the details section for more information about the available likelihoods.
+#' @param confidence    a numeric value between 0 and 1 specifying the confidence level used in the planning. Defaults to 0.95 for 95\% confidence.
 #' @param N             an integer larger than 0 specifying the total population size. Only required when \code{likelihood = 'hypergeometric'}.
 #' @param prior         a logical specifying whether to use a prior distribution when planning, or an object of class \code{jfaPrior} or \code{jfaPosterior} containing the prior distribution. Defaults to \code{FALSE} for frequentist planning. If \code{TRUE}, a negligible prior distribution is chosen by default, but can be adjusted using the \code{kPrior} and \code{nPrior} arguments. Chooses a conjugate gamma distribution for the Poisson likelihood, a conjugate beta distribution for the binomial likelihood, and a conjugate beta-binomial distribution for the hypergeometric likelihood.
 #' @param nPrior        if \code{prior = TRUE}, a numeric value larger than, or equal to, 0 specifying the sample size of the sample equivalent to the prior information.
@@ -49,25 +49,29 @@
 #'
 #' @author Koen Derks, \email{k.derks@nyenrode.nl}
 #'
-#' @seealso \code{\link{auditPrior}} \code{\link{selection}} \code{\link{evaluation}} \code{\link{report}}
+#' @seealso \code{\link{auditPrior}} \code{\link{selection}} \code{\link{evaluation}} \code{\link{report}} \code{\link{auditBF}}
 #'
+#' @references Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J., & Wetzels, R. (2021). Priors in a Bayesian audit: How integration of existing information into the prior distribution can improve audit transparency and efficiency. \emph{International Journal of Auditing}, 1-16.
 #' @references Dyer, D. and Pierce, R.L. (1993). On the choice of the prior distribution in hypergeometric sampling. \emph{Communications in Statistics - Theory and Methods}, 22(8), 2125 - 2146.
 #'
 #' @keywords planning sample size audit
 #'
 #' @examples
 #' # Frequentist planning using a binomial likelihood
-#' planning(confidence = 0.95, materiality = 0.05, expectedError = 0.025,
-#'          likelihood = 'binomial')
+#' planning(materiality = 0.05, expectedError = 0.025, likelihood = 'binomial')
 #' 
 #' # Bayesian planning using a negligible beta prior
-#' planning(confidence = 0.95, materiality = 0.05, expectedError = 0.025,
-#'          likelihood = 'binomial', prior = TRUE)
+#' planning(materiality = 0.05, expectedError = 0.025, likelihood = 'binomial', 
+#'          prior = TRUE)
+#'
+#' # Bayesian planning using an informed beta prior
+#' planning(materiality = 0.05, expectedError = 0.025, likelihood = 'binomial', 
+#'          prior = auditPrior(method = 'median', materiality = 0.05))
 #'
 #' @export
 
-planning <- function(confidence, materiality = NULL, minPrecision = NULL,
-                     expectedError = 0, likelihood = 'binomial', N = NULL,  
+planning <- function(materiality = NULL, minPrecision = NULL, expectedError = 0,
+                     likelihood = 'binomial', confidence = 0.95, N = NULL,  
                      prior = FALSE, nPrior = 0, kPrior = 0,
                      increase = 1, maxSize = 5000) {
   
@@ -84,20 +88,20 @@ planning <- function(confidence, materiality = NULL, minPrecision = NULL,
   }
   
   # Perform error handling with respect to incompatible input options
+  if (is.null(materiality) && is.null(minPrecision))
+    stop("You must specify your sampling objective(s) using the 'materiality' or 'minPrecision' argument(s).")
+
   if (confidence >= 1 || confidence <= 0 || is.null(confidence))
-    stop("Specify a value for the confidence likelihood. Possible values lie within the range of 0 to 1.")
+    stop("Specify a valid value for the 'confidence' argument. Possible values lie within the range of 0 to 1.")
   
   if (!(likelihood %in% c("poisson", "binomial", "hypergeometric")))
-    stop("Specify a valid likelihood. Possible options are 'binomial', 'poisson', and 'hypergeometric'.")
-  
-  if (is.null(materiality) && is.null(minPrecision))
-    stop("You must specify the materiality or the minimum precision.")
+    stop("Specify a valid option for the 'likelihood' argument. Possible options are 'binomial', 'poisson', and 'hypergeometric'.")
   
   if (!is.null(minPrecision) && (minPrecision <= 0 || minPrecision >= 1))
     stop("The minimum required precision must be a positive value < 1.")
   
   if ((class(prior) == "logical" && prior == TRUE) && kPrior < 0 || nPrior < 0)
-    stop("If you specify a prior, the values for nPrior and kPrior should be >= 0.")
+    stop("If you specify a prior, the values for the 'nPrior' and 'kPrior' arguments should be >= 0.")
   
   # Define a placeholder for the sample size 
   ss <- NULL
@@ -107,13 +111,13 @@ planning <- function(confidence, materiality = NULL, minPrecision = NULL,
     
     errorType <- "percentage"
     if (!is.null(materiality) && expectedError >= materiality)
-      stop("This analysis is not possible: the expected errors are higher than, or equal to, the materiality.")
+      stop("The value for the 'expectedError' argument must be lower than the value for the 'materiality' argument.")
     
   } else if (expectedError >= 1) {
     
     errorType <- "integer"
     if (expectedError%%1 != 0 && likelihood %in% c("binomial", "hypergeometric") && !((class(prior) == "logical" && prior == TRUE) || class(prior) %in% c("jfaPrior", "jfaPosterior")))
-      stop("When expectedError > 1 and the likelihood is 'binomial' or 'hypergeometric', its value must be an integer.")
+      stop("When the 'expectedError' argument > 1 and the 'likelihood' argument is 'binomial' or 'hypergeometric', its value must be an integer.")
     
   }
   
@@ -162,13 +166,13 @@ planning <- function(confidence, materiality = NULL, minPrecision = NULL,
     if ((class(prior) == "logical" && prior == TRUE) || class(prior) %in% c("jfaPrior", "jfaPosterior")) { # Bayesian planning
       
       bound <- switch(likelihood, 
-                      "poisson" = stats::qgamma(confidence, shape = 1 + kPrior + implicitK, rate = nPrior + i),
-                      "binomial" = stats::qbeta(confidence, shape1 = 1 + kPrior + implicitK, shape2 = 1 + nPrior - kPrior + i - implicitK),
-                      "hypergeometric" = .qBetaBinom(p = confidence, N = N - i, shape1 = 1 + kPrior + implicitK, shape2 = 1 + nPrior - kPrior + i - implicitK) / N)
+                      "poisson" = stats::qgamma(confidence, shape = (1 + kPrior) + implicitK, rate = nPrior + i),
+                      "binomial" = stats::qbeta(confidence, shape1 = (1 + kPrior) + implicitK, shape2 = (1 + nPrior - kPrior) + i - implicitK),
+                      "hypergeometric" = .qBetaBinom(p = confidence, N = N - i, shape1 = (1 + kPrior) + implicitK, shape2 = (1 + nPrior - kPrior) + i - implicitK) / N)
       mle <- switch(likelihood,
-                    "poisson" = (1 + kPrior + implicitK - 1) / (nPrior + i),
-                    "binomial" = (1 + kPrior + implicitK - 1) / (1 + kPrior + implicitK + 1 + nPrior - kPrior + i - implicitK - 2),
-                    "hypergeometric" = .modeBetaBinom(N = N - i, shape1 = 1 + kPrior + implicitK, shape2 = 1 + nPrior - kPrior + i - implicitK) / N)
+                    "poisson" = ((1 + kPrior + implicitK) - 1) / (nPrior + i),
+                    "binomial" = ((1 + kPrior + implicitK) - 1) / ((1 + kPrior + implicitK) + (1 + nPrior - kPrior + i - implicitK) - 2),
+                    "hypergeometric" = .modeBetaBinom(N = N - i, shape1 = (1 + kPrior) + implicitK, shape2 = (1 + nPrior - kPrior) + i - implicitK) / N)
       
     } else { # Classical planning
       
@@ -209,6 +213,7 @@ planning <- function(confidence, materiality = NULL, minPrecision = NULL,
   result[["expectedPrecision"]]     <- as.numeric(bound - mle)
   if (likelihood == "hypergeometric")
     result[["populationK"]]         <- as.numeric(populationK)
+  result[["iterations"]]            <- as.numeric(iter)
   
   # Create the prior distribution object	
   if (((class(prior) == "logical" && prior == TRUE) || class(prior) %in% c("jfaPrior", "jfaPosterior"))) {

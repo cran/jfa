@@ -9,7 +9,7 @@
 
 <img src='https://github.com/koenderks/jfa/raw/master/man/figures/readme/logo/jfaLogo.png' width='149' height='173' alt='logo' align='right' margin-left='20' margin-right='20'/>
 
-`jfa` is an R package for statistical audit sampling. The package provides five functions for planning, performing, evaluating, and reporting an audit sample. Specifically, these functions implement standard audit sampling techniques for calculating sample sizes, selecting items from a population, and evaluating the misstatement from a data sample or from summary statistics. Additionally, the `jfa` package allows the user to create a prior probability distribution to perform Bayesian audit sampling using these functions.
+`jfa` is an R package for statistical audit sampling. The package provides functions for planning, performing, evaluating, and reporting an audit sample. Specifically, these functions implement standard audit sampling techniques for calculating sample sizes, selecting items from a population, and evaluating the misstatement from a data sample or from summary statistics. Additionally, the `jfa` package allows the user to create a prior probability distribution to perform Bayesian audit sampling using these functions.
 
 ## Overview
 
@@ -19,7 +19,7 @@ For complete documentation of `jfa`, visit the [package website](https://koender
 2. [Cheat sheet](#2-cheat-sheet)
 3. [Benchmarks](#3-benchmarks)
 4. [Statistical tables](#4-statistical-tables)
-5. [Available functions](#5-available-functions)
+5. [Intended workflow](#5-intended-workflow)
 6. [References](#6-references)
 7. [Package statistics](#7-package-statistics) 
 8. [Contributing](#8-contributing) 
@@ -82,7 +82,7 @@ Below you can find several informative tables that contain statistical sample si
 - [Bayes factors based on the gamma distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaPoissonBayesFactors.pdf)
 - [Bayes factors based on the beta-binomial distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaHypergeometricBayesFactors.pdf)
 
-## 5. Available functions
+## 5. Intended workflow
 
 <p align='center'><img src='https://github.com/koenderks/jfa/raw/master/man/figures/readme/banner/jfaBanner.png' alt='banner'/></p>
 
@@ -92,17 +92,17 @@ Below you can find an explanation of the available functions in `jfa`, sorted by
 * [`planning()`](#plan-a-sample-with-the-planning-function)
 * [`selection()`](#select-items-with-the-selection-function)
 * [`evaluation()`](#evaluate-a-sample-with-the-evaluation-function)
-* [`report()`](#generate-a-report-with-the-report-function)
+* [`report()`](#create-a-report-with-the-report-function)
 
 ### Create a prior distribution with the `auditPrior()` function
 
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 
-The `auditPrior()` function creates a prior distribution according to one of several methods, including a translation of the assessments of the inherent risk and control risk from the audit risk model. The function returns an object of class `jfaPrior` which can be used with associated `print()` and `plot()` methods. Objects with class `jfaPrior` can also be used as input for the `prior` argument in other functions.
+The `auditPrior()` function creates a prior distribution according to one of several methods, including a translation of the assessments of the inherent risk and control risk from the audit risk model. The function returns an object of class `jfaPrior` which can be used with associated `summary()` and `plot()` methods. Objects with class `jfaPrior` can also be used as input for the `prior` argument in other functions.
 
 *Full function with default arguments:*
 
-`auditPrior(confidence, materiality = NULL, expectedError = 0, method = 'none', likelihood = 'binomial', N = NULL, ir = 1, cr = 1, ub = NULL, pHmin = NULL, pHplus = NULL, sampleN = 0, sampleK = 0, factor = 1)`
+`auditPrior(method = 'none', likelihood = 'binomial', expectedError = 0, confidence = 0.95, materiality = NULL, N = NULL, ir = 1, cr = 1, ub = NULL, pHmin = NULL, pHplus = NULL, sampleN = 0, sampleK = 0, factor = 1)`
 
 *Supported options for the `method` argument:*
 
@@ -124,15 +124,24 @@ The `auditPrior()` function creates a prior distribution according to one of sev
 | `poisson` | Gamma prior distribution (+ Poisson likelihood) | Stewart (2013) |
 | `hypergeometric` | Beta-binomial prior distribution (+ hypergeometric likelihood) | Dyer and Pierce (1991) |
 
+*Example usage:*
+
+```
+# A uniform beta prior distribution 
+x <- auditPrior(method = 'none', likelihood = 'binomial')
+
+summary(x) # Prints information about the prior distribution
+```
+
 ### Plan a sample with the `planning()` function
 
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 
-The `planning()` function calculates the minimum sample size for a statistical audit sample based on the binomial, Poisson, or hypergeometric likelihood. The function returns an object of class `jfaPlanning` which can be used with associated `print()` and a `plot()` methods. To perform Bayesian planning, the input for the `prior` argument can be an object of class `jfaPrior` as returned by the `auditPrior()` function, or an object of class `jfaPosterior` as returned by the `evaluation()` function.
+The `planning()` function calculates the minimum sample size for a statistical audit sample based on the binomial, Poisson, or hypergeometric likelihood. The function returns an object of class `jfaPlanning` which can be used with associated `summary()` and `plot()` methods. To perform Bayesian planning, the input for the `prior` argument can be an object of class `jfaPrior` as returned by the `auditPrior()` function, or an object of class `jfaPosterior` as returned by the `evaluation()` function.
 
 *Full function with default arguments:*
 
-`planning(confidence, materiality = NULL, minPrecision = NULL, expectedError = 0, likelihood = 'binomial', N = NULL, prior = FALSE, nPrior = 0, kPrior = 0, increase = 1, maxSize = 5000)`
+`planning(materiality = NULL, minPrecision = NULL, expectedError = 0, likelihood = 'binomial', confidence = 0.95, N = NULL, prior = FALSE, nPrior = 0, kPrior = 0, increase = 1, maxSize = 5000)`
 
 *Supported options for the `likelihood` argument:*
 
@@ -142,11 +151,20 @@ The `planning()` function calculates the minimum sample size for a statistical a
 | `poisson` | Poisson likelihood | Stewart (2012) |
 | `hypergeometric` | Hypergeometric likelihood | Stewart (2012) |
 
+*Example usage:*
+
+```
+# Planning using binomial likelihood
+x <- planning(materiality = 0.03, likelihood = 'binomial', confidence = 0.95)
+
+summary(x) # Prints information about the planning
+```
+
 ### Select items with the `selection()` function
 
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 
-The `selection()` function takes a data frame and performs statistical sampling according to one of three algorithms: random sampling, cell sampling, or fixed interval sampling in combination with either record sampling or monetary unit sampling. The function returns an object of class `jfaSelection` which can be used with associated `print()` and a `plot()` methods. The input for the `sampleSize` argument can be an object of class `jfaPlanning` as returned by the `planning()` function.
+The `selection()` function takes a data frame and performs statistical sampling according to one of three algorithms: random sampling, cell sampling, or fixed interval sampling in combination with either record sampling or monetary unit sampling. The function returns an object of class `jfaSelection` which can be used with associated `summary()` and `plot()` methods. The input for the `sampleSize` argument can be an object of class `jfaPlanning` as returned by the `planning()` function.
 
 *Full function with default arguments:*
 
@@ -167,15 +185,24 @@ The `selection()` function takes a data frame and performs statistical sampling 
 | `cell` | Select a random unit from every interval | |
 | `interval` | Select a fixed unit from every interval | `intervalStartingPoint` |
 
+*Example usage:*
+
+```
+# Selection using fixed interval record sampling
+x <- selection(population = BuildIt, sampleSize = 100, units = 'records', algorithm = 'interval')
+
+summary(x) # Prints information about the selection
+```
+
 ### Evaluate a sample with the `evaluation()` function
 
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 
-The `evaluation()` function takes a sample or summary statistics of the sample and performs evaluation according to the specified method and sampling objectives. The function returns an object of class `jfaEvalution` which can be used with associated `print()` and `plot()` methods. To perform Bayesian evaluation, the input for the `prior` argument can be an object of class `jfaPrior` as returned by the `auditPrior()` function, or an object of class `jfaPosterior` as returned by the `evaluation()` function.
+The `evaluation()` function takes a sample or summary statistics of the sample and performs evaluation according to the specified method and sampling objectives. The function returns an object of class `jfaEvalution` which can be used with associated `summary()` and `plot()` methods. To perform Bayesian evaluation, the input for the `prior` argument can be an object of class `jfaPrior` as returned by the `auditPrior()` function, or an object of class `jfaPosterior` as returned by the `evaluation()` function.
 
 *Full function with default arguments:*
 
-`evaluation(confidence, materiality = NULL, minPrecision = NULL, method = 'binomial', sample = NULL, bookValues = NULL, auditValues = NULL, counts = NULL, nSumstats = NULL, kSumstats = NULL, N = NULL, populationBookValue = NULL, prior = FALSE, nPrior = 0, kPrior = 0, rohrbachDelta = 2.7, momentPoptype = 'accounts', csA = 1, csB = 3, csMu = 0.5)`
+`evaluation(materiality = NULL, minPrecision = NULL, method = 'binomial', confidence = 0.95, sample = NULL, bookValues = NULL, auditValues = NULL, counts = NULL, nSumstats = NULL, kSumstats = NULL, N = NULL, populationBookValue = NULL, prior = FALSE, nPrior = 0, kPrior = 0, rohrbachDelta = 2.7, momentPoptype = 'accounts', csA = 1, csB = 3, csMu = 0.5)`
 
 *Supported options for the `method` argument:*
 
@@ -196,6 +223,15 @@ The `evaluation()` function takes a sample or summary statistics of the sample a
 | `quotient` | Quotient estimator | `populationBookValue` | Touw and Hoogduin (2011) |
 | `regression` | Regression estimator | `populationBookValue` | Touw and Hoogduin (2011) |
 
+*Example usage:*
+
+```
+# Binomial evaluation using summary statistics from a sample
+x <- evaluation(materiality = 0.03, confidence = 0.95, nSumstats = 100, kSumstats = 1, method = 'binomial')
+
+summary(x) # Prints information about the evaluation
+```
+
 ### Create a report with the `report()` function
 
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
@@ -206,14 +242,21 @@ The `report()` function takes an object of class `jfaEvaluation` as returned by 
 
 `report(object, file = 'report.html', format = 'html_document')`
 
+*Example usage:*
+
+```
+# Generate an automatic report
+report(object = x, file = 'myReport.html')
+```
+
 For an example report, see the following [link](https://github.com/koenderks/jfa/raw/master/man/figures/readme/report/report.pdf).
 
 ## 6. References
 
 - Bickel, P. J. (1992). Inference and auditing: The Stringer bound. *International Statistical Review*, 60(2), 197–209. - [View online](https://www.jstor.org/stable/1403650)
 - Cox, D. R., & Snell, E. J. (1979). On sampling and the estimation of rare errors. *Biometrika*, 66(1), 125-132. - [View online](https://doi.org/10.1093/biomet/66.1.125)
-- Derks, K. (2021). jfa: Bayesian and classical audit sampling. R package version 0.5.3. - [View online](https://cran.r-project.org/package=jfa)
-- Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J., & Wetzels, R. (2021). Priors in a Bayesian audit: How integration of existing information into the prior distribution can improve audit transparency and efficiency. *In Press*. - [View online](https://psyarxiv.com/8fhkp/)
+- Derks, K. (2021). jfa: Bayesian and classical audit sampling. R package version 0.5.5. - [View online](https://cran.r-project.org/package=jfa)
+- Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J., & Wetzels, R. (2021). Priors in a Bayesian audit: How integration of existing information into the prior distribution can improve audit transparency and efficiency. *International Journal of Auditing*, 1-16. - [View online](https://doi.org/10.1111/ijau.12240)
 - Dworin, L. D. and Grimlund, R. A. (1984). Dollar-unit sampling for accounts receivable and inventory. *The Accounting Review*, 59(2), 218–241. - [View online](https://www.jstor.org/stable/247296)
 - Dyer, D., & Pierce, R. L. (1993). On the choice of the prior distribution in hypergeometric sampling. *Communications in Statistics - Theory and Methods*, 22(8), 2125-2146. - [View online](https://www.tandfonline.com/doi/abs/10.1080/03610929308831139)
 - Meikle, G. R. (1972). *Statistical Sampling in an Audit Context*. Canadian Institute of Chartered Accountants.

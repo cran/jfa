@@ -1,6 +1,6 @@
 #' Select a statistical audit sample
 #'
-#' @description This function takes a data frame and performs statistical sampling according to one of three algorithms: random sampling, cell sampling, and fixed interval sampling. Sampling is done on the level of two possible sampling units: records or monetary units. The function returns an object of class \code{jfaSelection} which can be used with associated \code{print()} and a \code{plot()} methods.
+#' @description This function takes a data frame and performs statistical sampling according to one of three algorithms: random sampling, cell sampling, and fixed interval sampling. Sampling is done on the level of two possible sampling units: records or monetary units. The function returns an object of class \code{jfaSelection} which can be used with associated \code{summary()} and a \code{plot()} methods.
 #'
 #' For more details on how to use this function, see the package vignette:
 #' \code{vignette('jfa', package = 'jfa')}
@@ -45,7 +45,7 @@
 #'
 #' @author Koen Derks, \email{k.derks@nyenrode.nl}
 #'
-#' @seealso \code{\link{auditPrior}} \code{\link{planning}} \code{\link{evaluation}} \code{\link{report}}
+#' @seealso \code{\link{auditPrior}} \code{\link{planning}} \code{\link{evaluation}} \code{\link{report}} \code{\link{auditBF}}
 #'
 #' @references Leslie, D. A., Teitlebaum, A. D., & Anderson, R. J. (1979). \emph{Dollar-unit Sampling: A Practical Guide for Auditors}. Copp Clark Pitman; Belmont, Calif.: distributed by Fearon-Pitman.
 #' @references Wampler, B., & McEacharn, M. (2005). Monetary-unit sampling using Microsoft Excel. \emph{The CPA journal}, 75(5), 36.
@@ -96,7 +96,7 @@ selection <- function(population, sampleSize, units = 'records', algorithm = 'ra
     bv <- population[, bookValues]
   
   if (units == "mus" && sampleSize > sum(bv)) # Check if the sample size is valid
-    stop("Cannot take a sample larger than the population value")
+    stop("Cannot take a sample larger than the population value.")
   
   if (ordered && !is.null(bv)) { # Order the population
     population <- population[order(bv, decreasing = !ascending), ]
@@ -104,7 +104,7 @@ selection <- function(population, sampleSize, units = 'records', algorithm = 'ra
   }
   
   if (!is.null(bv) && any(bv < 0)) { # Remove the negative book values from the population
-    warning("The book values contain negative values, these are removed from the data")
+    warning("The book values contain negative values, these are removed from the data.")
     negativeValues <- which(bv < 0)
     population     <- population[-negativeValues, ]
     bv             <- population[, bookValues]
@@ -175,9 +175,6 @@ selection <- function(population, sampleSize, units = 'records', algorithm = 'ra
   # Gather output
   count     <- as.numeric(table(index))
   rowNumber <- as.numeric(unique(index))
-  
-  if (length(rowNumber) < sampleSize) # The sample size was larger than the population
-    warning("The sample contains fewer items than the specified sample size")
   
   sample           <- cbind(rowNumber, count, population[rowNumber, ])
   rownames(sample) <- 1:nrow(sample)

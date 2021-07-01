@@ -4,21 +4,21 @@
 \alias{auditPrior}
 \title{Create a prior distribution for audit sampling}
 \usage{
-auditPrior(confidence, materiality = NULL, expectedError = 0, 
-           method = 'none', likelihood = 'binomial', N = NULL, 
+auditPrior(method = 'none', likelihood = 'binomial', expectedError = 0, 
+           confidence = 0.95, materiality = NULL, N = NULL, 
            ir = 1, cr = 1, ub = NULL, pHmin = NULL, pHplus = NULL, 
            sampleN = 0, sampleK = 0, factor = 1)
 }
 \arguments{
-\item{confidence}{a numeric value between 0 and 1 specifying the confidence level to be used in the planning.}
-
-\item{materiality}{a numeric value between 0 and 1 specifying the performance materiality (i.e., the maximum upper limit) as a fraction of the total population size. Can be \code{NULL} for some methods.}
-
-\item{expectedError}{a numeric value between 0 and 1 specifying the expected errors in the sample relative to the total sample size, or a numeric value (>= 1) that represents the sum of expected errors in the sample. It is advised to set this value conservatively to minimize the probability of the observed errors exceeding the expected errors, which would imply that insufficient work has been done in the end.}
-
 \item{method}{a character specifying the method by which the prior distribution is constructed. Defaults to \code{none} which incorporates no existing information. Other options are \code{arm}, \code{bram}, \code{median}, \code{hypotheses}, \code{sample}, and \code{factor}. See the details section for more information about the available methods.}
 
 \item{likelihood}{a character specifying the likelihood assumed when updating the prior distribution. This can be either \code{binomial} for the binomial likelihood and beta prior distribution, \code{poisson} for the Poisson likelihood and gamma prior distribution, or \code{hypergeometric} for the hypergeometric likelihood and beta-binomial prior distribution. See the details section for more information about the available likelihoods.}
+
+\item{expectedError}{a numeric value between 0 and 1 specifying the expected errors in the sample relative to the total sample size, or a numeric value (>= 1) that represents the sum of expected errors in the sample. It is advised to set this value conservatively to minimize the probability of the observed errors exceeding the expected errors, which would imply that insufficient work has been done in the end.}
+
+\item{confidence}{a numeric value between 0 and 1 specifying the confidence level to be used in the planning. Defaults to 0.95 for 95\% confidence.}
+
+\item{materiality}{a numeric value between 0 and 1 specifying the performance materiality (i.e., the maximum upper limit) as a fraction of the total population size. Can be \code{NULL} for some methods.}
 
 \item{N}{an numeric value larger than 0 specifying the total population size. Optional unless \code{likelihood = 'hypergeometric'}.}
 
@@ -34,7 +34,7 @@ auditPrior(confidence, materiality = NULL, expectedError = 0,
 
 \item{sampleN}{if \code{method = 'sample'} or \code{method = 'factor'}, an integer larger than, or equal to, 0 specifying the sample size of the sample equivalent to the prior information.}
 
-\item{sampleK}{if \code{sample} or \code{factor}, a numeric value larger than, or equal to, 0 specifying the sum of errors in the sample equivalent to the prior information.}
+\item{sampleK}{if \code{method = 'sample'} or \code{method = 'factor'}, a numeric value larger than, or equal to, 0 specifying the sum of errors in the sample equivalent to the prior information.}
 
 \item{factor}{if \code{method = 'factor'}, a numeric value between 0 and 1 specifying the weighting factor for the results of the sample equivalent to the prior information.}
 }
@@ -53,7 +53,7 @@ An object of class \code{jfaPrior} containing:
 \item{hypotheses}{if \code{materiality} is specified, a list containing information about the hypotheses, including prior probabilities and odds for the hypothesis of tolerable misstatement (H-) and the hypothesis of intolerable misstatement (H+).}
 }
 \description{
-This function creates a prior distribution with audit information to be used in the \code{planning()} and \code{evaluation()} functions via their \code{prior} argument. The function returns an object of class \code{jfaPrior} which can be used with associated \code{print()} and \code{plot()} methods.
+This function creates a prior distribution with audit information to be used in the \code{planning()} and \code{evaluation()} functions via their \code{prior} argument. The function returns an object of class \code{jfaPrior} which can be used with associated \code{summary()} and \code{plot()} methods.
 
 For more details on how to use this function, see the package vignette:
 \code{vignette('jfa', package = 'jfa')}
@@ -82,16 +82,16 @@ This section elaborates on the available likelihoods and corresponding prior dis
 \examples{
  
 # Translate inherent risk (ir) and control risk (cr) to a prior distribution
-auditPrior(confidence = 0.95, materiality = 0.05, expectedError = 0.025,
-           method = 'arm', likelihood = 'binomial', ir = 1, cr = 0.6)
+auditPrior(method = 'arm', likelihood = 'binomial', expectedError = 0.025,
+           materiality = 0.05, ir = 1, cr = 0.6)
 }
 \references{
 Derks, K., de Swart, J., Wagenmakers, E.-J., Wille, J., & Wetzels, R. (2019). JASP for audit: Bayesian tools for the auditing practice.
 
-Derks, K., de Swart, J., van Batenburg, P. Wagenmakers, E.-J., & Wetzels, R. (2021). Priors in a Bayesian audit: How integrating information into the prior distribution can improve audit transparency and efficiency. In Press.
+Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J., & Wetzels, R. (2021). Priors in a Bayesian audit: How integration of existing information into the prior distribution can improve audit transparency and efficiency. \emph{International Journal of Auditing}, 1-16.
 }
 \seealso{
-\code{\link{planning}} \code{\link{selection}} \code{\link{evaluation}} \code{\link{report}}
+\code{\link{planning}} \code{\link{selection}} \code{\link{evaluation}} \code{\link{report}} \code{\link{auditBF}}
 }
 \author{
 Koen Derks, \email{k.derks@nyenrode.nl}

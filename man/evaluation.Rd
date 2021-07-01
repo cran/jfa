@@ -4,22 +4,22 @@
 \alias{evaluation}
 \title{Evaluate a statistical audit sample}
 \usage{
-evaluation(confidence, materiality = NULL, minPrecision = NULL, method = 'binomial',
-           sample = NULL, bookValues = NULL, auditValues = NULL, counts = NULL, 
-           nSumstats = NULL, kSumstats = NULL,
+evaluation(materiality = NULL, minPrecision = NULL, method = 'binomial',
+           confidence = 0.95, sample = NULL, bookValues = NULL, auditValues = NULL, 
+           counts = NULL, nSumstats = NULL, kSumstats = NULL,
            N = NULL, populationBookValue = NULL,
            prior = FALSE, nPrior = 0, kPrior = 0, 
            rohrbachDelta = 2.7, momentPoptype = 'accounts',
            csA = 1, csB = 3, csMu = 0.5)
 }
 \arguments{
-\item{confidence}{a numeric value between 0 and 1 specifying the confidence level used in the evaluation. Defaults to 0.95 for 95\% confidence.}
-
 \item{materiality}{a numeric value between 0 and 1 specifying the performance materiality (maximum tolerable error) as a fraction of the total size of the population. If specified, the function also returns the conclusion of the analysis with respect to the performance materiality. The value is discarded when \code{direct}, \code{difference}, \code{quotient}, or \code{regression} method is chosen.}
 
 \item{minPrecision}{a numeric value between 0 and 1 specifying the required minimum precision (upper bound minus most likely error) as a fraction of the total size of the population. If specified, the function also returns the conclusion of the analysis with respect to the required minimum precision.}
 
 \item{method}{a character specifying the method to be used in the evaluation. Possible options are \code{poisson}, \code{binomial} (default), \code{hypergeometric}, \code{mpu}, \code{stringer}, \code{stringer-meikle}, \code{stringer-lta}, \code{stringer-pvz}, \code{rohrbach}, \code{moment}, \code{direct}, \code{difference}, \code{quotient}, or \code{regression}. See the details section for more information.}
+
+\item{confidence}{a numeric value between 0 and 1 specifying the confidence level used in the evaluation. Defaults to 0.95 for 95\% confidence.}
 
 \item{sample}{a data frame containing the sample to be evaluated. The sample must at least contain a column of book values and a column of audit (true) values.}
 
@@ -78,7 +78,7 @@ An object of class \code{jfaEvaluation} containing:
 \item{data}{a data frame containing the relevant columns from the \code{sample}.}
 }
 \description{
-This function takes a data frame (using \code{sample}, \code{bookValues}, and \code{auditValues}) or summary statistics (using \code{nSumstats} and \code{kSumstats}) and performs inference on the misstatement in the sample. The function returns an object of class \code{jfaEvaluation} which can be used with associated \code{print()} and \code{plot()} methods.
+This function takes a data frame (using \code{sample}, \code{bookValues}, and \code{auditValues}) or summary statistics (using \code{nSumstats} and \code{kSumstats}) and performs inference on the misstatement in the sample. The function returns an object of class \code{jfaEvaluation} which can be used with associated \code{summary()} and \code{plot()} methods.
 
 For more details on how to use this function, see the package vignette:
 \code{vignette('jfa', package = 'jfa')}
@@ -113,12 +113,14 @@ sample <- selection(population = BuildIt, sampleSize = 100,
           algorithm = 'interval', units = 'mus', bookValues = 'bookValue')$sample
 
 # Evaluate using the Stringer bound
-evaluation(confidence = 0.95, materiality = 0.05, method = 'stringer',
+evaluation(materiality = 0.05, method = 'stringer', confidence = 0.95,
            sample = sample, bookValues = 'bookValue', auditValues = 'auditValue')
 
 }
 \references{
 Cox, D. and Snell, E. (1979). On sampling and the estimation of rare errors. \emph{Biometrika}, 66(1), 125-132.
+
+Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J., & Wetzels, R. (2021). Priors in a Bayesian audit: How integration of existing information into the prior distribution can improve audit transparency and efficiency. \emph{International Journal of Auditing}, 1-16.
 
 Dworin, L. D. and Grimlund, R. A. (1984). Dollar-unit sampling for accounts receivable and inventory. \emph{The Accounting Review}, 59(2), 218–241
 
@@ -135,7 +137,7 @@ Stringer, K. W. (1963). Practical aspects of statistical sampling in auditing. \
 Touw, P., and Hoogduin, L. (2011). \emph{Statistiek voor Audit en Controlling}. Boom uitgevers Amsterdam.
 }
 \seealso{
-\code{\link{auditPrior}} \code{\link{planning}} \code{\link{selection}} \code{\link{report}}
+\code{\link{auditPrior}} \code{\link{planning}} \code{\link{selection}} \code{\link{report}} \code{\link{auditBF}}
 }
 \author{
 Koen Derks, \email{k.derks@nyenrode.nl}

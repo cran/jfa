@@ -1,22 +1,22 @@
 #' Evaluate a statistical audit sample
 #'
-#' @description This function takes a data frame (using \code{sample}, \code{bookValues}, and \code{auditValues}) or summary statistics (using \code{nSumstats} and \code{kSumstats}) and performs inference on the misstatement in the sample. The function returns an object of class \code{jfaEvaluation} which can be used with associated \code{print()} and \code{plot()} methods.
+#' @description This function takes a data frame (using \code{sample}, \code{bookValues}, and \code{auditValues}) or summary statistics (using \code{nSumstats} and \code{kSumstats}) and performs inference on the misstatement in the sample. The function returns an object of class \code{jfaEvaluation} which can be used with associated \code{summary()} and \code{plot()} methods.
 #'
 #' For more details on how to use this function, see the package vignette:
 #' \code{vignette('jfa', package = 'jfa')}
 #'
-#' @usage evaluation(confidence, materiality = NULL, minPrecision = NULL, method = 'binomial',
-#'            sample = NULL, bookValues = NULL, auditValues = NULL, counts = NULL, 
-#'            nSumstats = NULL, kSumstats = NULL,
+#' @usage evaluation(materiality = NULL, minPrecision = NULL, method = 'binomial',
+#'            confidence = 0.95, sample = NULL, bookValues = NULL, auditValues = NULL, 
+#'            counts = NULL, nSumstats = NULL, kSumstats = NULL,
 #'            N = NULL, populationBookValue = NULL,
 #'            prior = FALSE, nPrior = 0, kPrior = 0, 
 #'            rohrbachDelta = 2.7, momentPoptype = 'accounts',
 #'            csA = 1, csB = 3, csMu = 0.5) 
 #'
-#' @param confidence   	a numeric value between 0 and 1 specifying the confidence level used in the evaluation. Defaults to 0.95 for 95\% confidence.
 #' @param materiality   a numeric value between 0 and 1 specifying the performance materiality (maximum tolerable error) as a fraction of the total size of the population. If specified, the function also returns the conclusion of the analysis with respect to the performance materiality. The value is discarded when \code{direct}, \code{difference}, \code{quotient}, or \code{regression} method is chosen.
 #' @param minPrecision  a numeric value between 0 and 1 specifying the required minimum precision (upper bound minus most likely error) as a fraction of the total size of the population. If specified, the function also returns the conclusion of the analysis with respect to the required minimum precision.
 #' @param method        a character specifying the method to be used in the evaluation. Possible options are \code{poisson}, \code{binomial} (default), \code{hypergeometric}, \code{mpu}, \code{stringer}, \code{stringer-meikle}, \code{stringer-lta}, \code{stringer-pvz}, \code{rohrbach}, \code{moment}, \code{direct}, \code{difference}, \code{quotient}, or \code{regression}. See the details section for more information.
+#' @param confidence   	a numeric value between 0 and 1 specifying the confidence level used in the evaluation. Defaults to 0.95 for 95\% confidence.
 #' @param sample        a data frame containing the sample to be evaluated. The sample must at least contain a column of book values and a column of audit (true) values.
 #' @param bookValues    a character specifying the column name for the book values in the \code{sample}.
 #' @param auditValues   a character specifying the column name for the audit values in the \code{sample}.
@@ -55,6 +55,7 @@
 #' }
 #' 
 #' @references Cox, D. and Snell, E. (1979). On sampling and the estimation of rare errors. \emph{Biometrika}, 66(1), 125-132. 
+#' @references Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J., & Wetzels, R. (2021). Priors in a Bayesian audit: How integration of existing information into the prior distribution can improve audit transparency and efficiency. \emph{International Journal of Auditing}, 1-16.
 #' @references Dworin, L. D. and Grimlund, R. A. (1984). Dollar-unit sampling for accounts receivable and inventory. \emph{The Accounting Review}, 59(2), 218–241
 #' @references Leslie, D. A., Teitlebaum, A. D., & Anderson, R. J. (1979). \emph{Dollar-unit Sampling: A Practical Guide for Auditors}. Copp Clark Pitman; Belmont, Calif.: distributed by Fearon-Pitman.
 #' @references Meikle, G. R. (1972). \emph{Statistical Sampling in an Audit Context: An Audit Technique}. Canadian Institute of Chartered Accountants.
@@ -88,7 +89,7 @@
 #'
 #' @author Koen Derks, \email{k.derks@nyenrode.nl}
 #'
-#' @seealso \code{\link{auditPrior}} \code{\link{planning}} \code{\link{selection}} \code{\link{report}}
+#' @seealso \code{\link{auditPrior}} \code{\link{planning}} \code{\link{selection}} \code{\link{report}} \code{\link{auditBF}}
 #'
 #' @keywords evaluation confidence bound audit
 #'
@@ -101,14 +102,14 @@
 #'           algorithm = 'interval', units = 'mus', bookValues = 'bookValue')$sample
 #' 
 #' # Evaluate using the Stringer bound
-#' evaluation(confidence = 0.95, materiality = 0.05, method = 'stringer',
+#' evaluation(materiality = 0.05, method = 'stringer', confidence = 0.95,
 #'            sample = sample, bookValues = 'bookValue', auditValues = 'auditValue')
 #'
 #' @export 
 
-evaluation <- function(confidence, materiality = NULL, minPrecision = NULL, method = 'binomial',
-                       sample = NULL, bookValues = NULL, auditValues = NULL, counts = NULL,
-                       nSumstats = NULL, kSumstats = NULL,
+evaluation <- function(materiality = NULL, minPrecision = NULL, method = 'binomial', 
+                       confidence = 0.95, sample = NULL, bookValues = NULL, auditValues = NULL,
+                       counts = NULL, nSumstats = NULL, kSumstats = NULL,
                        N = NULL, populationBookValue = NULL,
                        prior = FALSE, nPrior = 0, kPrior = 0, 
                        rohrbachDelta = 2.7, momentPoptype = 'accounts',
@@ -122,16 +123,16 @@ evaluation <- function(confidence, materiality = NULL, minPrecision = NULL, meth
     
     nPrior      <- prior[["description"]]$implicitn
     kPrior      <- prior[["description"]]$implicitk
-    likelihood  <- prior[["likelihood"]]
+    method      <- prior[["likelihood"]]
     
   }
   
   # Perform error handling with respect to incompatible input options
   if (confidence >= 1 || confidence <= 0 || is.null(confidence))
-    stop("Specify a value for the confidence likelihood. Possible values lie within the range of 0 to 1.")
+    stop("Specify a valid value for the 'confidence' argument. Possible values lie within the range of 0 to 1.")
   
   if (is.null(materiality) && is.null(minPrecision))
-    stop("You must specify the materiality or the minimum precision.")
+    stop("You must specify your sampling objective(s) using the 'materiality' or 'minPrecision' argument(s).")
   
   if (!is.null(minPrecision) && (minPrecision <= 0 || minPrecision >= 1))
     stop("The minimum required precision must be a positive value < 1.")
@@ -223,7 +224,7 @@ evaluation <- function(confidence, materiality = NULL, minPrecision = NULL, meth
     if ((class(prior) == "logical" && prior == TRUE) || class(prior) %in% c("jfaPrior", "jfaPosterior")) {
       # Bayesian evaluation using the gamma distribution
       bound     <- stats::qgamma(p = confidence, shape = 1 + kPrior + t, rate = nPrior + n)
-      mle       <- (1 + kPrior + t - 1) / (nPrior + n)
+      mle       <- ((1 + kPrior + t) - 1) / (nPrior + n)
       precision <- bound - mle
     } else {
       # Classical evaluation using the Poisson distribution
@@ -237,7 +238,7 @@ evaluation <- function(confidence, materiality = NULL, minPrecision = NULL, meth
     if ((class(prior) == "logical" && prior == TRUE) || class(prior) %in% c("jfaPrior", "jfaPosterior")) {
       # Bayesian evaluation using the beta distribution
       bound     <- stats::qbeta(p = confidence, shape1 = 1 + kPrior + t, shape2 = 1 + nPrior - kPrior + n - t)
-      mle       <- (1 + kPrior + t - 1) / (1 + kPrior + t + 1 + nPrior - kPrior + n - t)
+      mle       <- (1 + kPrior + t - 1) / ((1 + kPrior + t) + (1 + nPrior - kPrior + n - t) - 2)
       precision <- bound - mle
     } else {
       # Classical evaluation using the binomial distribution

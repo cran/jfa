@@ -1,7 +1,7 @@
 ---
 title: "Testing misstatement"
 author: Koen Derks
-date: "last modified: 19-11-2020"
+date: "last modified: 29-06-2021"
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -35,7 +35,7 @@ This will be added in a future version of `jfa`.
 
 Bayesian hypothesis testing uses the Bayes factor, $BF_{-+}$ or $BF_{+-}$, to make a statement about the evidence provided by the sample in support for one of the two hypotheses $H_-$ or $H_+$. The subscript The Bayes factor denotes which hypothesis it favors. By default, the `evaluation()` function returns the value for $BF_{-+}$.
 
-As an example of how to interpret the Bayes factor, the value of $BF_{-+} = 10$ (provided by the `evluation()` function) can be interpreted as: *the data are 10 times more likely to have occurred under the hypothesis $H_-:\theta<\theta_{max}$ than under the hypothesis $H_+:\theta\geq\theta_{max}$*. $BF_{-+} > 1$ indicates evidence for $H_-$, while $BF_{-+} < 1$ indicates evidence for $H_+$. 
+As an example of how to interpret the Bayes factor, the value of $BF_{-+} = 10$ (provided by the `evaluation()` function) can be interpreted as: *the data are 10 times more likely to have occurred under the hypothesis $H_-:\theta<\theta_{max}$ than under the hypothesis $H_+:\theta\geq\theta_{max}$*. $BF_{-+} > 1$ indicates evidence for $H_-$, while $BF_{-+} < 1$ indicates evidence for $H_+$. 
 
 | $BF_{-+}$ | Strength of evidence |
 |---------|-------|
@@ -58,8 +58,9 @@ As an example, consider that an auditor wants to verify whether the population c
 The output below shows that $BF_{-+}=30.28$, implying that there is very strong evidence for $H_-$, the hypothesis that the population contains misstatements lower than 5 percent of the population. 
 
 ```{r}
-prior <- auditPrior(confidence = 0.95, materiality = 0.05, method = "none", likelihood = "binomial")
-evaluation(confidence = 0.95, materiality = 0.05, nSumstats = 40, kSumstats = 1, prior = prior)
+prior <- auditPrior(materiality = 0.05, method = "none", likelihood = "binomial")
+stage4 <- evaluation(materiality = 0.05, nSumstats = 40, kSumstats = 1, prior = prior)
+summary(stage4)
 ```
 
 ### Sensitivity to the prior distribution
@@ -69,6 +70,7 @@ In audit sampling, the Bayes factor is dependent on the prior distribution for $
 The output below shows that $BF_{-+}=3.08$, implying that there is anecdotal evidence for $H_-$, the hypothesis that the population contains misstatements lower than 5 percent of the population. 
 
 ```{r}
-prior <- auditPrior(confidence = 0.95, materiality = 0.05, method = "median", likelihood = "binomial")
-evaluation(confidence = 0.95, materiality = 0.05, nSumstats = 40, kSumstats = 1, prior = prior)
+prior <- auditPrior(materiality = 0.05, method = "median", likelihood = "binomial")
+stage4 <- evaluation(materiality = 0.05, nSumstats = 40, kSumstats = 1, prior = prior)
+summary(stage4)
 ```

@@ -1,7 +1,7 @@
 ---
 title: "The audit sampling workflow"
 author: Koen Derks
-date: "last modified: 10-05-2021"
+date: "last modified: 29-06-2021"
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -50,19 +50,20 @@ cr <- 0.6   # 60%
 
 ## Stage 1: Planning an audit sample
 
-Laura can choose to either perform a frequentist analysis, where she uses the increased detection risk as her level of uncertainty, or perform a Bayesian analysis, where she captures the information in the control risk in a prior distribution. For this example, we will show how Laura performs a Bayesian analysis. A frequentist analysis can easily be done through the following functions by setting `prior = FALSE`. In a frequentist audit, Laura immediately uses the adjusted confidence to calculate the sample size using the `planning()` function.
+Laura can choose to either perform a frequentist analysis, where she uses the increased detection risk as her level of uncertainty, or perform a Bayesian analysis, where she captures the information in the control risk in a prior distribution. For this example, we will show how Laura performs a frequentist analysis. In a frequentist audit, Laura immediately uses the adjusted confidence to calculate the sample size using the `planning()` function.
 
 ```{r}
 # Adjust the required confidence for a frequentist analysis.
 adjustedConfidence <- 1 - ((1 - confidence) / (ir * cr))
 # Step 1: Calculate the required sample size.
-planningResult <- planning(adjustedConfidence, materiality, expectedError = expectedError)
+planningResult <- planning(materiality = materiality, expectedError = expectedError, 
+                           confidence = adjustedConfidence)
 ```
 
-Laura can then inspect the result from her planning procedure by using the `print()` function. Her result tells her that, given her prior distribution she needs to audit a sample of 190 transactions so that, when at most 5 errors are found, she can conclude with 91.66% confidence that the maximum error in BuildIt's financial statements is lower the materiality of 5%. 
+Laura can then inspect the result from her planning procedure by using the `summary()` function. Her result tells her that, given her prior distribution she needs to audit a sample of 190 transactions so that, when at most 5 errors are found, she can conclude with 91.66% confidence that the maximum error in BuildIt's financial statements is lower the materiality of 5%. 
 
 ```{r}
-print(planningResult)
+summary(planningResult)
 ```
 
 ## Stage 2: Selecting a sample
@@ -73,13 +74,14 @@ Laura chooses to use *monetary unit sampling*, as she wants to include more high
 
 ```{r}
 # Step 2: Draw a sample from the financial statements.
-samplingResult <- selection(BuildIt, sampleSize = 190, units = "mus", bookValues = "bookValue")
+samplingResult <- selection(population = BuildIt, sampleSize = planningResult, 
+                            units = "mus", bookValues = "bookValue")
 ```
 
-Laura can inspect the outcomes of her sampling procedure by using the `print()` function.
+Laura can inspect the outcomes of her sampling procedure by using the `summary()` function.
 
 ```{r}
-print(samplingResult)
+summary(samplingResult)
 ```
 
 ## Stage 3: Executing the audit
@@ -97,7 +99,7 @@ sample <- samplingResult$sample
 # sample <- read.csv(file = "auditSample.csv")
 ```
 
-For this example, the audit values of the sample are already included in the `auditValue` column of the dataset .
+For this example, the audit values of the sample are already included in the `auditValue` column of the data set .
 
 ## Stage 4: Evaluating the sample
 
@@ -105,16 +107,17 @@ Using her annotated sample, Laura can perform her inference with the `evaluation
 
 ```{r}
 # Step 4: Evaluate the sample
-evaluationResult <- evaluation(confidence, materiality, sample = sample, 
-                               bookValues = 'bookValue', auditValues = 'auditValue')
+evaluationResult <- evaluation(materiality = materiality, confidence = adjustedConfidence, 
+                               sample = sample, bookValues = 'bookValue', 
+                               auditValues = 'auditValue')
 ```
 
-Laura can inspect the outcomes of her inference by using the `print()` function. Her resulting upper bound is 1.564%, which is lower than the materiality of 5%. The output tells Laura the correct conclusion immediately.
+Laura can inspect the outcomes of her inference by using the `summary()` function. Her resulting 91.66% upper bound is 1.299%, which is lower than the materiality of 5%. The output tells Laura the correct conclusion immediately.
 
 ```{r}
-print(evaluationResult)
+summary(evaluationResult)
 ```
 
 ## Conclusion
 
-Since the 95% upper confidence bound on the misstatement in population is lower than the performance materiality Laura can conclude that there is less than 5% risk that the population contains material misstatement.
+Since the 91.66% upper confidence bound on the misstatement in population is lower than the performance materiality Laura can conclude that there is less than 5% risk that the population contains material misstatement.

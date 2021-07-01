@@ -19,30 +19,33 @@ adjustedConfidence <- 1 - ((1 - confidence) / (ir * cr))
 
 ## -----------------------------------------------------------------------------
 # Step 0: Create a prior distribution according to the audit risk model.
-prior <- auditPrior(confidence, materiality, expectedError, method = "arm", likelihood = "binomial", ir = ir, cr = cr)
+prior <- auditPrior(method = "arm", likelihood = "binomial", expectedError = expectedError,
+                    materiality = materiality, ir = ir, cr = cr)
 
 ## -----------------------------------------------------------------------------
-print(prior)
+summary(prior)
 
 ## ----fig.align="center", fig.height=4, fig.width=6----------------------------
 plot(prior)
 
 ## -----------------------------------------------------------------------------
 # Step 1: Calculate the required sample size.
-planningResult <- planning(confidence, materiality, expectedError = expectedError, prior = prior)
+planningResult <- planning(materiality = materiality, expectedError = expectedError,
+                           confidence = confidence, prior = prior)
 
 ## -----------------------------------------------------------------------------
-print(planningResult)
+summary(planningResult)
 
 ## ----fig.align="center", fig.height=4, fig.width=6----------------------------
 plot(planningResult)
 
 ## -----------------------------------------------------------------------------
 # Step 2: Draw a sample from the financial statements.
-samplingResult <- selection(BuildIt, sampleSize = 164, units = "mus", bookValues = "bookValue")
+samplingResult <- selection(population = BuildIt, sampleSize = planningResult, 
+                            units = "mus", bookValues = "bookValue")
 
 ## -----------------------------------------------------------------------------
-print(samplingResult)
+summary(samplingResult)
 
 ## -----------------------------------------------------------------------------
 # Step 3: Isolate the sample for execution of the audit.
@@ -56,10 +59,12 @@ sample <- samplingResult$sample
 
 ## -----------------------------------------------------------------------------
 # Step 4: Evaluate the sample.
-evaluationResult <- evaluation(confidence, materiality, sample = sample, bookValues = "bookValue", auditValues = "auditValue", prior = prior)
+evaluationResult <- evaluation(materiality = materiality, confidence = confidence, 
+                               sample = sample, bookValues = "bookValue", 
+                               auditValues = "auditValue", prior = prior)
 
 ## -----------------------------------------------------------------------------
-print(evaluationResult)
+summary(evaluationResult)
 
 ## ----fig.align="center", fig.height=4, fig.width=6----------------------------
 plot(evaluationResult)
