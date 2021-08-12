@@ -59,29 +59,22 @@ test_that(desc = "(id: f6-v0.1.0-t7) Test for units = 'mus' and algorithm = 'int
 })
 
 
-# jfa version 0.2.0
-# No changes to be benchmarked
-
-# jfa version 0.3.0
-# No changes to be benchmarked
-
-# jfa version 0.3.1
-# No changes to be benchmarked
-
-# jfa version 0.4.0
+# jfa version 0.2.0 - 0.4.0
 # No changes to be benchmarked
 
 # jfa version 0.5.0
 
-test_that(desc = "(id: f6-v0.5.0-t1) Test for summary function", {
+test_that(desc = "(id: f6-v0.5.0-t1) Test for summary and print function", {
   set.seed(1)
   population <- data.frame(ID = sample(1000:100000, size = 1000, replace = FALSE), bookValue = runif(n = 1000, min = 100, max = 500))
   jfaRes <- selection(population, sampleSize = 100, units = "mus", algorithm = "random", ordered = TRUE, bookValues = "bookValue")
+  invisible(capture.output(print(jfaRes)))
   invisible(capture.output(summary(jfaRes)))
   expect_equal(ncol(jfaRes[["sample"]]), 4)
   expect_equal(nrow(jfaRes[["sample"]]), 100)
   
   jfaRes <- selection(population, sampleSize = 100, units = "records", algorithm = "random", ordered = TRUE)
+  invisible(capture.output(print(jfaRes)))
   invisible(capture.output(summary(jfaRes)))
   expect_equal(ncol(jfaRes[["sample"]]), 4)
   expect_equal(nrow(jfaRes[["sample"]]), 100)
@@ -96,20 +89,5 @@ test_that(desc = "(id: f6-v0.5.0-t2) Test for plot function", {
   expect_equal(nrow(jfaRes[["sample"]]), 100)
 })
 
-# jfa version 0.5.1
-# No changes to be benchmarked
-
-# jfa version 0.5.2
-# No changes to be benchmarked
-
-# jfa version 0.5.3
-# No changes to be benchmarked
-
-# jfa version 0.5.4
-# No changes to be benchmarked
-
-# jfa version 0.5.5
-# No changes to be benchmarked
-
-# jfa version 0.5.6
+# jfa version 0.5.1 - 0.5.7
 # No changes to be benchmarked

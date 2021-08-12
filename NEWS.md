@@ -1,3 +1,10 @@
+# jfa 0.5.7
+
+**Minor changes**
+
+- The logo is now displayed in the `?jfa-package` help file.
+- The cheat sheet link has changed in the RADME file.
+
 # jfa 0.5.6
 
 **Bug fixes**

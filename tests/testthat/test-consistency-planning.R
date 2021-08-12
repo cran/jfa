@@ -163,10 +163,7 @@ test_that(desc = "(id: f5-v0.2.0-t3) Bayesian poisson 100% materiality 1% errors
   expect_equal(jfaRes$expectedSampleError, 2.2, tolerance = 0.001)
 })
 
-# jfa version 0.3.0
-# No changes to be benchmarked
-
-# jfa version 0.3.1
+# jfa version 0.3.0 - 0.3.1
 # No changes to be benchmarked
 
 # jfa version 0.4.0
@@ -205,16 +202,19 @@ test_that(desc = "(id: f5-v0.4.0-t3) Expected Bayes factors for median priors", 
 
 # jfa version 0.5.0
 
-test_that(desc = "(id: f5-v0.5.0-t1) Test for frequentist summary function", {
+test_that(desc = "(id: f5-v0.5.0-t1) Test for frequentist summary and print function", {
   jfaRes <- planning(materiality = 0.01, confidence = 0.95, expectedError = 0, likelihood = "poisson")
+  invisible(capture.output(print(jfaRes)))
   invisible(capture.output(summary(jfaRes)))
   expect_equal(jfaRes[["sampleSize"]], 300)
   expect_equal(jfaRes[["expectedSampleError"]], 0)
 })
 
-test_that(desc = "(id: f5-v0.5.0-t2) Test for Bayesian summary function", {
+test_that(desc = "(id: f5-v0.5.0-t2) Test for Bayesian summary and print function", {
   jfaRes <- planning(materiality = 0.01, confidence = 0.95, expectedError = 0, likelihood = "poisson", prior = TRUE)
+  invisible(capture.output(print(jfaRes)))
   invisible(capture.output(summary(jfaRes)))
+  invisible(capture.output(print(jfaRes[["expectedPosterior"]])))
   invisible(capture.output(summary(jfaRes[["expectedPosterior"]])))
   expect_equal(jfaRes[["sampleSize"]], 300)
   expect_equal(jfaRes[["expectedSampleError"]], 0)
@@ -270,14 +270,5 @@ test_that(desc = "(id: f5-v0.5.2-t2) Test for change in beta-binomial mode calcu
   expect_equal(modeDist, 0)
 })
 
-# jfa version 0.5.3
-# No changes to be benchmarked
-
-# jfa version 0.5.4
-# No changes to be benchmarked
-
-# jfa version 0.5.5
-# No changes to be benchmarked
-
-# jfa version 0.5.6
+# jfa version 0.5.3 - 0.5.7
 # No changes to be benchmarked

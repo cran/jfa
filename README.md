@@ -1,15 +1,17 @@
 [![CRAN](https://img.shields.io/cran/v/jfa?color=yellow&label=CRAN&logo=r)](https://cran.r-project.org/package=jfa)
 [![R_build_status](https://github.com/koenderks/jfa/workflows/Build/badge.svg)](https://github.com/koenderks/jfa/actions)
-[![Codecov](https://codecov.io/gh/koenderks/jfa/branch/master/graph/badge.svg?token=ZoxIB8p8PW)](https://codecov.io/gh/koenderks/jfa)
+[![Codecov](https://codecov.io/gh/koenderks/jfa/branch/development/graph/badge.svg?token=ZoxIB8p8PW)](https://codecov.io/gh/koenderks/jfa)
 [![Bugs](https://img.shields.io/github/issues/koenderks/jfa/bug?label=Bugs&logo=github&logoColor=%23FFF&color=brightgreen)](https://github.com/koenderks/jfa/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
 [![Monthly](https://cranlogs.r-pkg.org/badges/jfa?color=blue)](https://cranlogs.r-pkg.org)
 [![Total](https://cranlogs.r-pkg.org/badges/grand-total/jfa?color=blue)](https://cranlogs.r-pkg.org)
 
 # jfa: Bayesian and Classical Audit Sampling
 
-<img src='https://github.com/koenderks/jfa/raw/master/man/figures/readme/logo/jfaLogo.png' width='149' height='173' alt='logo' align='right' margin-left='20' margin-right='20'/>
+<img src='https://github.com/koenderks/jfa/raw/development/man/figures/logo.png' width='149' height='173' alt='logo' align='right' margin-left='20' margin-right='20'/>
 
 `jfa` is an R package for statistical audit sampling. The package provides functions for planning, performing, evaluating, and reporting an audit sample. Specifically, these functions implement standard audit sampling techniques for calculating sample sizes, selecting items from a population, and evaluating the misstatement from a data sample or from summary statistics. Additionally, the `jfa` package allows the user to create a prior probability distribution to perform Bayesian audit sampling using these functions.
+
+The package and its intended workflow are also implemented with a graphical user interface in the Audit module of [JASP](https://jasp-stats.org), a free and open-source statistical software program.
 
 ## Overview
 
@@ -46,13 +48,13 @@ library(jfa)
 
 ## 2. Cheat sheet
 
-The cheat sheet below can help you get started with the `jfa` package and its intended workflow. You can download a `pdf` version of the cheat sheet [here](https://github.com/koenderks/jfa/raw/master/man/figures/cheatsheet/cheatsheet.pdf).
+The cheat sheet below can help you get started with the `jfa` package and its intended workflow. You can download a `pdf` version of the cheat sheet [here](https://github.com/koenderks/jfa/raw/development/man/figures/cheatsheet/cheatsheet.pdf).
 
-<p align='center'><img src='https://github.com/koenderks/jfa/raw/master/man/figures/cheatsheet/cheatsheet.png' alt='cheatsheet' width='1000'></p>
+<p align='center'><img src='https://github.com/koenderks/jfa/raw/development/man/figures/cheatsheet/cheatsheet.png' alt='cheatsheet' width='1000'></p>
 
 ## 3. Benchmarks
 
-To validate the statistical results, `jfa`'s automated [unit tests](https://github.com/koenderks/jfa/tree/master/tests/testthat) regularly verify the main output from the package against the following benchmarks:
+To validate the statistical results, `jfa`'s automated [unit tests](https://github.com/koenderks/jfa/tree/development/tests/testthat) regularly verify the main output from the package against the following benchmarks:
 
 - [Audit Sampling: Audit Guide](https://future.aicpa.org/cpe-learning/publication/audit-sampling-audit-guide-OPL) (Appendix A and Appendix C)
 - [AuditSampler](https://cplusglobal.wordpress.com/solutions/auditsampler-statistical-sampling-software/)
@@ -66,25 +68,25 @@ Below you can find several informative tables that contain statistical sample si
 
 *Sample sizes*
 
-- [Sample sizes based on the binomial distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaBinomialSampleSizes.pdf)
-- [Sample sizes based on the Poisson distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaPoissonSampleSizes.pdf)
-- [Sample sizes based on the hypergeometric distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaHypergeometricSampleSizes.pdf)
+- [Sample sizes based on the binomial distribution](https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaBinomialSampleSizes.pdf)
+- [Sample sizes based on the Poisson distribution](https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaPoissonSampleSizes.pdf)
+- [Sample sizes based on the hypergeometric distribution](https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaHypergeometricSampleSizes.pdf)
 
 *Upper limits*
 
-- [Upper limits based on the binomial distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaBinomialUpperBounds.pdf)
-- [Upper limits based on the Poisson distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaPoissonUpperBounds.pdf)
-- [Upper limits based on the hypergeometric distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaHypergeometricUpperBounds.pdf)
+- [Upper limits based on the binomial distribution](https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaBinomialUpperBounds.pdf)
+- [Upper limits based on the Poisson distribution](https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaPoissonUpperBounds.pdf)
+- [Upper limits based on the hypergeometric distribution](https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaHypergeometricUpperBounds.pdf)
 
 *Bayes factors*
 
-- [Bayes factors based on the beta distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaBinomialBayesFactors.pdf)
-- [Bayes factors based on the gamma distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaPoissonBayesFactors.pdf)
-- [Bayes factors based on the beta-binomial distribution](https://github.com/koenderks/jfa/raw/master/man/figures/tables/jfaHypergeometricBayesFactors.pdf)
+- [Bayes factors based on the beta distribution](https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaBinomialBayesFactors.pdf)
+- [Bayes factors based on the gamma distribution](https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaPoissonBayesFactors.pdf)
+- [Bayes factors based on the beta-binomial distribution](https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaHypergeometricBayesFactors.pdf)
 
 ## 5. Intended workflow
 
-<p align='center'><img src='https://github.com/koenderks/jfa/raw/master/man/figures/readme/banner/jfaBanner.png' alt='banner'/></p>
+<p align='center'><img src='https://github.com/koenderks/jfa/raw/development/man/figures/readme/banner/jfaBanner.png' alt='banner'/></p>
 
 Below you can find an explanation of the available functions in `jfa`, sorted by their occurrence in the standard audit sampling workflow. For detailed examples of how to use these functions, visit the [Get started](https://koenderks.github.io/jfa/articles/jfa.html) section on the package website.
 
@@ -273,13 +275,13 @@ report(object, file = 'report.html', format = 'html_document')
 report(object = x, file = 'myReport.html')
 ```
 
-For an example report, see the following [link](https://github.com/koenderks/jfa/raw/master/man/figures/readme/report/report.pdf).
+For an example report, see the following [link](https://github.com/koenderks/jfa/raw/development/man/figures/readme/report/report.pdf).
 
 ## 6. References
 
 - Bickel, P. J. (1992). Inference and auditing: The Stringer bound. *International Statistical Review*, 60(2), 197–209. - [View online](https://www.jstor.org/stable/1403650)
 - Cox, D. R., & Snell, E. J. (1979). On sampling and the estimation of rare errors. *Biometrika*, 66(1), 125-132. - [View online](https://doi.org/10.1093/biomet/66.1.125)
-- Derks, K. (2021). jfa: Bayesian and classical audit sampling. R package version 0.5.6. - [View online](https://cran.r-project.org/package=jfa)
+- Derks, K. (2021). jfa: Bayesian and classical audit sampling. R package version 0.5.7. - [View online](https://cran.r-project.org/package=jfa)
 - Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J., & Wetzels, R. (2021). Priors in a Bayesian audit: How integration of existing information into the prior distribution can improve audit transparency and efficiency. *International Journal of Auditing*, 1-16. - [View online](https://doi.org/10.1111/ijau.12240)
 - Dworin, L. D. and Grimlund, R. A. (1984). Dollar-unit sampling for accounts receivable and inventory. *The Accounting Review*, 59(2), 218–241. - [View online](https://www.jstor.org/stable/247296)
 - Dyer, D., & Pierce, R. L. (1993). On the choice of the prior distribution in hypergeometric sampling. *Communications in Statistics - Theory and Methods*, 22(8), 2125-2146. - [View online](https://www.tandfonline.com/doi/abs/10.1080/03610929308831139)
@@ -295,7 +297,7 @@ For an example report, see the following [link](https://github.com/koenderks/jfa
 
 ## 7. Package statistics
 
-<img src='https://github.com/koenderks/jfa/raw/master/man/figures/readme/downloads/downloads.svg' width='50%' /><img src='https://github.com/koenderks/jfa/raw/master/man/figures/readme/worldmap/worldmap.svg' width='50%' />
+<img src='https://github.com/koenderks/jfa/raw/development/man/figures/readme/downloads/downloads.svg' width='50%' /><img src='https://github.com/koenderks/jfa/raw/development/man/figures/readme/worldmap/worldmap.svg' width='50%' />
 
 ## 8. Contributing
 
