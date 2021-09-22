@@ -2,44 +2,50 @@
 % Please edit documentation in R/selection.R
 \name{selection}
 \alias{selection}
-\title{Select a statistical audit sample}
+\title{Select a Statistical Audit Sample}
 \usage{
-selection(population, sampleSize, units = 'records', algorithm = 'random',
-          bookValues = NULL, intervalStartingPoint = 1, ordered = TRUE, 
-          ascending = TRUE, withReplacement = FALSE, seed = 1)
+selection(data, size, units = c('items', 'values'),
+          method = c('interval', 'cell', 'random', 'sieve'), values = NULL,
+          start = 1, order = FALSE, decreasing = FALSE, replace = FALSE)
 }
 \arguments{
-\item{population}{a data frame containing the population of items the auditor wishes to sample from.}
+\item{data}{a data frame containing the population of items the auditor wishes to sample from.}
 
-\item{sampleSize}{an integer larger than 0 specifying the number of sampling units that need to be selected from the population. Can also be an object of class \code{jfaPlanning}.}
+\item{size}{an integer larger than 0 specifying the number of sampling units that need to be selected from the population. Can also be an object of class \code{jfaPlanning}.}
 
-\item{units}{a character specifying the sampling units used. Possible options are \code{records} (default) for selection on the level of items or \code{mus} for selection on the level of monetary units.}
+\item{units}{a character specifying the sampling units used. Possible options are \code{items} (default) for selection on the level of items (rows) or \code{values} for selection on the level of monetary units.}
 
-\item{algorithm}{a character specifying the sampling algorithm used. Possible options are \code{random} (default) for random sampling, \code{cell} for cell sampling, or \code{interval} for fixed interval sampling.}
+\item{method}{a character specifying the sampling algorithm used. Possible options are \code{interval} (default) for fixed interval sampling, \code{cell} for cell sampling, \code{random} for random sampling, or \code{sieve} for modified sieve sampling.}
 
-\item{bookValues}{a character specifying the name of the column in the \code{population} that contains the book values of the items.}
+\item{values}{a character specifying name of a column in \code{data} containing the book values of the items.}
 
-\item{intervalStartingPoint}{if \code{algorithm = 'interval'}, an integer larger than 0 specifying the starting point of the algorithm.}
+\item{start}{if \code{method = 'interval'}, an integer larger than 0 specifying the starting point of the algorithm.}
 
-\item{ordered}{a logical specifying whether to first order the items in the \code{population} according to the value of their \code{bookValues}. Defaults to \code{TRUE}.}
+\item{order}{a logical specifying whether to first order the items in the \code{data} according to the value of their \code{values}. Defaults to \code{FALSE}.}
 
-\item{ascending}{if \code{ordered = TRUE}, a logical specifying whether to order the population \code{bookValues} from smallest to largest. Defaults to \code{TRUE}.}
+\item{decreasing}{if \code{order = TRUE}, a logical specifying whether to order the population \code{values} from smallest to largest. Defaults to \code{FALSE}.}
 
-\item{withReplacement}{if \code{algorithm = 'random'}, a logical specifying whether sampling should be performed with replacement. Defaults to \code{FALSE}.}
-
-\item{seed}{if \code{algorithm = 'random'} or \code{algorithm = 'cell'}, an integer specifying a seed to reproduce results. Defaults to 1.}
+\item{replace}{if \code{method = 'random'}, a logical specifying whether sampling should be performed with replacement. Defaults to \code{FALSE}.}
 }
 \value{
 An object of class \code{jfaSelection} containing:
 
-\item{population}{a data frame containing the input population.}
+\item{data}{a data frame containing the input data.}
 \item{sample}{a data frame containing the selected sample of items.}
+\item{n.req}{an integer indicating the requested sample size.}
+\item{n.units}{an integer indicating the total number of obtained sampling units.}
+\item{n.items}{an integer indicating the total number of obtained sample items.}
+\item{N.units}{an integer indicating the total number of sampling units in the population.}
+\item{N.items}{an integer indicating the total number of items in the population.}
+\item{interval}{if \code{method = 'interval'}, a numeric value indicating the size of the selection interval.}
 \item{units}{a character indicating the sampling units that were used to create the selection.}
-\item{algorithm}{a character indicating the the algorithm that was used to create the selection.}
-\item{bookValues}{if \code{bookValues} is specified, a character indicating the name of the book value column.}
+\item{method}{a character indicating the the algorithm that was used to create the selection.}
+\item{values}{if \code{values} is specified, a character indicating the name of the book value column.}
+\item{start}{if \code{method = 'interval'}, an integer indicating the starting point in the interval.}
+\item{data.name}{a character string giving the name of the data.}
 }
 \description{
-This function takes a data frame and performs statistical sampling according to one of three algorithms: random sampling, cell sampling, and fixed interval sampling. Sampling is done on the level of two possible sampling units: records or monetary units. The function returns an object of class \code{jfaSelection} which can be used with associated \code{summary()} and a \code{plot()} methods.
+This function takes a data frame and performs statistical selection according to one of four algorithms: fixed interval sampling, cell sampling, random sampling, and modified sieve sampling. Selection is done on the level of two possible sampling units: items (records / rows) or monetary units. The function returns an object of class \code{jfaSelection} which can be used with associated \code{summary()} and a \code{plot()} methods.
 
 For more details on how to use this function, see the package vignette:
 \code{vignette('jfa', package = 'jfa')}
@@ -48,34 +54,40 @@ For more details on how to use this function, see the package vignette:
 The first part of this section elaborates on the two possible options for the \code{units} argument:
 
 \itemize{
- \item{\code{records}:     In record sampling each item in the population is seen as a sampling unit. An item of $5000 is therefore equally likely to be selected as an item of $500.}
- \item{\code{mus}:         In monetary unit sampling each monetary unit in the population is seen as a sampling unit. An item of $5000 is therefore ten times more likely to be selected as an item of $500.}
+ \item{\code{items}:     In record sampling each item in the population is seen as a sampling unit. An item of $5000 is therefore equally likely to be selected as an item of $500.}
+ \item{\code{values}:    In monetary unit sampling each monetary unit in the population is seen as a sampling unit. An item of $5000 is therefore ten times more likely to be selected as an item of $500.}
 }
 
-The second part of this section elaborates on the three possible options for the \code{algorithm} argument:
+The second part of this section elaborates on the three possible options for the \code{method} argument:
 
 \itemize{
- \item{\code{random}:      In random sampling each sampling unit in the population is drawn with equal probability.}
+ \item{\code{interval}:    In fixed interval sampling the sampling units in the population are divided into a number (equal to the sample size) of intervals. From each interval one sampling unit is selected according to a fixed starting point (specified by \code{start}).}
  \item{\code{cell}:        In cell sampling the sampling units in the population are divided into a number (equal to the sample size) of intervals. From each interval one sampling unit is selected with equal probability.}
- \item{\code{interval}:    In fixed interval sampling the sampling units in the population are divided into a number (equal to the sample size) of intervals. From each interval one sampling unit is selected according to a fixed starting point (specified by \code{intervalStartingPoint}).}
+ \item{\code{random}:      In random sampling each sampling unit in the population is drawn with equal probability.}
+ \item{\code{sieve}:       In modified sieve sampling each item in the population is selected proportional to its value (Hoogduin, Hall, & Tsay, 2010).}
 }
 }
 \examples{
-data('BuildIt')
+data("BuildIt")
 
-# Draw a sample of 100 monetary units from the population using
-# fixed interval monetary unit sampling
-selection(population = BuildIt, sampleSize = 100, 
-          algorithm = 'interval', units = 'mus', bookValues = 'bookValue')
+# Select 100 items using random sampling
+selection(data = BuildIt, size = 100, method = "random")
 
+# Select 150 monetary units using fixed interval sampling
+selection(
+  data = BuildIt, size = 150, units = "values",
+  method = "interval", values = "bookValue"
+)
 }
 \references{
+Hoogduin, L. A., Hall, T. W., & Tsay, J. J. (2010). Modified sieve sampling: A method for single-and multi-stage probability-proportional-to-size sampling. \emph{Auditing: A Journal of Practice & Theory}, 29(1), 125-148.
+
 Leslie, D. A., Teitlebaum, A. D., & Anderson, R. J. (1979). \emph{Dollar-unit Sampling: A Practical Guide for Auditors}. Copp Clark Pitman; Belmont, Calif.: distributed by Fearon-Pitman.
 
 Wampler, B., & McEacharn, M. (2005). Monetary-unit sampling using Microsoft Excel. \emph{The CPA journal}, 75(5), 36.
 }
 \seealso{
-\code{\link{auditPrior}} \code{\link{planning}} \code{\link{evaluation}} \code{\link{report}} \code{\link{auditBF}}
+\code{\link{auditPrior}} \code{\link{planning}} \code{\link{evaluation}} \code{\link{report}}
 }
 \author{
 Koen Derks, \email{k.derks@nyenrode.nl}

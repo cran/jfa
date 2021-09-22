@@ -17,8 +17,8 @@ tolerance  <- 0.05 # 5% tolerance
 #  # [1,] 2 0.02439024 0.006504196 0.07341118
 
 ## -----------------------------------------------------------------------------
-auditBF(tolerance, n = 32, k = 2)
+evaluation(materiality = tolerance, x = 2, n = 32, prior = TRUE)
 
 ## -----------------------------------------------------------------------------
-auditBF(tolerance, n = 32 + 50, k = 2 + 0)
+evaluation(materiality = tolerance, x = 2 + 0, n = 32 + 50, prior = TRUE)
 

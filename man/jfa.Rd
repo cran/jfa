@@ -29,23 +29,30 @@
 
   \emph{Sample sizes}
   \itemize{
-  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaBinomialSampleSizes.pdf}{Sample sizes based on the binomial distribution}
-  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaPoissonSampleSizes.pdf}{Sample sizes based on the Poisson distribution}
-  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaHypergeometricSampleSizes.pdf}{Sample sizes based on the hypergeometric distribution}
+  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/pdf/pois.ss.pdf}{Sample sizes based on the Poisson distribution}
+  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/pdf/binom.ss.pdf}{Sample sizes based on the binomial distribution}
+  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/pdf/hyper.ss.pdf}{Sample sizes based on the hypergeometric distribution}
   }
 
   \emph{Upper limits}
   \itemize{
-  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaBinomialUpperBounds.pdf}{Upper limits based on the binomial distribution}
-  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaPoissonUpperBounds.pdf}{Upper limits based on the Poisson distribution}
-  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaHypergeometricUpperBounds.pdf}{Upper limits based on the hypergeometric distribution}
+  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/pdf/pois.ub.pdf}{Upper limits based on the Poisson distribution}
+  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/pdf/binom.ub.pdf}{Upper limits based on the binomial distribution}
+  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/pdf/hyper.ub.pdf}{Upper limits based on the hypergeometric distribution}
+  }
+
+  \emph{One-sided p values}
+  \itemize{
+  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/pdf/pois.p.pdf}{One sided p values based on the Poisson distribution}
+  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/pdf/binom.p.pdf}{One sided p values based on the binomial distribution}
+  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/pdf/hyper.p.pdf}{One sided p values based on the hypergeometric distribution}
   }
 
   \emph{Bayes factors}
   \itemize{
-  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaBinomialBayesFactors.pdf}{Bayes factors based on the beta distribution}
-  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaPoissonBayesFactors.pdf}{Bayes factors based on the gamma distribution}
-  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/jfaHypergeometricBayesFactors.pdf}{Bayes factors based on the beta-binomial distribution}
+  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/pdf/pois.lbfi.pdf}{Impartial Bayes factors based on the gamma distribution}
+  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/pdf/binom.lbfi.pdf}{Impartial Bayes factors based on the beta distribution}
+  \item \href{https://github.com/koenderks/jfa/raw/development/man/figures/tables/pdf/hyper.lbfi.pdf}{Impartial Bayes factors based on the beta-binomial distribution}
   }
 }
 
@@ -55,7 +62,7 @@
   }
  
   Please use the citation provided by \R when citing this package. 
-  A BibTex entry is available from \code{citation("jfa")}.
+  A BibTex entry is available from \code{citation('jfa')}.
 }
 
 \seealso{
@@ -73,30 +80,30 @@ Useful links:
 library(jfa)
 
 # Load the BuildIt population
-data("BuildIt")
+data('BuildIt')
 
 ############################################
 ### Example 1: Classical audit sampling ####
 ############################################
 
 # Stage 1: Planning
-stage1 <- planning(materiality = 0.03, expectedError = 0.01, 
-                   likelihood = "poisson", confidence = 0.95)
+stage1 <- planning(materiality = 0.03, expected = 0.01, 
+                   likelihood = 'poisson', conf.level = 0.95)
 summary(stage1)
 
 # Stage 2: Selection
-stage2 <- selection(population = BuildIt, sampleSize = stage1,
-                    units = "mus", bookValues = "bookValue",
-                    algorithm = "interval", intervalStartingPoint = 1)
+stage2 <- selection(data = BuildIt, size = stage1,
+                    units = 'values', values = 'bookValue',
+                    method = 'interval', start = 1)
 summary(stage2)
 
 # Stage 3: Execution
-sample <- stage2[["sample"]]
+sample <- stage2[['sample']]
 
 # Stage 4: Evaluation
-stage4 <- evaluation(materiality = 0.03, method = "stringer",
-                     confidence = 0.95, sample = sample,
-                     bookValues = "bookValue", auditValues = "auditValue")
+stage4 <- evaluation(materiality = 0.03, method = 'stringer',
+                     conf.level = 0.95, data = sample,
+                     values = 'bookValue', values.audit = 'auditValue')
 summary(stage4)
 
 ######################################################################
@@ -104,26 +111,26 @@ summary(stage4)
 ######################################################################
 
 # Create the prior distribution
-prior <- auditPrior(method = "none", likelihood = "poisson")
+prior <- auditPrior(method = 'default', likelihood = 'poisson')
 summary(prior)
 
 # Stage 1: Planning
-stage1 <- planning(materiality = 0.03, expectedError = 0.01,
-                   likelihood = "poisson", confidence = 0.95, prior = prior)
+stage1 <- planning(materiality = 0.03, expected = 0.01,
+                   likelihood = 'poisson', conf.level = 0.95, prior = prior)
 summary(stage1)
 
 # Stage 2: Selection
-stage2 <- selection(population = BuildIt, sampleSize = stage1,
-                    units = "mus", bookValues = "bookValue",
-                    algorithm = "interval", intervalStartingPoint = 1)
+stage2 <- selection(data = BuildIt, size = stage1,
+                    units = 'values', values = 'bookValue',
+                    method = 'interval', start = 1)
 summary(stage2)
 
 # Stage 3: Execution
-sample <- stage2[["sample"]]
+sample <- stage2[['sample']]
 
 # Stage 4: Evaluation
-stage4 <- evaluation(materiality = 0.03, confidence = 0.95, sample = sample,
-                     bookValues = "bookValue", auditValues = "auditValue",
+stage4 <- evaluation(materiality = 0.03, conf.level = 0.95, data = sample,
+                     values = 'bookValue', values.audit = 'auditValue',
                      prior = prior)
 summary(stage4)
 
@@ -132,27 +139,27 @@ summary(stage4)
 ###################################################################
 
 # Create the prior distribution
-prior <- auditPrior(method = "arm", likelihood = "poisson",
-                    expectedError = 0.01, materiality = 0.03, cr = 0.6)
+prior <- auditPrior(method = 'arm', likelihood = 'poisson',
+                    expected = 0.01, materiality = 0.03, cr = 0.6, ir = 1)
 summary(prior)
 
 # Stage 1: Planning
-stage1 <- planning(materiality = 0.03, expectedError = 0.01,
-                   likelihood = "poisson", confidence = 0.95, prior = prior)
+stage1 <- planning(materiality = 0.03, expected = 0.01,
+                   likelihood = 'poisson', conf.level = 0.95, prior = prior)
 summary(stage1)
 
 # Stage 2: Selection
-stage2 <- selection(population = BuildIt, sampleSize = stage1,
-                    units = "mus", bookValues = "bookValue",
-                    algorithm = "interval", intervalStartingPoint = 1)
+stage2 <- selection(data = BuildIt, size = stage1,
+                    units = 'values', values = 'bookValue',
+                    method = 'interval', start = 1)
 summary(stage2)
 
 # Stage 3: Execution
-sample <- stage2[["sample"]]
+sample <- stage2[['sample']]
 
 # Stage 4: Evaluation
-stage4 <- evaluation(materiality = 0.03, confidence = 0.95, sample = sample,
-                     bookValues = "bookValue", auditValues = "auditValue",
+stage4 <- evaluation(materiality = 0.03, conf.level = 0.95, data = sample,
+                     values = 'bookValue', values.audit = 'auditValue',
                      prior = prior)
 summary(stage4)
 }

@@ -4,21 +4,27 @@
 \alias{jfa-methods}
 \alias{print.jfaPrior}
 \alias{print.jfaPosterior}
+\alias{print.jfaPredictive}
 \alias{print.jfaPlanning}
 \alias{print.jfaSelection}
 \alias{print.jfaEvaluation}
 \alias{print.summary.jfaPrior}
 \alias{print.summary.jfaPosterior}
+\alias{print.summary.jfaPredictive}
 \alias{print.summary.jfaPlanning}
 \alias{print.summary.jfaSelection}
 \alias{print.summary.jfaEvaluation}
 \alias{summary.jfaPrior}
 \alias{summary.jfaPosterior}
+\alias{summary.jfaPredictive}
 \alias{summary.jfaPlanning}
 \alias{summary.jfaSelection}
 \alias{summary.jfaEvaluation}
+\alias{predict.jfaPrior}
+\alias{predict.jfaPosterior}
 \alias{plot.jfaPrior}
 \alias{plot.jfaPosterior}
+\alias{plot.jfaPredictive}
 \alias{plot.jfaPlanning}
 \alias{plot.jfaSelection}
 \alias{plot.jfaEvaluation}
@@ -28,50 +34,68 @@
 
 \method{print}{jfaPosterior}(x, ...)
 
+\method{print}{jfaPredictive}(x, ...)
+
 \method{print}{jfaPlanning}(x, ...)
 
 \method{print}{jfaSelection}(x, ...)
 
-\method{print}{jfaEvaluation}(x, ...)
+\method{print}{jfaEvaluation}(x, digits = getOption("digits"), ...)
 
-\method{print}{summary.jfaPrior}(x, ...)
+\method{print}{summary.jfaPrior}(x, digits = getOption("digits"), ...)
 
-\method{print}{summary.jfaPosterior}(x, ...)
+\method{print}{summary.jfaPosterior}(x, digits = getOption("digits"), ...)
 
-\method{print}{summary.jfaPlanning}(x, ...)
+\method{print}{summary.jfaPredictive}(x, digits = getOption("digits"), ...)
 
-\method{print}{summary.jfaSelection}(x, ...)
+\method{print}{summary.jfaPlanning}(x, digits = getOption("digits"), ...)
 
-\method{print}{summary.jfaEvaluation}(x, ...)
+\method{print}{summary.jfaSelection}(x, digits = getOption("digits"), ...)
 
-\method{summary}{jfaPrior}(object, digits = 3, ...)
+\method{print}{summary.jfaEvaluation}(x, digits = getOption("digits"), ...)
 
-\method{summary}{jfaPosterior}(object, digits = 3, ...)
+\method{summary}{jfaPrior}(object, digits = getOption("digits"), ...)
 
-\method{summary}{jfaPlanning}(object, digits = 3, ...)
+\method{summary}{jfaPosterior}(object, digits = getOption("digits"), ...)
 
-\method{summary}{jfaSelection}(object, digits = 3, ...)
+\method{summary}{jfaPredictive}(object, digits = getOption("digits"), ...)
 
-\method{summary}{jfaEvaluation}(object, digits = 3, ...)
+\method{summary}{jfaPlanning}(object, digits = getOption("digits"), ...)
 
-\method{plot}{jfaPrior}(x, xmax = 0.5, ...)
+\method{summary}{jfaSelection}(object, digits = getOption("digits"), ...)
 
-\method{plot}{jfaPosterior}(x, xmax = 0.5, ...)
+\method{summary}{jfaEvaluation}(object, digits = getOption("digits"), ...)
 
-\method{plot}{jfaPlanning}(x, xmax = 0.5, ...)
+\method{predict}{jfaPrior}(object, n, lim = NULL, cumulative = FALSE, ...)
+
+\method{predict}{jfaPosterior}(object, n, lim = NULL, cumulative = FALSE, ...)
+
+\method{plot}{jfaPrior}(x, xlim = c(0, 1), ...)
+
+\method{plot}{jfaPosterior}(x, xlim = c(0, 1), ...)
+
+\method{plot}{jfaPredictive}(x, xlim = c(0, 1), ...)
+
+\method{plot}{jfaPlanning}(x, xlim = c(0, 1), ...)
 
 \method{plot}{jfaSelection}(x, ...)
 
-\method{plot}{jfaEvaluation}(x, xmax = 0.5, ...)
+\method{plot}{jfaEvaluation}(x, xlim = c(0, 1), ...)
 }
 \arguments{
 \item{...}{further arguments, currently ignored.}
 
-\item{object, x}{an object of class \code{jfaPrior}, \code{jfaPosterior}, \code{jfaPlanning}, \code{jfaSelection}, or \code{jfaEvaluation}.}
-
 \item{digits}{an integer specifying the number of digits to which output should be rounded. Used in \code{summary}.}
 
-\item{xmax}{a number between 0 and 1 specifying the x-axis limits of the plot. Used in \code{plot}.}
+\item{object, x}{an object of class \code{jfaPrior}, \code{jfaPosterior}, \code{jfaPredictive}, \code{jfaPlanning}, \code{jfaSelection}, or \code{jfaEvaluation}.}
+
+\item{n}{used in \code{predict}. Specifies the sample size for which predictions should be made.}
+
+\item{lim}{used in \code{predict}. Limits the number of errors for which predictions should be made.}
+
+\item{cumulative}{used in \code{predict}. Specifies whether cumulative probabilities should be shown.}
+
+\item{xlim}{used in \code{plot}. Specifies the x limits (x1, x2) of the plot.}
 }
 \value{
 The \code{summary} methods return a \code{data.frame} which contains the input and output.

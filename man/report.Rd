@@ -4,7 +4,7 @@
 \alias{report}
 \title{Create a statistical audit sampling report}
 \usage{
-report(object, file = 'report.html', format = 'html_document')
+report(object, file = 'report.html', format = c('html_document', 'pdf_document'))
 }
 \arguments{
 \item{object}{an object of class \code{jfaEvaluation} as returned by the \code{evaluation()} function.}
@@ -23,25 +23,27 @@ For more details on how to use this function, see the package vignette:
 \code{vignette('jfa', package = 'jfa')}
 }
 \examples{
-data('BuildIt')
+data("BuildIt")
 
 # Draw a sample of 100 monetary units from the population using
 # fixed interval monetary unit sampling
-sample <- selection(population = BuildIt, sampleSize = 100, 
-          algorithm = 'interval', units = 'mus', bookValues = 'bookValue')$sample
+sample <- selection(
+  data = BuildIt, size = 100, method = "interval",
+  units = "values", values = "bookValue"
+)$sample
 
 # Evaluate using the Stringer bound
-result <- evaluation(confidence = 0.95, materiality = 0.05, 
-                     method = 'stringer', sample = sample, 
-                     bookValues = 'bookValue', auditValues = 'auditValue')
-
-\dontrun{ 
- report(result) 
+result <- evaluation(
+  conf.level = 0.95, materiality = 0.05, method = "stringer",
+  data = sample, values = "bookValue", values.audit = "auditValue"
+)
+\dontrun{
+report(result)
 }
 
 }
 \seealso{
-\code{\link{auditPrior}} \code{\link{planning}} \code{\link{selection}} \code{\link{evaluation}} \code{\link{auditBF}}
+\code{\link{auditPrior}} \code{\link{planning}} \code{\link{selection}} \code{\link{evaluation}}
 }
 \author{
 Koen Derks, \email{k.derks@nyenrode.nl}
