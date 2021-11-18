@@ -17,8 +17,11 @@ tolerance  <- 0.05 # 5% tolerance
 #  # [1,] 2 0.02439024 0.006504196 0.07341118
 
 ## -----------------------------------------------------------------------------
-evaluation(materiality = tolerance, x = 2, n = 32, prior = TRUE)
+prior <- auditPrior(method = "impartial", likelihood = "binomial", materiality = 0.05)
 
 ## -----------------------------------------------------------------------------
-evaluation(materiality = tolerance, x = 2 + 0, n = 32 + 50, prior = TRUE)
+evaluation(materiality = tolerance, x = 2, n = 32, prior = prior)
+
+## -----------------------------------------------------------------------------
+evaluation(materiality = tolerance, x = 2 + 0, n = 32 + 50, prior = prior)
 

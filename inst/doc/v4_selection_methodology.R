@@ -45,3 +45,15 @@ set.seed(1)
 sample <- selection(data = BuildIt, size = 100, units = 'values', method = 'sieve', values = 'bookValue')
 head(sample$sample, n = 6)
 
+## -----------------------------------------------------------------------------
+# Ordering population from lowest 'bookValue' to highest 'bookValue' before MUS
+set.seed(1)
+sample <- selection(data = BuildIt, size = 100, units = 'values', values = 'bookValue', order = 'bookValue', decreasing = FALSE)
+head(sample$sample, n = 6)
+
+## -----------------------------------------------------------------------------
+# Randomly shuffle population items before MUS
+set.seed(1)
+sample <- selection(data = BuildIt, size = 100, units = 'values', values = 'bookValue', randomize = TRUE)
+head(sample$sample, n = 6)
+

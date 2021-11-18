@@ -27,6 +27,101 @@
     </style>
 
 
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 
 
 
@@ -50,23 +145,81 @@
 
 <div id="TOC">
 <ul>
-<li><a href="#estimation-in-an-audit-context">Estimation in an audit context</a></li>
-<li><a href="#frequentist-estimation-using-the-likelihood">Frequentist estimation using the likelihood</a></li>
-<li><a href="#bayesian-estimation-using-the-posterior-distribution">Bayesian estimation using the posterior distribution</a></li>
+<li><a href="#estimation">Estimation</a>
+<ul>
+<li><a href="#classical-estimation">Classical estimation</a></li>
+<li><a href="#bayesian-estimation">Bayesian estimation</a></li>
+</ul></li>
+<li><a href="#references">References</a></li>
 </ul>
 </div>
 
-<div id="estimation-in-an-audit-context" class="section level2">
-<h2>Estimation in an audit context</h2>
-<p>In audit sampling estimation the auditor tries to determine the unknown quantity of the misstatement <span class="math inline">\(\theta\)</span> in the population as best as possible.</p>
+<div id="estimation" class="section level2">
+<h2>Estimation</h2>
+<p>When performing estimation the auditor tries to determine the unknown misstatement in the population on the basis of a sample. Generally, estimation implies that there is a minimal amount of assurance to be obtained about the precision / accuracy of your estimate (i.e., the most likely error - the upper bound). This inference about the population misstatement can be performed using the <code>evaluation()</code> function by specifying the <code>min.precision</code> argument and providing the sample data or summary statistics.</p>
+<div id="classical-estimation" class="section level3">
+<h3>Classical estimation</h3>
+<p>Suppose your sampling objective is to estimate the misstatement with a precision of 2%. You have planned a sample of <em>n</em> = 188 items from which <em>x</em> = 1 turns out a contain an error. Standard classical evaluation using the Poisson distribution can be performed using the example code below.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>result_classical <span class="ot">&lt;-</span> <span class="fu">evaluation</span>(<span class="at">min.precision =</span> <span class="fl">0.02</span>, <span class="at">method =</span> <span class="st">&quot;poisson&quot;</span>, <span class="at">n =</span> <span class="dv">188</span>, <span class="at">x =</span> <span class="dv">1</span>)</span></code></pre></div>
+<p>Calling the <code>summary()</code> function on the result from the <code>evaluation()</code> function provides the estimates for the most likely error, the 95% upper bound, and the precision.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(result_classical)</span></code></pre></div>
+<pre><code>## 
+##  Classical Audit Sample Evaluation Summary
+## 
+## Options:
+##   Confidence level:               0.95 
+##   Materiality:                    1 
+##   Min. precision:                 0.02 
+##   Method:                         poisson 
+## 
+## Data:
+##   Sample size:                    188 
+##   Number of errors:               1 
+##   Sum of taints:                  1 
+## 
+## Results:
+##   Most likely error:              0.0053191 
+##   95 percent confidence interval: [0, 0.025233] 
+##   Precision:                      0.019914</code></pre>
+<p>As we can see, the most likely error in the population is 1 / 188 = 0.53% and the 95% (one-sided) confidence interval ranges from 0% to 2.52%. Consequently, the precision of the estimate is 2.52% - 0.53% = 1.99%. This means that this sample provides sufficient information to estimate the misstatement in the population with a precision of 2%.</p>
 </div>
-<div id="frequentist-estimation-using-the-likelihood" class="section level2">
-<h2>Frequentist estimation using the likelihood</h2>
-<p>This will be featured in a future version of <code>jfa</code>.</p>
+<div id="bayesian-estimation" class="section level3">
+<h3>Bayesian estimation</h3>
+<p>In principle Bayesian estimation follows the same procedure as its classical counterpart, with the exception that a prior distribution must be provided to the <code>evaluation()</code> function. Therefore, the first step is to set up a prior distribution (see also the vignette <a href="https://koenderks.github.io/jfa/articles/v3_prior_distributions.html">Prior distributions</a>). For illustration, we will assume a <code>default</code> <em>gamma(1, 1)</em> prior distribution.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>prior <span class="ot">&lt;-</span> <span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="st">&quot;default&quot;</span>, <span class="at">likelihood =</span> <span class="st">&quot;poisson&quot;</span>)</span></code></pre></div>
+<p>The sample outcomes together with the prior distribution can then be provided to the evaluation function. Once again, the <code>summary()</code> function provides the estimates for the most likely error, the 95% upper bound, and the precision. Note that, because the prior is already constructed for use with a <code>poisson</code> likelihood, the <code>method</code> argument does not need to be provided to the <code>evaluation()</code> function.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>result_bayesian <span class="ot">&lt;-</span> <span class="fu">evaluation</span>(<span class="at">min.precision =</span> <span class="fl">0.02</span>, <span class="at">n =</span> <span class="dv">188</span>, <span class="at">x =</span> <span class="dv">1</span>, <span class="at">prior =</span> prior)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(result_bayesian)</span></code></pre></div>
+<pre><code>## 
+##  Bayesian Audit Sample Evaluation Summary
+## 
+## Options:
+##   Confidence level:               0.95 
+##   Materiality:                    1 
+##   Min. precision:                 0.02 
+##   Method:                         poisson 
+##   Prior distribution:             gamma(a = 1, ß = 1) 
+## 
+## Data:
+##   Sample size:                    188 
+##   Number of errors:               1 
+##   Sum of taints:                  1 
+## 
+## Results:
+##   Posterior distribution:         gamma(a = 2, ß = 189) 
+##   Most likely error:              0.005291 
+##   95 percent credible interval:   [0, 0.0251] 
+##   Precision:                      0.019809</code></pre>
+<p>As we can see, the posterior distribution is a <em>gamma(2, 189)</em> distribution. This distribution implies a most likely error in the population is 0.53% and a 95% (one-sided) confidence interval that ranges from 0% to 2.51%. Consequently, the precision of the estimate is 2.51% - 0.53% = 1.98%. Also in the Bayesian framework, this sample provides sufficient information to estimate the misstatement in the population with a precision of 2%.</p>
 </div>
-<div id="bayesian-estimation-using-the-posterior-distribution" class="section level2">
-<h2>Bayesian estimation using the posterior distribution</h2>
-<p>This will be featured in a future version of <code>jfa</code>.</p>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li><p>Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J., and Wetzels, R. (2021). Priors in a Bayesian audit: How integration of existing information into the prior distribution can improve audit transparency and efficiency. <em>International Journal of Auditing</em>, 25(3), 621-636.</p></li>
+<li><p>Stewart, T. R. (2012). <em>Technical Notes on the AICPA Audit Guide Audit Sampling</em>. American Institute of Certified Public Accountants, New York.</p></li>
+<li><p>Stewart, T. R. (2013). <em>A Bayesian Audit Assurance Model with Application to the Component Materiality problem in Group Audits.</em> VU University, Amsterdam.</p></li>
+</ul>
 </div>
 
 
