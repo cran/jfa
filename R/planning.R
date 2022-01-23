@@ -1,3 +1,18 @@
+# Copyright (C) 2020-2022 Koen Derks
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #' Plan a Statistical Audit Sample
 #'
 #' @description This function calculates the minimum sample size for a statistical audit sample based on the Poisson, binomial, or hypergeometric likelihood. The function returns an object of class \code{jfaPlanning} which can be used with associated \code{summary()} and \code{plot()} methods.
@@ -16,9 +31,9 @@
 #' @param likelihood    a character specifying the likelihood assumed in the calculation. This can be either \code{poisson} (default) for the Poisson likelihood, \code{binomial} for the binomial likelihood, or \code{hypergeometric} for the hypergeometric likelihood. See the details section for more information about the available likelihoods.
 #' @param conf.level    a numeric value between 0 and 1 specifying the confidence level used in the planning. Defaults to 0.95 for 95\% confidence.
 #' @param N.units       an integer larger than 0 specifying the total number of units or items in the population (i.e., the population size). Only required when \code{likelihood = 'hypergeometric'}.
-#' @param prior         a logical specifying whether to use a prior distribution when planning, or an object of class \code{jfaPrior} or \code{jfaPosterior} containing the prior distribution. Defaults to \code{FALSE} for frequentist planning. If \code{TRUE}, a minimal information prior is chosen by default. Chooses a conjugate gamma distribution for the Poisson likelihood, a conjugate beta distribution for the binomial likelihood, and a conjugate beta-binomial distribution for the hypergeometric likelihood.
 #' @param by            an integer larger than 0 specifying the desired increment for the sample size calculation.
 #' @param max           an integer larger than 0 specifying the maximum sample size that is considered in the calculation. Defaults to 5000 for efficiency. Increase this value if the sample size cannot be found due to it being too large (e.g., for a low materiality).
+#' @param prior         a logical specifying whether to use a prior distribution when planning, or an object of class \code{jfaPrior} or \code{jfaPosterior} containing the prior distribution. Defaults to \code{FALSE} for frequentist planning. If \code{TRUE}, a minimal information prior is chosen by default. Chooses a conjugate gamma distribution for the Poisson likelihood, a conjugate beta distribution for the binomial likelihood, and a conjugate beta-binomial distribution for the hypergeometric likelihood.
 #'
 #' @details This section elaborates on the available likelihoods and corresponding prior distributions for the \code{likelihood} argument.
 #'
@@ -77,30 +92,35 @@ planning <- function(materiality = NULL, min.precision = NULL, expected = 0,
                      likelihood = c("poisson", "binomial", "hypergeometric"),
                      conf.level = 0.95, N.units = NULL, by = 1, max = 5000,
                      prior = FALSE) {
-  proper <- TRUE
   bayesian <- (class(prior) == "logical" && prior == TRUE) || class(prior) %in% c("jfaPrior", "jfaPosterior")
   likelihood <- match.arg(likelihood)
   # Import existing prior distribution with class 'jfaPrior' or 'jfaPosterior'
   if (class(prior) %in% c("jfaPrior", "jfaPosterior")) {
+    if (likelihood != prior[["likelihood"]]) {
+      warning(paste0("using 'likelihood = ", prior[["likelihood"]], "' from 'prior'"))
+    }
     prior.n <- prior[["description"]]$implicit.n
     prior.x <- prior[["description"]]$implicit.x
     likelihood <- prior[["likelihood"]]
     if (!is.null(prior[["N.units"]])) {
+      warning(paste0("using 'N.units = ", prior[["N.units"]], "' from 'prior'"))
       N.units <- prior[["N.units"]]
     }
-    proper <- prior[["description"]]$alpha != 0 && prior[["description"]]$beta != 0
   } else if (prior) {
     prior.n <- 1
     prior.x <- 0
   }
-  if (is.null(materiality) && is.null(min.precision)) {
-    stop("'materiality' or `min.precision` is missing for planning")
-  }
   if (conf.level >= 1 || conf.level <= 0 || is.null(conf.level) || length(conf.level) != 1) {
-    stop("'conf.level' must be a single number between 0 and 1")
+    stop("'conf.level' must be a single value between 0 and 1")
+  }
+  if (is.null(materiality) && is.null(min.precision)) {
+    stop("missing value for 'materiality' or `min.precision`")
+  }
+  if (!is.null(materiality) && (materiality <= 0 || materiality >= 1)) {
+    stop("'materiality' must be a single value between 0 and 1")
   }
   if (!is.null(min.precision) && (min.precision <= 0 || min.precision >= 1)) {
-    stop("'min.precision' must be a single number between 0 and 1")
+    stop("'min.precision' must be a single value between 0 and 1")
   }
   # Define a placeholder for the sample size
   n <- NULL
@@ -108,13 +128,16 @@ planning <- function(materiality = NULL, min.precision = NULL, expected = 0,
   if (expected >= 0 && expected < 1) {
     errorType <- "percentage"
     if (!is.null(materiality) && expected >= materiality) {
-      stop("'expected' must be a single number < 'materiality'")
+      stop("'expected' must be a single value < 'materiality'")
     }
   } else if (expected >= 1) {
     errorType <- "integer"
     if (expected %% 1 != 0 && likelihood %in% c("binomial", "hypergeometric") && !bayesian) {
-      stop("'expected' must be a nonnegative and integer")
+      stop("'expected' must be an integer >= 0")
     }
+  }
+  if (expected >= max) {
+    stop("'expected' must be an integer < 'max'")
   }
   # Set the materiality and the minimium precision to 1 if they are not specified
   if (is.null(materiality)) {
@@ -126,11 +149,12 @@ planning <- function(materiality = NULL, min.precision = NULL, expected = 0,
   # Requirements for the hypergeometric distribution
   if (likelihood == "hypergeometric") {
     if (is.null(N.units)) {
-      stop("'N.units' is missing for planning")
+      stop("missing value for 'N.units'")
     }
-    if (N.units <= 0 || N.units %% 1 != 0) {
-      stop("'N.units' must be nonegative and integer")
+    if (N.units <= 0 || length(N.units) != 1) {
+      stop("'N.units' must be a single integer > 0")
     }
+    N.units <- ceiling(N.units)
     if (!is.null(materiality) && expected >= 1 && expected >= ceiling(materiality * N.units)) {
       stop("'expected' / 'N.units' must be < 'materiality'")
     }
@@ -320,47 +344,8 @@ planning <- function(materiality = NULL, min.precision = NULL, expected = 0,
       )
       result[["posterior"]][["hypotheses"]]$odds.h1 <- result[["posterior"]][["hypotheses"]]$p.h1 / result[["posterior"]][["hypotheses"]]$p.h0
       result[["posterior"]][["hypotheses"]]$odds.h0 <- 1 / result[["posterior"]][["hypotheses"]]$odds.h1
-      # For improper priors we take the posterior odds as Bayes factor
-      result[["posterior"]][["hypotheses"]]$bf.h1 <- result[["posterior"]][["hypotheses"]]$odds.h1
-      if (proper) { # The prior is proper, so we divide by the prior odds
-        result[["posterior"]][["hypotheses"]]$bf.h1 <- result[["posterior"]][["hypotheses"]]$bf.h1 / result[["prior"]][["hypotheses"]]$odds.h1
-      }
+      result[["posterior"]][["hypotheses"]]$bf.h1 <- result[["posterior"]][["hypotheses"]]$odds.h1 / result[["prior"]][["hypotheses"]]$odds.h1
       result[["posterior"]][["hypotheses"]]$bf.h0 <- 1 / result[["posterior"]][["hypotheses"]]$bf.h1
-    }
-    # Create the posterior predictive section
-    if (likelihood != "hypergeometric" && !is.null(result[["N.units"]])) {
-      result[["posterior"]][["predictive"]] <- list()
-      result[["posterior"]][["predictive"]]$predictive <- switch(likelihood,
-        "poisson" = paste0("Negative-binomial(r = ", round(result[["posterior"]][["description"]]$alpha, 3), ", p = ", round(1 / (1 + result[["posterior"]][["description"]]$beta), 3), ")"),
-        "binomial" = paste0("Beta-binomial(N = ", ceiling(result[["N.units"]] - result[["n"]]), ", \u03B1 = ", round(result[["posterior"]][["description"]]$alpha, 3), ", \u03B2 = ", round(result[["posterior"]][["description"]]$beta, 3), ")")
-      )
-      result[["posterior"]][["predictive"]]$conf.level <- conf.level
-      result[["posterior"]][["predictive"]][["description"]] <- list()
-      result[["posterior"]][["predictive"]][["statistics"]] <- list()
-      result[["posterior"]][["predictive"]][["description"]]$N.units <- result[["N.units"]] - result[["n"]]
-      if (likelihood == "poisson") {
-        result[["posterior"]][["predictive"]][["description"]]$density <- "negative-binomial"
-        result[["posterior"]][["predictive"]][["description"]]$r <- result[["posterior"]][["description"]]$alpha
-        result[["posterior"]][["predictive"]][["description"]]$p <- 1 / (1 + result[["posterior"]][["description"]]$beta)
-        result[["posterior"]][["predictive"]][["statistics"]]$mode <- if (result[["posterior"]][["predictive"]][["description"]]$r <= 1) 0 else (result[["posterior"]][["predictive"]][["description"]]$p * (result[["posterior"]][["predictive"]][["description"]]$r - 1)) / (1 - result[["posterior"]][["predictive"]][["description"]]$p)
-        result[["posterior"]][["predictive"]][["statistics"]]$mean <- (result[["posterior"]][["predictive"]][["description"]]$r * result[["posterior"]][["predictive"]][["description"]]$p) / (1 - result[["posterior"]][["predictive"]][["description"]]$p)
-        result[["posterior"]][["predictive"]][["statistics"]]$median <- stats::qnbinom(0.5, size = result[["posterior"]][["predictive"]][["description"]]$r, prob = result[["posterior"]][["predictive"]][["description"]]$p)
-        result[["posterior"]][["predictive"]][["statistics"]]$var <- (result[["posterior"]][["predictive"]][["description"]]$p * result[["posterior"]][["predictive"]][["description"]]$r) / (1 - result[["posterior"]][["predictive"]][["description"]]$p)^2
-        result[["posterior"]][["predictive"]][["statistics"]]$skewness <- (1 + result[["posterior"]][["predictive"]][["description"]]$p) / sqrt(result[["posterior"]][["predictive"]][["description"]]$p * result[["posterior"]][["predictive"]][["description"]]$r)
-        result[["posterior"]][["predictive"]][["statistics"]]$ub <- stats::qnbinom(conf.level, size = result[["posterior"]][["predictive"]][["description"]]$r, prob = result[["posterior"]][["predictive"]][["description"]]$p)
-      } else {
-        result[["posterior"]][["predictive"]][["description"]]$density <- "beta-binomial"
-        result[["posterior"]][["predictive"]][["description"]]$alpha <- result[["posterior"]][["description"]]$alpha
-        result[["posterior"]][["predictive"]][["description"]]$beta <- result[["posterior"]][["description"]]$beta
-        result[["posterior"]][["predictive"]][["statistics"]]$mode <- .modebbinom(N = result[["posterior"]][["predictive"]][["description"]]$N.units, shape1 = result[["posterior"]][["predictive"]][["description"]]$alpha, shape2 = result[["posterior"]][["predictive"]][["description"]]$beta)
-        result[["posterior"]][["predictive"]][["statistics"]]$mean <- result[["posterior"]][["predictive"]][["description"]]$alpha / (result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta) * result[["posterior"]][["predictive"]][["description"]]$N.units
-        result[["posterior"]][["predictive"]][["statistics"]]$median <- .qbbinom(0.5, N = result[["posterior"]][["predictive"]][["description"]]$N.units, shape1 = result[["posterior"]][["predictive"]][["description"]]$alpha, shape2 = result[["posterior"]][["predictive"]][["description"]]$beta)
-        result[["posterior"]][["predictive"]][["statistics"]]$var <- ((result[["posterior"]][["predictive"]][["description"]]$N.units * result[["posterior"]][["predictive"]][["description"]]$alpha * result[["posterior"]][["predictive"]][["description"]]$beta) * (result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta + result[["posterior"]][["predictive"]][["description"]]$N.units)) / ((result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta)^2 * (result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta + 1))
-        result[["posterior"]][["predictive"]][["statistics"]]$skewness <- (((result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta + 2 * result[["posterior"]][["predictive"]][["description"]]$N.units) * (result[["posterior"]][["predictive"]][["description"]]$beta - result[["posterior"]][["predictive"]][["description"]]$alpha)) / (result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta + 2)) * sqrt((1 + result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta) / (result[["posterior"]][["predictive"]][["description"]]$N.units * result[["posterior"]][["predictive"]][["description"]]$alpha * result[["posterior"]][["predictive"]][["description"]]$beta * (result[["posterior"]][["predictive"]][["description"]]$N.units + result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta)))
-        result[["posterior"]][["predictive"]][["statistics"]]$ub <- .qbbinom(conf.level, N = result[["posterior"]][["predictive"]][["description"]]$N.units, shape1 = result[["posterior"]][["predictive"]][["description"]]$alpha, shape2 = result[["posterior"]][["predictive"]][["description"]]$beta)
-      }
-      result[["posterior"]][["predictive"]][["statistics"]]$precision <- result[["posterior"]][["predictive"]][["statistics"]]$ub - result[["posterior"]][["predictive"]][["statistics"]]$mode
-      class(result[["posterior"]][["predictive"]]) <- "jfaPredictive"
     }
     result[["posterior"]]$N.units <- result[["N.units"]]
     # Add class 'jfaPosterior' to the posterior distribution object

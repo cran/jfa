@@ -1,3 +1,18 @@
+# Copyright (C) 2020-2022 Koen Derks
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #' Evaluate a statistical audit sample
 #'
 #' @description This function takes a data frame (using \code{data}, \code{values}, and \code{values.audit}) or summary statistics (using \code{x} and \code{n}) and performs inference on the misstatement in the sample. The function returns an object of class \code{jfaEvaluation} which can be used with associated \code{summary()} and \code{plot()} methods.
@@ -134,36 +149,35 @@ evaluation <- function(materiality = NULL, min.precision = NULL, method = "poiss
                        x = NULL, n = NULL, N.units = NULL, N.items = NULL,
                        r.delta = 2.7, m.type = "accounts", cs.a = 1, cs.b = 3, cs.mu = 0.5,
                        prior = FALSE) {
-  proper <- TRUE
   alternative <- match.arg(alternative)
   bayesian <- (class(prior) == "logical" && prior == TRUE) || class(prior) %in% c("jfaPrior", "jfaPosterior")
   # Import existing prior distribution with class 'jfaPrior' or 'jfaPosterior'.
   if (class(prior) %in% c("jfaPrior", "jfaPosterior")) {
+    if (method != prior[["likelihood"]]) {
+      warning(paste0("using 'method = ", prior[["likelihood"]], "' from 'prior'"))
+    }
     prior.x <- prior[["description"]]$implicit.x
     prior.n <- prior[["description"]]$implicit.n
     method <- prior[["likelihood"]]
     if (!is.null(prior[["N.units"]])) {
+      warning(paste0("using 'N.units = ", prior[["N.units"]], "' from 'prior'"))
       N.units <- prior[["N.units"]]
     }
-    proper <- prior[["description"]]$alpha != 0 && prior[["description"]]$beta != 0
   } else {
     prior.n <- 1
     prior.x <- 0
   }
-  if (is.null(conf.level)) {
-    stop("'conf.level' is missing for evaluation")
-  }
-  if (conf.level >= 1 || conf.level <= 0 || length(conf.level) != 1) {
-    stop("'conf.level' must be a single number between 0 and 1")
+  if (conf.level >= 1 || conf.level <= 0 || is.null(conf.level) || length(conf.level) != 1) {
+    stop("'conf.level' must be a single value between 0 and 1")
   }
   if (is.null(materiality) && is.null(min.precision)) {
-    stop("'materiality' or `min.precision` is missing for evaluation")
+    stop("missing value for 'materiality' or `min.precision`")
   }
   if (!is.null(materiality) && (materiality <= 0 || materiality > 1)) {
-    stop("'materiality' must be a single number between 0 and 1")
+    stop("'materiality' must be a single value between 0 and 1")
   }
   if (!is.null(min.precision) && (min.precision <= 0 || min.precision >= 1)) {
-    stop("'min.precision' must be a single number between 0 and 1")
+    stop("'min.precision' must be a single value between 0 and 1")
   }
   if (!(method %in% c("poisson", "binomial", "hypergeometric", "stringer", "stringer.meikle", "stringer.lta", "stringer.pvz", "rohrbach", "moment", "coxsnell", "direct", "difference", "quotient", "regression", "mpu")) || length(method) != 1) {
     stop("'method' should be one of 'poisson', 'binomial', 'hypergeometric', 'stringer', 'stringer.meikle', 'stringer.lta', 'stringer.pvz', 'rohrbach', 'moment', 'coxsnell', 'direct', 'difference', 'quotient', 'regression', 'mpu'")
@@ -176,16 +190,16 @@ evaluation <- function(materiality = NULL, min.precision = NULL, method = "poiss
   }
   if (!is.null(x) || !is.null(n)) { # Use summary statistics
     if (method %in% c("stringer", "stringer.meikle", "stringer.lta", "stringer.pvz", "coxsnell", "rohrbach", "moment", "direct", "difference", "quotient", "regression", "mpu")) {
-      stop(paste0("'method = ", method, "' is missing 'data' for evaluation"))
+      stop(paste0("missing value for 'data' with 'method = ", method, "'"))
     }
     if (is.null(n)) {
-      stop("'n' is missing for evaluation")
+      stop("missing value for 'n'")
     }
     if (n <= 0 || n %% 1 != 0 || length(n) != 1) {
       stop("'n' must be a single integer > 0")
     }
     if (is.null(x)) {
-      stop("'x' is missing for evaluation")
+      stop("missing value for 'x'")
     }
     if (x < 0 || length(x) != 1) {
       stop("'x' must be a single value >= 0")
@@ -205,7 +219,7 @@ evaluation <- function(materiality = NULL, min.precision = NULL, method = "poiss
   } else if (!is.null(data)) { # Use data sample
     dname <- deparse(substitute(data))
     if (is.null(values)) {
-      stop("'values' is missing for evaluation")
+      stop("missing value for 'values'")
     }
     if (length(values) != 1) {
       stop("'values' must be a single character")
@@ -214,7 +228,7 @@ evaluation <- function(materiality = NULL, min.precision = NULL, method = "poiss
       stop(paste0("'", values, "' is not a column in 'data'"))
     }
     if (is.null(values.audit)) {
-      stop("'values.audit' is missing for evaluation")
+      stop("missing value for 'values.audit'")
     }
     if (length(values.audit) != 1) {
       stop("'values.audit' must be a single character")
@@ -227,7 +241,7 @@ evaluation <- function(materiality = NULL, min.precision = NULL, method = "poiss
     }
     missing <- unique(c(which(is.na(data[, values])), which(is.na(data[, values.audit]))))
     if (length(missing) == nrow(data)) {
-      stop("not enough 'data' observations")
+      stop("not enough rows in 'data'")
     }
     data <- stats::na.omit(data)
     if (!is.null(times)) {
@@ -254,7 +268,7 @@ evaluation <- function(materiality = NULL, min.precision = NULL, method = "poiss
     }
     t.obs <- sum(t)
   } else {
-    stop("'data' or a combination of 'x' and 'n' is missing for evaluation")
+    stop("missing value(s) for 'data' or a combination of 'x' and 'n'")
   }
   # Set the materiality and the minimium precision to 1 if they are NULL
   if (is.null(materiality)) {
@@ -339,11 +353,12 @@ evaluation <- function(materiality = NULL, min.precision = NULL, method = "poiss
     }
   } else if (method == "hypergeometric") {
     if (is.null(N.units)) {
-      stop("'N.units' is missing for evaluation")
+      stop("missing value for 'N.units'")
     }
-    if (N.units <= 0 || N.units %% 1 != 0) {
-      stop("'N.units' must be a nonnegative integer")
+    if (N.units <= 0 || length(N.units) != 1) {
+      stop("'N.units' must be a single integer > 0")
     }
+    N.units <- ceiling(N.units)
     if (bayesian) {
       # Bayesian evaluation using the beta-binomial distribution
       mle <- .modebbinom(N = N.units - n.obs, shape1 = 1 + prior.x + t.obs, shape2 = prior.n - prior.x + n.obs - t.obs) / N.units
@@ -568,48 +583,9 @@ evaluation <- function(materiality = NULL, min.precision = NULL, method = "poiss
         }
         result[["posterior"]][["hypotheses"]]$odds.h1 <- result[["posterior"]][["hypotheses"]]$p.h1 / result[["posterior"]][["hypotheses"]]$p.h0
         result[["posterior"]][["hypotheses"]]$odds.h0 <- 1 / result[["posterior"]][["hypotheses"]]$odds.h1
-        # For improper priors we take the posterior odds as Bayes factor
-        result[["posterior"]][["hypotheses"]]$bf.h1 <- result[["posterior"]][["hypotheses"]]$odds.h1
-        if (proper) { # The prior is proper, so we divide by the prior odds
-          result[["posterior"]][["hypotheses"]]$bf.h1 <- result[["posterior"]][["hypotheses"]]$bf.h1 / result[["prior"]][["hypotheses"]]$odds.h1
-        }
+        result[["posterior"]][["hypotheses"]]$bf.h1 <- result[["posterior"]][["hypotheses"]]$odds.h1 / result[["prior"]][["hypotheses"]]$odds.h1
         result[["posterior"]][["hypotheses"]]$bf.h0 <- 1 / result[["posterior"]][["hypotheses"]]$bf.h1
       }
-    }
-    # Create the posterior predictive section
-    if (method != "hypergeometric" && !is.null(result[["N.units"]])) {
-      result[["posterior"]][["predictive"]] <- list()
-      result[["posterior"]][["predictive"]]$predictive <- switch(method,
-        "poisson" = paste0("Negative-binomial(r = ", round(result[["posterior"]][["description"]]$alpha, 3), ", p = ", round(1 / (1 + result[["posterior"]][["description"]]$beta), 3), ")"),
-        "binomial" = paste0("Beta-binomial(N = ", ceiling(result[["N.units"]] - result[["n"]]), ", \u03B1 = ", round(result[["posterior"]][["description"]]$alpha, 3), ", \u03B2 = ", round(result[["posterior"]][["description"]]$beta, 3), ")")
-      )
-      result[["posterior"]][["predictive"]]$conf.level <- conf.level
-      result[["posterior"]][["predictive"]][["description"]] <- list()
-      result[["posterior"]][["predictive"]][["statistics"]] <- list()
-      result[["posterior"]][["predictive"]][["description"]]$N.units <- result[["N.units"]] - result[["n"]]
-      if (method == "poisson") {
-        result[["posterior"]][["predictive"]][["description"]]$density <- "negative-binomial"
-        result[["posterior"]][["predictive"]][["description"]]$r <- result[["posterior"]][["description"]]$alpha
-        result[["posterior"]][["predictive"]][["description"]]$p <- 1 / (1 + result[["posterior"]][["description"]]$beta)
-        result[["posterior"]][["predictive"]][["statistics"]]$mode <- if (result[["posterior"]][["predictive"]][["description"]]$r <= 1) 0 else (result[["posterior"]][["predictive"]][["description"]]$p * (result[["posterior"]][["predictive"]][["description"]]$r - 1)) / (1 - result[["posterior"]][["predictive"]][["description"]]$p)
-        result[["posterior"]][["predictive"]][["statistics"]]$mean <- (result[["posterior"]][["predictive"]][["description"]]$r * result[["posterior"]][["predictive"]][["description"]]$p) / (1 - result[["posterior"]][["predictive"]][["description"]]$p)
-        result[["posterior"]][["predictive"]][["statistics"]]$median <- stats::qnbinom(0.5, size = result[["posterior"]][["predictive"]][["description"]]$r, prob = result[["posterior"]][["predictive"]][["description"]]$p)
-        result[["posterior"]][["predictive"]][["statistics"]]$var <- (result[["posterior"]][["predictive"]][["description"]]$p * result[["posterior"]][["predictive"]][["description"]]$r) / (1 - result[["posterior"]][["predictive"]][["description"]]$p)^2
-        result[["posterior"]][["predictive"]][["statistics"]]$skewness <- (1 + result[["posterior"]][["predictive"]][["description"]]$p) / sqrt(result[["posterior"]][["predictive"]][["description"]]$p * result[["posterior"]][["predictive"]][["description"]]$r)
-        result[["posterior"]][["predictive"]][["statistics"]]$ub <- stats::qnbinom(conf.level, size = result[["posterior"]][["predictive"]][["description"]]$r, prob = result[["posterior"]][["predictive"]][["description"]]$p)
-      } else {
-        result[["posterior"]][["predictive"]][["description"]]$density <- "beta-binomial"
-        result[["posterior"]][["predictive"]][["description"]]$alpha <- result[["posterior"]][["description"]]$alpha
-        result[["posterior"]][["predictive"]][["description"]]$beta <- result[["posterior"]][["description"]]$beta
-        result[["posterior"]][["predictive"]][["statistics"]]$mode <- .modebbinom(N = result[["posterior"]][["predictive"]][["description"]]$N.units, shape1 = result[["posterior"]][["predictive"]][["description"]]$alpha, shape2 = result[["posterior"]][["predictive"]][["description"]]$beta)
-        result[["posterior"]][["predictive"]][["statistics"]]$mean <- result[["posterior"]][["predictive"]][["description"]]$alpha / (result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$alpha) * result[["posterior"]][["predictive"]][["description"]]$N.units
-        result[["posterior"]][["predictive"]][["statistics"]]$median <- .qbbinom(0.5, N = result[["posterior"]][["predictive"]][["description"]]$N.units, shape1 = result[["posterior"]][["predictive"]][["description"]]$alpha, shape2 = result[["posterior"]][["predictive"]][["description"]]$beta)
-        result[["posterior"]][["predictive"]][["statistics"]]$var <- ((result[["posterior"]][["predictive"]][["description"]]$N.units * result[["posterior"]][["predictive"]][["description"]]$alpha * result[["posterior"]][["predictive"]][["description"]]$beta) * (result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta + result[["posterior"]][["predictive"]][["description"]]$N.units)) / ((result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta)^2 * (result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta + 1))
-        result[["posterior"]][["predictive"]][["statistics"]]$skewness <- (((result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta + 2 * result[["posterior"]][["predictive"]][["description"]]$N.units) * (result[["posterior"]][["predictive"]][["description"]]$beta - result[["posterior"]][["predictive"]][["description"]]$alpha)) / (result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta + 2)) * sqrt((1 + result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta) / (result[["posterior"]][["predictive"]][["description"]]$N.units * result[["posterior"]][["predictive"]][["description"]]$alpha * result[["posterior"]][["predictive"]][["description"]]$beta * (result[["posterior"]][["predictive"]][["description"]]$N.units + result[["posterior"]][["predictive"]][["description"]]$alpha + result[["posterior"]][["predictive"]][["description"]]$beta)))
-        result[["posterior"]][["predictive"]][["statistics"]]$ub <- .qbbinom(conf.level, N = result[["posterior"]][["predictive"]][["description"]]$N.units, shape1 = result[["posterior"]][["predictive"]][["description"]]$alpha, shape2 = result[["posterior"]][["predictive"]][["description"]]$beta)
-      }
-      result[["posterior"]][["predictive"]][["statistics"]]$precision <- result[["posterior"]][["predictive"]][["statistics"]]$ub - result[["posterior"]][["predictive"]][["statistics"]]$mode
-      class(result[["posterior"]][["predictive"]]) <- "jfaPredictive"
     }
     result[["posterior"]]$N.units <- result[["N.units"]]
     # Add class 'jfaPosterior' to the posterior distribution object.

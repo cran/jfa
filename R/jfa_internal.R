@@ -1,3 +1,18 @@
+# Copyright (C) 2020-2022 Koen Derks
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 # Quantiles of the beta-binomial distribution
 .qbbinom <- function(p, N, shape1, shape2, lower.tail = TRUE, log.p = FALSE) {
   if (shape1 == 0 || shape2 == 0) {
@@ -14,6 +29,9 @@
 .modebbinom <- function(N, shape1, shape2) {
   if ((shape1 == 1 && shape2 == 1) || shape1 == 0 || shape2 == 0) {
     return(NA)
+  }
+  if (shape1 == 1 && shape2 > 1) {
+    return(0)
   }
   index <- which.max(extraDistr::dbbinom(x = 0:N, size = N, alpha = shape1, beta = shape2)) - 1
   return(index)

@@ -1,3 +1,18 @@
+# Copyright (C) 2020-2022 Koen Derks
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 context("Consistency of function evaluation()")
 
 # jfa version 0.1.0
@@ -233,7 +248,7 @@ test_that(desc = "(id: f3-v0.4.0-t1) Bayes factors", {
   expect_equal(jfaEval[["posterior"]][["hypotheses"]]$bf.h1, 44957.32, tolerance = 0.001)
   prior <- auditPrior(method = "strict", likelihood = "poisson")
   jfaEval <- evaluation(conf.level = 0.95, materiality = 0.05, data = samp, values = "bookValue", values.audit = "auditValue", method = "poisson", times = "times", prior = prior)
-  expect_equal(jfaEval[["posterior"]][["hypotheses"]]$bf.h1, 1822.754944, tolerance = 0.001)
+  expect_equal(jfaEval[["posterior"]][["hypotheses"]]$odds.h1, 1822.754944, tolerance = 0.001)
   prior <- auditPrior(method = "default", likelihood = "hypergeometric", N.units = 1000)
   jfaEval <- evaluation(conf.level = 0.95, materiality = 0.05, data = samp, values = "bookValue", values.audit = "auditValue", method = "hypergeometric", times = "times", prior = prior, N.units = 1000)
   expect_equal(jfaEval[["posterior"]][["hypotheses"]]$bf.h1, 235810.5921, tolerance = 0.001)
@@ -347,18 +362,18 @@ test_that(desc = "(id: f3-v0.6.0-t1) Test Bayes factors for beta prior", {
 
   # Compute a default Bayes factor from an improper beta prior
   # BF-+ = 2.58
-  BF <- evaluation(materiality = 0.05, n = 50, x = 1, prior = auditPrior(method = "param", alpha = 1, beta = 0, likelihood = "binomial"))$posterior$hypotheses$bf.h1
+  BF <- evaluation(materiality = 0.05, n = 50, x = 1, prior = auditPrior(method = "param", alpha = 1, beta = 0, likelihood = "binomial"))$posterior$hypotheses$odds.h1
   expect_equal(BF, 2.578691368)
 })
 
 test_that(desc = "(id: f3-v0.6.0-t2) Test Bayes factors for gamma prior", {
 
   # Compute a Bayes factor from a noninformative gamma(1, 0) prior
-  BF <- evaluation(materiality = 0.03, n = 160, x = 1, prior = auditPrior(method = "strict", likelihood = "poisson"))$posterior$hypotheses$bf.h1
+  BF <- evaluation(materiality = 0.03, n = 160, x = 1, prior = auditPrior(method = "strict", likelihood = "poisson"))$posterior$hypotheses$odds.h1
   expect_equal(BF, 19.95007199)
 
   # Compute a Bayes factor from a noninformative gamma(1, 0) prior
-  BF <- evaluation(materiality = 0.05, n = 50, x = 1, prior = auditPrior(method = "strict", likelihood = "poisson"))$posterior$hypotheses$bf.h1
+  BF <- evaluation(materiality = 0.05, n = 50, x = 1, prior = auditPrior(method = "strict", likelihood = "poisson"))$posterior$hypotheses$odds.h1
   expect_equal(BF, 2.48071256)
 
   # Compute a default Bayes factor from an impartial gamma prior

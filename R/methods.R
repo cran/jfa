@@ -1,3 +1,18 @@
+# Copyright (C) 2020-2022 Koen Derks
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 .stringer <- function(taints, conf.level, n, correction = NULL) {
   mle <- sum(taints) / n
   t <- ifelse(taints < 0, yes = 0, no = taints)
@@ -159,10 +174,10 @@
 
 .direct <- function(bookvalues, auditvalues, conf.level, alternative, N.items = NULL, n, N.units = NULL, correction = FALSE) {
   if (is.null(N.items)) {
-    stop("'N.items' is missing for evaluation")
+    stop("missing value for 'N.items'")
   }
   if (is.null(N.units)) {
-    stop("'N.units' is missing for evaluation")
+    stop("missing value for 'N.units'")
   }
   w <- mean(auditvalues)
   s <- stats::sd(auditvalues)
@@ -183,7 +198,7 @@
 
 .difference <- function(bookvalues, auditvalues, conf.level, alternative, N.items = NULL, n, correction = FALSE) {
   if (is.null(N.items)) {
-    stop("'N.items' is missing for evaluation")
+    stop("missing value for 'N.items'")
   }
   we <- mean(bookvalues - auditvalues)
   s <- stats::sd(bookvalues - auditvalues)
@@ -204,7 +219,7 @@
 
 .quotient <- function(bookvalues, auditvalues, conf.level, alternative, N.items = NULL, n, correction = FALSE) {
   if (is.null(N.items)) {
-    stop("'N.items' is missing for evaluation")
+    stop("missing value for 'N.items'")
   }
   w <- mean(auditvalues)
   sw <- stats::sd(auditvalues)
@@ -230,10 +245,10 @@
 
 .regression <- function(bookvalues, auditvalues, conf.level, alternative, N.items = NULL, n, N.units = NULL, correction = FALSE) {
   if (is.null(N.items)) {
-    stop("'N.items' is missing for evaluation")
+    stop("missing value for 'N.items'")
   }
   if (is.null(N.units)) {
-    stop("'N.units' is missing for evaluation")
+    stop("missing value for 'N.units'")
   }
   w <- mean(auditvalues)
   sw <- stats::sd(auditvalues)

@@ -1,3 +1,18 @@
+# Copyright (C) 2020-2022 Koen Derks
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 context("Consistency of function planning()")
 
 # jfa version 0.1.0
@@ -157,7 +172,7 @@ test_that(desc = "(id: f5-v0.2.0-t3) Bayesian poisson 100% materiality 1% errors
 test_that(desc = "(id: f5-v0.4.0-t1) Expected Bayes factors for zero expected errors", {
   prior <- auditPrior(method = "strict", likelihood = "poisson")
   jfaRes <- planning(conf.level = 0.95, materiality = 0.02, expected = 0, likelihood = "poisson", prior = prior)
-  expect_equal(jfaRes[["posterior"]][["hypotheses"]]$bf.h1, 19.08554, tolerance = 0.001)
+  expect_equal(jfaRes[["posterior"]][["hypotheses"]]$odds.h1, 19.08554, tolerance = 0.001)
 
   prior <- auditPrior(method = "default", likelihood = "binomial")
   jfaRes <- planning(conf.level = 0.95, materiality = 0.02, expected = 0, likelihood = "binomial", prior = prior)
@@ -171,7 +186,7 @@ test_that(desc = "(id: f5-v0.4.0-t1) Expected Bayes factors for zero expected er
 test_that(desc = "(id: f5-v0.4.0-t2) Expected Bayes factors for expected errors > 0", {
   prior <- auditPrior(method = "strict", likelihood = "poisson")
   jfaRes <- planning(conf.level = 0.95, materiality = 0.02, expected = 0.01, likelihood = "poisson", prior = prior)
-  expect_equal(jfaRes[["posterior"]][["hypotheses"]]$bf.h1, 19.01191777, tolerance = 0.001)
+  expect_equal(jfaRes[["posterior"]][["hypotheses"]]$odds.h1, 19.01191777, tolerance = 0.001)
 
   prior <- auditPrior(method = "default", likelihood = "binomial")
   jfaRes <- planning(conf.level = 0.95, materiality = 0.02, expected = 0.01, likelihood = "binomial", prior = prior)

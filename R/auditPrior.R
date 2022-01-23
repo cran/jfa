@@ -1,3 +1,18 @@
+# Copyright (C) 2020-2022 Koen Derks
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #' Prior Distributions for Audit Sampling
 #'
 #' @description This function creates a prior distribution for the misstatement parameter \eqn{\theta} in an audit sampling model. The prior can be used in the \code{planning()} and \code{evaluation()} functions via their \code{prior} argument. The function returns an object of class \code{jfaPrior} which can be used with associated \code{summary()} and \code{plot()} methods.
@@ -13,7 +28,6 @@
 #' @param method          a character specifying the method by which the prior distribution is constructed. Defaults to \code{default} which incorporates no existing information. Other options are \code{strict}, \code{arm}, \code{bram}, \code{impartial}, \code{hyp}, \code{sample}, and \code{factor}. See the details section for more information about the available methods.
 #' @param likelihood      a character specifying the likelihood assumed when updating the prior distribution. This can be either \code{poisson} (default) for the Poisson likelihood and gamma prior distribution, \code{biomial} for the binomial likelihood and beta prior distribution, or \code{hypergeometric} for the hypergeometric likelihood and beta-binomial prior distribution. See the details section for more information about the available likelihoods.
 #' @param expected        a numeric value between 0 and 1 specifying the expected errors in the sample relative to the total sample size, or a numeric value (>= 1) that represents the sum of expected errors in the sample. It is advised to set this value conservatively to minimize the probability of the observed errors exceeding the expected errors, which would imply that insufficient work has been done in the end.
-#' @param conf.level      a numeric value between 0 and 1 specifying the confidence level to be used in the planning. Defaults to 0.95 for 95\% confidence. Used to calculate the upper bound of the prior distribution.
 #' @param materiality     a numeric value between 0 and 1 specifying the performance materiality (i.e., the maximum upper limit) as a fraction of the total population size. Can be \code{NULL} for some methods.
 #' @param N.units         an numeric value larger than 0 specifying the total number of units in the population. Optional unless \code{likelihood = 'hypergeometric'}.
 #' @param ir              if \code{method = 'arm'}, a numeric value between 0 and 1 specifying the inherent risk in the audit risk model. Defaults to 1 for 100\% risk.
@@ -25,9 +39,10 @@
 #' @param factor          if \code{method = 'factor'}, a numeric value between 0 and 1 specifying the weighting factor for the results of the sample equivalent to the prior information.
 #' @param alpha           if \code{method = 'param'}, a numeric value specifying the \eqn{\alpha} parameter of the prior distribution.
 #' @param beta            if \code{method = 'param'}, a numeric value specifying the \eqn{\beta} parameter of the prior distribution.
+#' @param conf.level      a numeric value between 0 and 1 specifying the confidence level to be used in the planning. Defaults to 0.95 for 95\% confidence. Used to calculate the upper bound of the prior distribution.
 #'
 #' @details \code{auditPrior} is used to define prior distributions for parameters in \code{jfa} models. To perform Bayesian audit sampling, you must assign a prior distribution to the misstatement parameter \eqn{\theta}.
-#'          The prior is a probability distribution that reflects the existing information about the parameter before seeing a sample. To keep the priors proper, the \code{default} priors used by \code{jfa} are very diffuse,
+#'          The prior is a probability distribution that reflects the existing information about the parameter before seeing a sample. To keep the priors proper, the \code{default} priors used by \code{jfa} are indifferent as much as possible,
 #'          meaning they contain minimal prior information. However, it is strongly recommended to use an informed prior distribution when possible.
 #'
 #' @details This section elaborates on the available options for the \code{method} argument.
@@ -97,34 +112,29 @@ auditPrior <- function(method = "default", likelihood = c("poisson", "binomial",
   if (!(method %in% c("default", "strict", "param", "impartial", "hyp", "arm", "bram", "sample", "factor")) || length(method) != 1) {
     stop("'method' should be one of 'default', 'strict', 'param', 'impartial', 'hyp', 'arm', 'bram', 'sample', 'factor'")
   }
-  if (is.null(conf.level)) {
-    stop("'conf.level' is missing for prior construction")
-  }
-  if (conf.level >= 1 || conf.level <= 0 || length(conf.level) != 1) {
-    stop("'conf.level' must be a single number between 0 and 1")
+  if (conf.level >= 1 || conf.level <= 0 || is.null(conf.level) || length(conf.level) != 1) {
+    stop("'conf.level' must be a single value between 0 and 1")
   }
   if (expected < 0) {
-    stop("'expected' must be a single number >= 0")
+    stop("'expected' must be a single value >= 0")
   }
   if (is.null(materiality) && method %in% c("impartial", "hyp", "arm")) {
-    stop("'materiality' is missing for prior construction")
+    stop("missing value for 'materiality'")
   }
   if (!is.null(materiality) && expected >= materiality && expected < 1) {
-    stop("'expected' must be a single number < 'materiality'")
+    stop("'expected' must be a single value < 'materiality'")
   }
   if (expected >= 1 && !(method %in% c("default", "sample", "factor", "param", "strict"))) {
-    stop(paste0("'expected' must be a single number between 0 and 1 for 'method = ", method, "'"))
+    stop(paste0("'expected' must be a single value between 0 and 1 for 'method = ", method, "'"))
   }
   if (likelihood == "hypergeometric") {
     if (is.null(N.units)) {
-      stop("'N.units' is missing for prior construction")
+      stop("missing value for 'N.units'")
     }
-    if (N.units <= 0) {
-      stop("'N.units' must be a nonnegative")
+    if (N.units <= 0 || length(N.units) != 1) {
+      stop("'N.units' must be a single integer > 0")
     }
-    if (N.units %% 1 != 0) {
-      N.units <- ceiling(N.units)
-    }
+    N.units <- ceiling(N.units)
   }
   if (method == "default") { # Method 1: Minimum prior observations to make the prior proper
     prior.n <- 1 # Single earlier observation
@@ -134,28 +144,31 @@ auditPrior <- function(method = "default", likelihood = c("poisson", "binomial",
     prior.x <- 0 # Single earlier error
   } else if (method == "arm") { # Method 3: Translate risks from the audit risk model
     if (is.null(cr)) {
-      stop("'cr' is missing for prior construction")
+      stop("missing value for 'cr'")
     }
     if (cr < 0 || cr > 1) {
       stop("'cr' must be a single value between 0 and 1")
     }
     if (is.null(ir)) {
-      stop("'ir' is missing for prior construction")
+      stop("missing value for 'ir'")
     }
     if (ir < 0 || ir > 1) {
       stop("'ir' must be a single value between 0 and 1")
     }
     dr <- (1 - conf.level) / (ir * cr) # Calculate the required detection risk from the audit risk model
+    if (dr >= 1) {
+      stop("ir * cr must be < 1 - conf.level")
+    }
     n.plus <- planning(conf.level = conf.level, likelihood = likelihood, expected = expected, N.units = N.units, materiality = materiality, prior = TRUE)$n # Calculate the sample size for the full detection risk
     n.min <- planning(conf.level = 1 - dr, likelihood = likelihood, expected = expected, N.units = N.units, materiality = materiality, prior = TRUE)$n # Calculated the sample size for the adjusted detection risk
     prior.n <- n.plus - n.min # Calculate the sample size equivalent to the increase in detection risk
     prior.x <- (n.plus * expected) - (n.min * expected) # Calculate errors equivalent to the increase in detection risk
   } else if (method == "bram") { # Method 4: Bayesian risk assessment model
     if (is.null(ub)) { # Check if the value for the upper bound is present
-      stop("'ub' is missing for prior construction")
+      stop("missing value for 'ub'")
     }
     if (ub <= 0 || ub >= 1 || ub <= expected) { # Check if the value for the upper bound is valid
-      stop("'ub' must be a single number between 0 and 1 and >= 'expected'")
+      stop("'ub' must be a single value between 0 and 1 and >= 'expected'")
     }
     if (likelihood == "poisson" && expected > 0) { # Perform approximation described in Stewart (2013) on p. 45.
       r <- expected / ub
@@ -185,7 +198,7 @@ auditPrior <- function(method = "default", likelihood = c("poisson", "binomial",
       p.h0 <- p.h1 <- 0.5
     } else if (method == "hyp") { # Method 6: Custom prior probabilities
       if (is.null(p.hmin)) { # Must have the prior probabilities and materiality
-        stop("'p.hmin' is missing for prior construction")
+        stop("missing value for 'p.hmin'")
       }
       p.h1 <- p.hmin
       p.h0 <- 1 - p.h1 # Calculate p(H+)
@@ -212,14 +225,14 @@ auditPrior <- function(method = "default", likelihood = c("poisson", "binomial",
     }
   } else if (method == "sample" || method == "factor") { # Method 7: Earlier sample & Method 8: Weighted earlier sample
     if (is.null(n)) {
-      stop("'n' is missing for prior construction")
+      stop("missing value for 'n'")
     }
     if (is.null(x)) {
-      stop("'x' is missing for prior construction")
+      stop("missing value for 'x'")
     }
     if (method == "factor") {
       if (is.null(factor)) {
-        stop("'factor' is missing for prior construction")
+        stop("missing value for 'factor'")
       }
     } else {
       factor <- 1
@@ -228,13 +241,13 @@ auditPrior <- function(method = "default", likelihood = c("poisson", "binomial",
     prior.x <- x * factor # Earlier errors
   } else if (method == "param") { # Method 9: User specified prior distribution
     if (is.null(alpha)) {
-      stop("'alpha' is missing for prior construction")
+      stop("missing value for 'alpha'")
     }
     if (alpha <= 0) {
       stop("'alpha' must be a single value > 0")
     }
     if (is.null(beta)) {
-      stop("'beta' is missing for prior construction")
+      stop("missing value for 'beta'")
     }
     if (beta < 0) {
       stop("'beta' must be a single value >= 0")
@@ -261,7 +274,6 @@ auditPrior <- function(method = "default", likelihood = c("poisson", "binomial",
   )
   description[["implicit.x"]] <- prior.x
   description[["implicit.n"]] <- prior.n
-  description[["proper"]] <- description[["alpha"]] != 0 && description[["beta"]] != 0
   # Create the prior string
   prior.string <- switch(likelihood,
     "poisson" = paste0("gamma(\u03B1 = ", round(description[["alpha"]], 3), ", \u03B2 = ", round(description[["beta"]], 3), ")"),
@@ -344,41 +356,6 @@ auditPrior <- function(method = "default", likelihood = c("poisson", "binomial",
       "hypergeometric" = extraDistr::dbbinom(ceiling(materiality * N.units), size = N.units, alpha = description[["alpha"]], beta = description[["beta"]])
     )
   }
-  # Create the prior predictive section
-  if (likelihood != "hypergeometric" && !is.null(N.units)) {
-    predictive <- list()
-    predictive[["predictive"]] <- switch(likelihood,
-      "poisson" = paste0("Negative-binomial(r = ", round(description[["alpha"]], 3), ", p = ", round(1 / (1 + description[["beta"]]), 3), ")"),
-      "binomial" = paste0("Beta-binomial(N = ", ceiling(N.units), ", \u03B1 = ", round(description[["alpha"]], 3), ", \u03B2 = ", round(description[["beta"]], 3), ")")
-    )
-    predictive[["conf.level"]] <- conf.level
-    predictive[["description"]] <- list()
-    predictive[["statistics"]] <- list()
-    predictive[["description"]]$N.units <- N.units
-    if (likelihood == "poisson") {
-      predictive[["description"]]$density <- "negative-binomial"
-      predictive[["description"]]$r <- description[["alpha"]]
-      predictive[["description"]]$p <- 1 / (1 + description[["beta"]])
-      predictive[["statistics"]]$mode <- if (predictive[["description"]]$r <= 1) 0 else (predictive[["description"]]$p * (predictive[["description"]]$r - 1)) / (1 - predictive[["description"]]$p)
-      predictive[["statistics"]]$mean <- (predictive[["description"]]$r * predictive[["description"]]$p) / (1 - predictive[["description"]]$p)
-      predictive[["statistics"]]$median <- stats::qnbinom(0.5, size = predictive[["description"]]$r, prob = predictive[["description"]]$p)
-      predictive[["statistics"]]$var <- (predictive[["description"]]$p * predictive[["description"]]$r) / (1 - predictive[["description"]]$p)^2
-      predictive[["statistics"]]$skewness <- (1 + predictive[["description"]]$p) / sqrt(predictive[["description"]]$p * predictive[["description"]]$r)
-      predictive[["statistics"]]$ub <- stats::qnbinom(conf.level, size = predictive[["description"]]$r, prob = predictive[["description"]]$p)
-    } else {
-      predictive[["description"]]$density <- "beta-binomial"
-      predictive[["description"]]$alpha <- description[["alpha"]]
-      predictive[["description"]]$beta <- description[["beta"]]
-      predictive[["statistics"]]$mode <- .modebbinom(N = N.units, shape1 = predictive[["description"]]$alpha, shape2 = predictive[["description"]]$beta)
-      predictive[["statistics"]]$mean <- predictive[["description"]]$alpha / (predictive[["description"]]$alpha + predictive[["description"]]$beta) * N.units
-      predictive[["statistics"]]$median <- .qbbinom(0.5, N = N.units, shape1 = predictive[["description"]]$alpha, shape2 = predictive[["description"]]$beta)
-      predictive[["statistics"]]$var <- ((N.units * predictive[["description"]]$alpha * predictive[["description"]]$beta) * (predictive[["description"]]$alpha + predictive[["description"]]$beta + N.units)) / ((predictive[["description"]]$alpha + predictive[["description"]]$beta)^2 * (predictive[["description"]]$alpha + predictive[["description"]]$beta + 1))
-      predictive[["statistics"]]$skewness <- (((predictive[["description"]]$alpha + predictive[["description"]]$beta + 2 * N.units) * (predictive[["description"]]$beta - predictive[["description"]]$alpha)) / (predictive[["description"]]$alpha + predictive[["description"]]$beta + 2)) * sqrt((1 + predictive[["description"]]$alpha + predictive[["description"]]$beta) / (N.units * predictive[["description"]]$alpha * predictive[["description"]]$beta * (N.units + predictive[["description"]]$alpha + predictive[["description"]]$beta)))
-      predictive[["statistics"]]$ub <- .qbbinom(conf.level, N = N.units, shape1 = predictive[["description"]]$alpha, shape2 = predictive[["description"]]$beta)
-    }
-    predictive[["statistics"]][["precision"]] <- predictive[["statistics"]]$ub - predictive[["statistics"]]$mode
-    class(predictive) <- "jfaPredictive"
-  }
   # Create the main result object
   result <- list()
   # Functional form of the prior distribution
@@ -390,9 +367,6 @@ auditPrior <- function(method = "default", likelihood = c("poisson", "binomial",
   }
   if (!is.null(materiality)) {
     result[["hypotheses"]] <- hypotheses
-  }
-  if (likelihood != "hypergeometric" && !is.null(N.units)) {
-    result[["predictive"]] <- predictive
   }
   result[["method"]] <- method
   result[["likelihood"]] <- likelihood
