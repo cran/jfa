@@ -1,3 +1,10 @@
+# jfa 0.6.3
+
+**Minor changes**
+
+- The value for `x` in `evaluation()` and `expected` in `planning()` is now automatically ceiled (while throwing a warning) for `method = "hypergeometric"`.
+- Improved overall documentation.
+
 # jfa 0.6.2
 
 **Major changes**
