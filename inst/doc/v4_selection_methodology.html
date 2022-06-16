@@ -15,7 +15,19 @@
 
 <title>Selection: Sampling methodology</title>
 
-<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -25,6 +37,7 @@
   div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
   ul.task-list{list-style: none;}
     </style>
+
 
 
 <style type="text/css">
@@ -126,7 +139,187 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
 
 
 
@@ -149,7 +342,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <ul>
 <li><a href="#sampling-units">Sampling units</a></li>
 <li><a href="#sampling-methods">Sampling methods</a></li>
-<li><a href="#ordering-or-randomizing-the-population">Ordering or randomizing the population</a></li>
+<li><a href="#ordering-or-randomizing-the-population">Ordering or
+randomizing the population</a></li>
 </ul></li>
 <li><a href="#references">References</a></li>
 </ul>
@@ -157,46 +351,125 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <div id="sampling-methodology" class="section level2">
 <h2>Sampling methodology</h2>
-<p>Auditors are often required to assess balances or processes that involve a large number of items. Since they cannot inspect all of these items individually, they need to select a subset (i.e., a sample) from the total population to make a statement about a certain characteristic of the population. For this purpose, various selection methodologies are available that have become standard in an audit context. However, in practice it seems that the distinction between sampling methods —and when to use them— is not always easy to make.</p>
-<p>This vignette outlines the most commonly used sampling methodology for auditing and shows how to select a sample using these methods with the <code>jfa</code> package.</p>
+<p>Auditors are often required to assess balances or processes that
+involve a large number of items. Since they cannot inspect all of these
+items individually, they need to select a subset (i.e., a sample) from
+the total population to make a statement about a certain characteristic
+of the population. For this purpose, various selection methodologies are
+available that have become standard in an audit context. However, in
+practice it seems that the distinction between sampling methods —and
+when to use them— is not always easy to make.</p>
+<p>This vignette outlines the most commonly used sampling methodology
+for auditing and shows how to select a sample using these methods with
+the <code>jfa</code> package.</p>
 <div id="sampling-units" class="section level3">
 <h3>Sampling units</h3>
-<p>Selecting a subset from the population requires knowledge of the sampling units; physical representations of the population that needs to be audited. Generally, the auditor has to choose between two types of sampling units: individual items in the population or individual monetary units in the population. In order to perform statistical selection, the population must be divided into individual sampling units that can be assigned a probability to be included in the sample. The total collection of all sampling units which have been assigned a selection probability is called the sampling frame.</p>
+<p>Selecting a subset from the population requires knowledge of the
+sampling units; physical representations of the population that needs to
+be audited. Generally, the auditor has to choose between two types of
+sampling units: individual items in the population or individual
+monetary units in the population. In order to perform statistical
+selection, the population must be divided into individual sampling units
+that can be assigned a probability to be included in the sample. The
+total collection of all sampling units which have been assigned a
+selection probability is called the sampling frame.</p>
 <div id="items" class="section level4">
 <h4>Items</h4>
-<p>A sampling unit for record (i.e., attributes) sampling is generally a characteristic of an item in the population. For example, suppose that you inspect a population of receipts. A possible sampling unit for record sampling can be the date of payment of the receipt. When a sampling unit (e.g., date of payment) is selected by the sampling method, the population item that corresponds to the sampled unit is included in the sample.</p>
+<p>A sampling unit for record (i.e., attributes) sampling is generally a
+characteristic of an item in the population. For example, suppose that
+you inspect a population of receipts. A possible sampling unit for
+record sampling can be the date of payment of the receipt. When a
+sampling unit (e.g., date of payment) is selected by the sampling
+method, the population item that corresponds to the sampled unit is
+included in the sample.</p>
 </div>
 <div id="monetary-units" class="section level4">
 <h4>Monetary units</h4>
-<p>A sampling unit for monetary unit sampling is different than a sampling unit for record sampling in that it is an individual monetary unit within an item or transaction, like an individual dollar. For example, a single sampling unit can be the 10<span class="math inline">\(^{th}\)</span> dollar from a specific receipt in the population. When a sampling unit (e.g., individual dollar) is selected by the sampling method, the population item that includes the sampling unit is included in the sample.</p>
+<p>A sampling unit for monetary unit sampling is different than a
+sampling unit for record sampling in that it is an individual monetary
+unit within an item or transaction, like an individual dollar. For
+example, a single sampling unit can be the 10<span class="math inline">\(^{th}\)</span> dollar from a specific receipt in
+the population. When a sampling unit (e.g., individual dollar) is
+selected by the sampling method, the population item that includes the
+sampling unit is included in the sample.</p>
 </div>
 </div>
 <div id="sampling-methods" class="section level3">
 <h3>Sampling methods</h3>
-<p>This section discusses the four sampling methods implemented in <code>jfa</code>. First, for notation, let the the population <span class="math inline">\(N\)</span> be defined as the total set of individual sampling units <span class="math inline">\(x_i\)</span>.</p>
-<p><span class="math display">\[N = \{x_1, x_2, \dots, x_N\}.\]</span></p>
-<p>In statistical sampling, every sampling unit <span class="math inline">\(x_i\)</span> in the population must receive a selection probability <span class="math inline">\(p(x_i)\)</span>. The purpose of the sampling method is to provide a framework to assign selection probabilities to each of the sampling units, and subsequently draw sampling units from the population until a set of size <span class="math inline">\(n\)</span> has been created.</p>
-<p>The next section discusses which sampling methods are available in <code>jfa</code>. To illustrate the outcomes for different sampling methods, we will use the <code>BuildIt</code> data set that can be loaded using the code below.</p>
+<p>This section discusses the four sampling methods implemented in
+<code>jfa</code>. First, for notation, let the the population <span class="math inline">\(N\)</span> be defined as the total set of
+individual sampling units <span class="math inline">\(x_i\)</span>.</p>
+<p><span class="math display">\[N = \{x_1, x_2, \dots,
+x_N\}.\]</span></p>
+<p>In statistical sampling, every sampling unit <span class="math inline">\(x_i\)</span> in the population must receive a
+selection probability <span class="math inline">\(p(x_i)\)</span>. The
+purpose of the sampling method is to provide a framework to assign
+selection probabilities to each of the sampling units, and subsequently
+draw sampling units from the population until a set of size <span class="math inline">\(n\)</span> has been created.</p>
+<p>The next section discusses which sampling methods are available in
+<code>jfa</code>. To illustrate the outcomes for different sampling
+methods, we will use the <code>BuildIt</code> data set that can be
+loaded using the code below.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(BuildIt)</span></code></pre></div>
 <div id="fixed-interval-sampling-systematic-sampling" class="section level4">
 <h4>Fixed interval sampling (Systematic sampling)</h4>
-<p>Fixed interval sampling is a method designed for yielding representative samples from monetary populations. The algorithm determines a uniform interval on the (optionally ranked) sampling units. Next, a starting point is handpicked or randomly selected in the first interval and a sampling unit is selected throughout the population at each of the uniform intervals from the starting point. For example, if the interval has a width of 10 sampling units and sampling unit number 5 is chosen as the starting point, the sampling units 5, 15, 25, etc. are selected to be included in the sample.</p>
-<p>The number of required intervals <span class="math inline">\(I\)</span> can be determined by dividing the number of sampling units in the population by the required sample size:</p>
+<p>Fixed interval sampling is a method designed for yielding
+representative samples from monetary populations. The algorithm
+determines a uniform interval on the (optionally ranked) sampling units.
+Next, a starting point is handpicked or randomly selected in the first
+interval and a sampling unit is selected throughout the population at
+each of the uniform intervals from the starting point. For example, if
+the interval has a width of 10 sampling units and sampling unit number 5
+is chosen as the starting point, the sampling units 5, 15, 25, etc. are
+selected to be included in the sample.</p>
+<p>The number of required intervals <span class="math inline">\(I\)</span> can be determined by dividing the
+number of sampling units in the population by the required sample
+size:</p>
 <p><span class="math display">\[I = \frac{N}{n},\]</span></p>
-<p>in which <span class="math inline">\(n\)</span> is the required sample size and <span class="math inline">\(N\)</span> is the total number of sampling units in the population.</p>
-<p>If the space between the selected sampling units is equal, the selection probability for each sampling unit is theoretically defined as:</p>
+<p>in which <span class="math inline">\(n\)</span> is the required
+sample size and <span class="math inline">\(N\)</span> is the total
+number of sampling units in the population.</p>
+<p>If the space between the selected sampling units is equal, the
+selection probability for each sampling unit is theoretically defined
+as:</p>
 <p><span class="math display">\[p(x) = \frac{1}{I},\]</span></p>
-<p>with the property that the space between selected units <span class="math inline">\(i\)</span> is the same as the interval <span class="math inline">\(I\)</span>, see Figure 1. However, in practice the selection is deterministic and completely depends on the chosen starting points (using <code>start</code>).</p>
+<p>with the property that the space between selected units <span class="math inline">\(i\)</span> is the same as the interval <span class="math inline">\(I\)</span>, see Figure 1. However, in practice the
+selection is deterministic and completely depends on the chosen starting
+points (using <code>start</code>).</p>
 <center>
 <div class="figure">
 <img src="data:image/png;base64,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" alt />
 <p class="caption">Figure 1: Illustration of fixed interval sampling</p>
 </div>
 </center>
-<p>The fixed interval method yields a sample that allows every sampling unit in the population an equal chance of being selected. However, the fixed interval method has the property that all items in the population with a monetary value larger than the interval <span class="math inline">\(I\)</span> have an selection probability of one because one of these items’ sampling units are always selected from the interval. Note that, if the population is arranged randomly with respect to its deviation pattern, fixed interval sampling is equivalent to random selection.</p>
-<p><strong>Advantage(s):</strong> The advantage of the fixed interval sampling method is that it is often simple to understand and fast to perform. Another advantage is that, in monetary unit sampling, all items that are greater than the calculated interval will be included in the sample. In record sampling, since units can be ranked on the basis of value, there is also a guarantee that some large items will be in the sample.</p>
-<p><strong>Disadvantage(s):</strong> A pattern in the population can coincide with the selected interval, rendering the sample less representative. What is sometimes seen as an added complication for this method is that the sample is hard to extend after drawing the initial sample. This is due to the chance of selecting the same sampling unit. However, by removing the already selected sampling units from the population and redrawing the intervals this problem can be efficiently solved.</p>
-<p>As an example, the code below shows how to apply the fixed interval sampling method in a record sampling and a monetary unit sampling setting. Note that, by default, the first sampling unit from each interval is selected. However, this can be changed by setting the argument <code>start = 1</code> to a different value.</p>
+<p>The fixed interval method yields a sample that allows every sampling
+unit in the population an equal chance of being selected. However, the
+fixed interval method has the property that all items in the population
+with a monetary value larger than the interval <span class="math inline">\(I\)</span> have an selection probability of one
+because one of these items’ sampling units are always selected from the
+interval. Note that, if the population is arranged randomly with respect
+to its deviation pattern, fixed interval sampling is equivalent to
+random selection.</p>
+<p><strong>Advantage(s):</strong> The advantage of the fixed interval
+sampling method is that it is often simple to understand and fast to
+perform. Another advantage is that, in monetary unit sampling, all items
+that are greater than the calculated interval will be included in the
+sample. In record sampling, since units can be ranked on the basis of
+value, there is also a guarantee that some large items will be in the
+sample.</p>
+<p><strong>Disadvantage(s):</strong> A pattern in the population can
+coincide with the selected interval, rendering the sample less
+representative. What is sometimes seen as an added complication for this
+method is that the sample is hard to extend after drawing the initial
+sample. This is due to the chance of selecting the same sampling unit.
+However, by removing the already selected sampling units from the
+population and redrawing the intervals this problem can be efficiently
+solved.</p>
+<p>As an example, the code below shows how to apply the fixed interval
+sampling method in a record sampling and a monetary unit sampling
+setting. Note that, by default, the first sampling unit from each
+interval is selected. However, this can be changed by setting the
+argument <code>start = 1</code> to a different value.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Record sampling</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&#39;items&#39;</span>, <span class="at">method =</span> <span class="st">&#39;interval&#39;</span>, <span class="at">start =</span> <span class="dv">1</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample<span class="sc">$</span>sample, <span class="at">n =</span> <span class="dv">6</span>)</span></code></pre></div>
@@ -220,8 +493,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="cell-sampling" class="section level4">
 <h4>Cell sampling</h4>
-<p>The cell sampling method divides the (optionally ranked) population into a set of intervals <span class="math inline">\(I\)</span> that are computed through the previously given equations. Within each interval, a sampling unit is selected by randomly drawing a number between 1 and the interval range <span class="math inline">\(I\)</span>. This causes the space <span class="math inline">\(i\)</span> between the sampling units to vary.</p>
-<p>Like in the fixed interval sampling method, the selection probability for each sampling unit is defined as:</p>
+<p>The cell sampling method divides the (optionally ranked) population
+into a set of intervals <span class="math inline">\(I\)</span> that are
+computed through the previously given equations. Within each interval, a
+sampling unit is selected by randomly drawing a number between 1 and the
+interval range <span class="math inline">\(I\)</span>. This causes the
+space <span class="math inline">\(i\)</span> between the sampling units
+to vary.</p>
+<p>Like in the fixed interval sampling method, the selection probability
+for each sampling unit is defined as:</p>
 <p><span class="math display">\[p(x) = \frac{1}{I}.\]</span></p>
 <center>
 <div class="figure">
@@ -229,10 +509,21 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p class="caption">Figure 2: Illustration of cell sampling</p>
 </div>
 </center>
-<p>The cell sampling method has the property that all items in the population with a monetary value larger than twice the interval <span class="math inline">\(I\)</span> have a selection probability of one.</p>
-<p><strong>Advantage(s):</strong> More sets of samples are possible than in fixed interval sampling, as there is no systematic interval <span class="math inline">\(i\)</span> to determine the selections. It is argued that the cell sampling algorithm offers a solution to the pattern problem in fixed interval sampling.</p>
-<p><strong>Disadvantage(s):</strong> A disadvantage of this sampling method is that not all items in the population with a monetary value larger than the interval have a selection probability of one. Besides, population items can be in two adjacent cells, thereby creating the possibility that an items is included in the sample twice.</p>
-<p>As an example, the code below shows how to apply the cell sampling method in a record sampling and a monetary unit sampling setting. It is important to set a seed to make the results reproducible.</p>
+<p>The cell sampling method has the property that all items in the
+population with a monetary value larger than twice the interval <span class="math inline">\(I\)</span> have a selection probability of
+one.</p>
+<p><strong>Advantage(s):</strong> More sets of samples are possible than
+in fixed interval sampling, as there is no systematic interval <span class="math inline">\(i\)</span> to determine the selections. It is
+argued that the cell sampling algorithm offers a solution to the pattern
+problem in fixed interval sampling.</p>
+<p><strong>Disadvantage(s):</strong> A disadvantage of this sampling
+method is that not all items in the population with a monetary value
+larger than the interval have a selection probability of one. Besides,
+population items can be in two adjacent cells, thereby creating the
+possibility that an items is included in the sample twice.</p>
+<p>As an example, the code below shows how to apply the cell sampling
+method in a record sampling and a monetary unit sampling setting. It is
+important to set a seed to make the results reproducible.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Record sampling</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&#39;items&#39;</span>, <span class="at">method =</span> <span class="st">&#39;cell&#39;</span>)</span>
@@ -258,18 +549,36 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="random-sampling" class="section level4">
 <h4>Random sampling</h4>
-<p>Random sampling is the most simple and straight-forward selection method The random sampling method provides a method that allows every sampling unit in the population an equal chance of being selected, meaning that every combination of sampling units has the same probability of being selected as every other combination of the same number of sampling units. Simply put, the algorithm draws a random selection of size <span class="math inline">\(n\)</span> of the sampling units. Therefore, the selection probability for each sampling unit is defined as:</p>
+<p>Random sampling is the most simple and straight-forward selection
+method The random sampling method provides a method that allows every
+sampling unit in the population an equal chance of being selected,
+meaning that every combination of sampling units has the same
+probability of being selected as every other combination of the same
+number of sampling units. Simply put, the algorithm draws a random
+selection of size <span class="math inline">\(n\)</span> of the sampling
+units. Therefore, the selection probability for each sampling unit is
+defined as:</p>
 <p><span class="math display">\[p(x) = \frac{1}{N},\]</span></p>
-<p>where <span class="math inline">\(N\)</span> is the number of units in the population. To clarify this procedure, Figure 3 provides an illustration of the random sampling method.</p>
+<p>where <span class="math inline">\(N\)</span> is the number of units
+in the population. To clarify this procedure, Figure 3 provides an
+illustration of the random sampling method.</p>
 <center>
 <div class="figure">
 <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAdsAAAA+CAMAAABUWkGDAAAAUVBMVEX///+Hh4c/Pz/Nzc0GBgbb29taWloAAAC7u7vv7+/4+PhYWFhnZ2cODg7T09N6enqkpKSWlpZQUFDs7OwqKioaGhpra2vg4OBfX1/ExMSBgYGRs/oRAAADS0lEQVR4Ae2b7W6yUBCEFbD4+Sp+2/u/0FdqTYxu3J09ZNKY4UeFddh5dk5IaaCjkTYloASUgBJQAkpACSgBJaAElIASUAJKQAl8dALzNTTe5gLJb2LQI+HQn5JCS3q9P40z73uG/ttJ42seFOfxw0F0F/SItn3SpdCeegxzyJnXZwU5UgGCHj60qUihmZ1Ki5x5fUqQ4+vvXrcpND+ghALMNOEQOwXkSAUIesTAX1QptJcuQxQ48/qkIEcqQNDDhzYVKTSzU2mRM69PCXKkAgQ9fGhTkUIzO5UWOfP6lCBHKkDQw4c2FSk0s1NpkTOvTwlypAIEPXxoU5FCMzuVFjnz+pQgRypA0MOHNhUpNLNTaZEzr08JcqQCBD18aFORQjM7lRY58/qUIEcqQNDDhzYVKTSzU2mRM69PCXKkAgQ9fGhTkUIzO5UWOfP6lCBHKkDQw4c2FSk0s1NpkTOvTwlypAIEPXxoU5FCMzuVFjnz+pQgRypA0MOHNhUpNLNTaZEzr08JcqQCBD18aFORQjM7lRY5876lrNaz3+e3p+PirbL/sttOrz9/AtxU/W5owzxCLV9FObTXPgNUKPMGOKfVYdw/m58fV+fa1e++D9WkX9vLft/NXfmvAPOIdn3S5dCemgxzSJk3hFrvz5NmXlW7kHr+vaq/xtO2C6nvIszjfhb4mUMDTWJyyrwRlNl+2Xxtw1fh5lAtVugbU6BHBNvQpNCMPuUlzrwBztOqPVx/60a3Y9PgL16AHlGWJ10K7anHMIeceQOs63YTUN0lu9Xhvgt8Yh5A40dpDu2xw2D7lHkDtHULXLaj0RZ75fUGAHoEqC1JCs1qVFzjzBvAxBZr499QG56Yh9EgUsqhRTrDGsq8MJVOUAJKQAkoASWgBJSAElACSkAJKAEloASUwIAJdF3s8dyAlmpFSODSTUdN+4/gJAt2Atcnr6NWa8uOneK3bBdaW0rSfBOtLT9zlqPWlpU030dry8+c5Xhb226q7fMS2P7cSzWttk9MoL9P1vaZCfRre5lp+7wEzvr7lnVrQ/fRfTI9cpqh1pYWNd1Ia0uPnGaotaVFTTdatnoORA+dZNhft3Ud/v9KEpVshkjgVJ+GaKMefzOB/zXbSvPrJ1xpAAAAAElFTkSuQmCC" alt />
 <p class="caption">Figure 3: Illustration of random sampling</p>
 </div>
 </center>
-<p><strong>Advantage(s):</strong> The random sampling method yields an optimal random selection, with the additional advantage that the sample can be easily extended by applying the same method again.</p>
-<p><strong>Disadvantages:</strong> Because the selection probabilities are equal for all sampling units there is no guarantee that items with a large monetary value in the population will be included in the sample.</p>
-<p>As an example, the code below shows how to apply the random sampling (with our without replacement using <code>replace</code>) method in a record sampling and a monetary unit sampling setting. It is important to set a seed to make results reproducible.</p>
+<p><strong>Advantage(s):</strong> The random sampling method yields an
+optimal random selection, with the additional advantage that the sample
+can be easily extended by applying the same method again.</p>
+<p><strong>Disadvantages:</strong> Because the selection probabilities
+are equal for all sampling units there is no guarantee that items with a
+large monetary value in the population will be included in the
+sample.</p>
+<p>As an example, the code below shows how to apply the random sampling
+(with our without replacement using <code>replace</code>) method in a
+record sampling and a monetary unit sampling setting. It is important to
+set a seed to make results reproducible.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Record sampling</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&#39;items&#39;</span>, <span class="at">method =</span> <span class="st">&#39;random&#39;</span>)</span>
@@ -295,10 +604,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="modified-sieve-sampling" class="section level4">
 <h4>Modified Sieve Sampling</h4>
-<p>The fourth option for the sampling method is modified sieve sampling (Hoogduin, Hall, &amp; Tsay, 2010). The algorithm starts by selecting a standard uniform random number <span class="math inline">\(R_i\)</span> between 0 and 1 for each item in the population. Next, the sieve ratio:</p>
+<p>The fourth option for the sampling method is modified sieve sampling
+(Hoogduin, Hall, &amp; Tsay, 2010). The algorithm starts by selecting a
+standard uniform random number <span class="math inline">\(R_i\)</span>
+between 0 and 1 for each item in the population. Next, the sieve
+ratio:</p>
 <p><span class="math display">\[S_i = \frac{Y_i}{R_i}\]</span></p>
-<p>is computed for each item by dividing the book value of that item by the random number. Lastly, the items in the population are sorted by their sieve ratio <span class="math inline">\(S\)</span> (in decreasing order) and the top <span class="math inline">\(n\)</span> items are selected for inspection. In contrast to the classical sieve sampling method (Rietveld, 1978), the modified sieve sampling method provides precise control over sample sizes.</p>
-<p>As an example, the code below shows how to apply the modified sieve sampling method in a monetary unit sampling setting. It is important to set a seed to make results reproducible.</p>
+<p>is computed for each item by dividing the book value of that item by
+the random number. Lastly, the items in the population are sorted by
+their sieve ratio <span class="math inline">\(S\)</span> (in decreasing
+order) and the top <span class="math inline">\(n\)</span> items are
+selected for inspection. In contrast to the classical sieve sampling
+method (Rietveld, 1978), the modified sieve sampling method provides
+precise control over sample sizes.</p>
+<p>As an example, the code below shows how to apply the modified sieve
+sampling method in a monetary unit sampling setting. It is important to
+set a seed to make results reproducible.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Monetary unit sampling</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&#39;values&#39;</span>, <span class="at">method =</span> <span class="st">&#39;sieve&#39;</span>, <span class="at">values =</span> <span class="st">&#39;bookValue&#39;</span>)</span>
@@ -314,7 +635,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="ordering-or-randomizing-the-population" class="section level3">
 <h3>Ordering or randomizing the population</h3>
-<p>The <code>selection()</code> function has additional arguments (<code>order</code>, <code>decreasing</code>, and <code>randomize</code>) to preprocess your population before selection. The <code>order</code> argument takes as input a column name in <code>data</code> which determines the order of the population. For example, you can order the population from lowest book value to highest book value before engaging in selection. In this case, you should use the <code>decreasing = FALSE</code> argument.</p>
+<p>The <code>selection()</code> function has additional arguments
+(<code>order</code>, <code>decreasing</code>, and
+<code>randomize</code>) to preprocess your population before selection.
+The <code>order</code> argument takes as input a column name in
+<code>data</code> which determines the order of the population. For
+example, you can order the population from lowest book value to highest
+book value before engaging in selection. In this case, you should use
+the <code>decreasing = FALSE</code> argument.</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ordering population from lowest &#39;bookValue&#39; to highest &#39;bookValue&#39; before MUS</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&#39;values&#39;</span>, <span class="at">values =</span> <span class="st">&#39;bookValue&#39;</span>, <span class="at">order =</span> <span class="st">&#39;bookValue&#39;</span>, <span class="at">decreasing =</span> <span class="cn">FALSE</span>)</span>
@@ -326,7 +654,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## 4  101     1 64282    172.65     172.65
 ## 5  838     1 43352    188.72     188.72
 ## 6  302     1 94296    198.59     198.59</code></pre>
-<p>The <code>randomize</code> argument can be used to randomly shuffle the items in the population before selection.</p>
+<p>The <code>randomize</code> argument can be used to randomly shuffle
+the items in the population before selection.</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Randomly shuffle population items before MUS</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&#39;values&#39;</span>, <span class="at">values =</span> <span class="st">&#39;bookValue&#39;</span>, <span class="at">randomize =</span> <span class="cn">TRUE</span>)</span>
@@ -343,8 +672,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="references" class="section level2">
 <h2>References</h2>
 <ul>
-<li><p>Hoogduin, L. A., Hall, T. W., &amp; Tsay, J. J. (2010). Modified sieve sampling: A method for single-and multi-stage probability-proportional-to-size sampling. <em>Auditing: A Journal of Practice &amp; Theory</em>, 29(1), 125-148.</p></li>
-<li><p>Leslie, D. A., Teitlebaum, A. D., &amp; Anderson, R. J. (1979). <em>Dollar-unit Sampling: A Practical Guide for Auditors</em>. London: Pitman.</p></li>
+<li><p>Hoogduin, L. A., Hall, T. W., &amp; Tsay, J. J. (2010). Modified
+sieve sampling: A method for single-and multi-stage
+probability-proportional-to-size sampling. <em>Auditing: A Journal of
+Practice &amp; Theory</em>, 29(1), 125-148.</p></li>
+<li><p>Leslie, D. A., Teitlebaum, A. D., &amp; Anderson, R. J. (1979).
+<em>Dollar-unit Sampling: A Practical Guide for Auditors</em>. London:
+Pitman.</p></li>
 </ul>
 </div>
 

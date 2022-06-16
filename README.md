@@ -1,3 +1,4 @@
+[![R](https://img.shields.io/badge/R-276DC3?style=for-the-badge&logo=r&logoColor=white)](https://github.com/koenderks/jfa/tree/development/R)
 [![CRAN](https://img.shields.io/cran/v/jfa?color=yellow&label=CRAN&logo=r)](https://cran.r-project.org/package=jfa)
 [![R_build_status](https://github.com/koenderks/jfa/workflows/Build/badge.svg)](https://github.com/koenderks/jfa/actions)
 [![Codecov](https://codecov.io/gh/koenderks/jfa/branch/development/graph/badge.svg?token=ZoxIB8p8PW)](https://app.codecov.io/gh/koenderks/jfa)
@@ -79,7 +80,7 @@ auditPrior(method = 'default', likelihood = c('poisson', 'binomial', 'hypergeome
 
 - `default`: Indifferent / noninformative prior distribution.
 - `strict`: Improper prior distribution (matches classical results).
-- `impartial`: Impartial prior distribution (Derks et al., 2021).
+- `impartial`: Impartial prior distribution (Derks et al., 2022).
 - `param`: Manually set the prior parameters.
 - `hyp`: Manually provide the prior probability for tolerable misstatement (Derks et al., 2021).
 - `arm`: Manually provide the inherent risk and internal control risk (Derks et al., 2021).
@@ -264,9 +265,11 @@ To validate the statistical results, `jfa`'s automated [unit tests](https://gith
 
 - [Audit Sampling: Audit Guide](https://www.aicpa.org/cpe-learning/publication/audit-sampling-audit-guide-OPL) (Appendix A and Appendix C)
 - [AuditSampler](https://cplusglobal.wordpress.com/solutions/auditsampler-statistical-sampling-software/)
+- [EZ-quant](https://www.dcaa.mil/Checklists-Tools/EZ-Quant-Applications/)
 - [MUS](https://cran.r-project.org/package=MUS) (R package version 0.1.6)
-- Touw, P., and Hoogduin, L. (2011). *Statistiek voor audit en controlling*. Boom uitgevers, Amsterdam.
+- [samplingbook](https://cran.r-project.org/package=samplingbook) (R package version 1.2.4)
 - [SMASH21 + SMASH21-Bayes](https://steekproeven.eu/)
+- Touw, P., and Hoogduin, L. (2011). *Statistiek voor audit en controlling*. Boom uitgevers, Amsterdam.
 
 ## 5. Statistical tables
 
@@ -304,6 +307,7 @@ Below you can find several informative tables that contain statistical sample si
 - Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J., & Wetzels, R. (2021). Priors in a Bayesian audit: How integration of existing information into the prior distribution can improve audit transparency and efficiency. *International Journal of Auditing*, 25(3), 621-636. - [View online](https://doi.org/10.1111/ijau.12240)
 - Derks, K., de Swart, J., Wagenmakers, E.-J., & Wetzels, R. (2021). The Bayesian Approach to Audit Evidence: Quantifying Statistical Evidence using the Bayes Factor. *PsyArXiv* - [View online](https://doi.org/10.31234/osf.io/kzqp5)
 - Derks, K., de Swart. J., Wagenmakers, E.-J., Wille, J., & Wetzels, R. (2021). JASP for Audit: Bayesian Tools for the Auditing Practice. *Journal of Open Source Software*, 6(68), 2733. - [View online](https://doi.org/10.21105/joss.02733)
+- Derks, K., de Swart, J., Wagenmakers, E.-J., & Wetzels, R. (2022). An Impartial Bayesian Hypothesis Test for Audit Sampling. *PsyArXiv* - [View online](https://doi.org/10.31234/osf.io/8nf3e)
 - Dworin, L. D. and Grimlund, R. A. (1984). Dollar-unit sampling for accounts receivable and inventory. *The Accounting Review*, 59(2), 218–241. - [View online](https://www.jstor.org/stable/247296)
 - Dyer, D., & Pierce, R. L. (1993). On the choice of the prior distribution in hypergeometric sampling. *Communications in Statistics - Theory and Methods*, 22(8), 2125-2146. - [View online](https://www.tandfonline.com/doi/abs/10.1080/03610929308831139)
 - Hoogduin, L. A., Hall, T. W., & Tsay, J. J. (2010). Modified sieve sampling: A method for single-and multi-stage probability-proportional-to-size sampling. *Auditing: A Journal of Practice & Theory*, 29(1), 125-148. - [View online](https://doi.org/10.2308/aud.2010.29.1.125)

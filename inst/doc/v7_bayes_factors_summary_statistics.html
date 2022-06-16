@@ -15,7 +15,19 @@
 
 <title>Evaluation: Bayes factors using summary statistics</title>
 
-<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -25,6 +37,7 @@
   div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
   ul.task-list{list-style: none;}
     </style>
+
 
 
 <style type="text/css">
@@ -126,7 +139,187 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
 
 
 
@@ -138,7 +331,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<h1 class="title toc-ignore">Evaluation: Bayes factors using summary statistics</h1>
+<h1 class="title toc-ignore">Evaluation: Bayes factors using summary
+statistics</h1>
 <h4 class="author">Koen Derks</h4>
 <h4 class="date">last modified: 19-08-2021</h4>
 
@@ -154,8 +348,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><a href="#bayes-factors">Bayes factors</a>
 <ul>
 <li><a href="#prior-distribution">Prior distribution</a></li>
-<li><a href="#bayes-factor-after-stage-1">Bayes factor after stage 1</a></li>
-<li><a href="#bayes-factor-after-stage-2">Bayes factor after stage 2</a></li>
+<li><a href="#bayes-factor-after-stage-1">Bayes factor after stage
+1</a></li>
+<li><a href="#bayes-factor-after-stage-2">Bayes factor after stage
+2</a></li>
 </ul></li>
 <li><a href="#references">References</a></li>
 </ul>
@@ -163,35 +359,85 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>This vignette illustrates how an auditor can use <code>jfa</code> to evaluate their sample outcomes with the Bayes factor using summary statistics alone. An example application in the context of quality control is described below.</p>
+<p>This vignette illustrates how an auditor can use <code>jfa</code> to
+evaluate their sample outcomes with the Bayes factor using summary
+statistics alone. An example application in the context of quality
+control is described below.</p>
 </div>
 <div id="application" class="section level2">
 <h2>Application</h2>
-<p>Two-stage sampling plans are required if an initial sample does not provide enough assurance to accept (or reject) a population definitively. In the field of quality control, ISO 28596 ‘Sampling procedures for inspection by attributes — Two-stage sampling plans for auditing and for inspection under prior information’ provides two-stage sampling plans by attributes for inspection for a proportion of nonconforming items in a target population of discrete units. For example, this standard applies for inspections of a proportion of nonconforming items in a lot of product items, or inspections of the proportion of nonconforming test characteristics of a product subject to an acceptance test.</p>
+<p>Two-stage sampling plans are required if an initial sample does not
+provide enough assurance to accept (or reject) a population
+definitively. In the field of quality control, ISO 28596 ‘Sampling
+procedures for inspection by attributes — Two-stage sampling plans for
+auditing and for inspection under prior information’ provides two-stage
+sampling plans by attributes for inspection for a proportion of
+nonconforming items in a target population of discrete units. For
+example, this standard applies for inspections of a proportion of
+nonconforming items in a lot of product items, or inspections of the
+proportion of nonconforming test characteristics of a product subject to
+an acceptance test.</p>
 <div id="standard-procedure" class="section level3">
 <h3>Standard procedure</h3>
-<p>The idea behind the standard two-stage sampling plan is simple. In the first stage, after drawing <span class="math inline">\(n_1\)</span> items and observing <span class="math inline">\(k_1\)</span> nonconforming items, a confidence interval for the proportion of nonconforming items is calculated. The decision in the first stage proceeds according to one of the three following scenarios:</p>
+<p>The idea behind the standard two-stage sampling plan is simple. In
+the first stage, after drawing <span class="math inline">\(n_1\)</span>
+items and observing <span class="math inline">\(k_1\)</span>
+nonconforming items, a confidence interval for the proportion of
+nonconforming items is calculated. The decision in the first stage
+proceeds according to one of the three following scenarios:</p>
 <ol style="list-style-type: decimal">
-<li>If the confidence interval completely lies below the tolerance value, the lot is accepted.</li>
-<li>If the confidence interval completely lies above the tolerance value, the lot is rejected.</li>
-<li>If the confidence interval contains the tolerance value, no decision can be made in the first stage. In this case, the auditor proceeds to the second stage.</li>
+<li>If the confidence interval completely lies below the tolerance
+value, the lot is accepted.</li>
+<li>If the confidence interval completely lies above the tolerance
+value, the lot is rejected.</li>
+<li>If the confidence interval contains the tolerance value, no decision
+can be made in the first stage. In this case, the auditor proceeds to
+the second stage.</li>
 </ol>
-<p>In the second stage, a number <span class="math inline">\(k_2\)</span> of nonconforming items is observed in a sample of size <span class="math inline">\(n_2\)</span>. A new confidence interval for the proportion of nonconforming items is calculated based on the total number <span class="math inline">\(k_1 + k_2\)</span> of nonconforming items. The decision in the second stage proceeds according to one of the two following scenarios:</p>
+<p>In the second stage, a number <span class="math inline">\(k_2\)</span> of nonconforming items is observed in
+a sample of size <span class="math inline">\(n_2\)</span>. A new
+confidence interval for the proportion of nonconforming items is
+calculated based on the total number <span class="math inline">\(k_1 +
+k_2\)</span> of nonconforming items. The decision in the second stage
+proceeds according to one of the two following scenarios:</p>
 <ol style="list-style-type: decimal">
-<li>If the confidence interval completely lies above or below the tolerance value, the decision for approval and rejection is analogous to that in the first stage.</li>
-<li>If the interval contains the tolerance value, the decision is based on whether a bigger portion of the confidence interval lies below or above the tolerance value. If a larger portion of the interval lies above the tolerance value, the lot is rejected. If a larger portion of the interval lies below the tolerance value, the lot is accepted.</li>
+<li>If the confidence interval completely lies above or below the
+tolerance value, the decision for approval and rejection is analogous to
+that in the first stage.</li>
+<li>If the interval contains the tolerance value, the decision is based
+on whether a bigger portion of the confidence interval lies below or
+above the tolerance value. If a larger portion of the interval lies
+above the tolerance value, the lot is rejected. If a larger portion of
+the interval lies below the tolerance value, the lot is accepted.</li>
 </ol>
 </div>
 <div id="numerical-example" class="section level3">
 <h3>Numerical example</h3>
-<p>The auditor is inspecting a lot of products and wants to make a statement with 90% confidence against a tolerance value of 5%. They formulate the hypothesis of intolerable deviations as <span class="math inline">\(H_0:\theta \geq 0.05\)</span> and the hypothesis of tolerable deviations as <span class="math inline">\(H_1: \theta &lt; 0.05\)</span>.</p>
+<p>The auditor is inspecting a lot of products and wants to make a
+statement with 90% confidence against a tolerance value of 5%. They
+formulate the hypothesis of intolerable deviations as <span class="math inline">\(H_0:\theta \geq 0.05\)</span> and the hypothesis
+of tolerable deviations as <span class="math inline">\(H_1: \theta &lt;
+0.05\)</span>.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>confidence <span class="ot">&lt;-</span> <span class="fl">0.90</span> <span class="co"># 90% confidence</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>tolerance  <span class="ot">&lt;-</span> <span class="fl">0.05</span> <span class="co"># 5% tolerance</span></span></code></pre></div>
-<p>In the first stage, the auditor inspects <span class="math inline">\(n_1 = 32\)</span> items and observes <span class="math inline">\(k_1 = 2\)</span> nonconforming items. The shortest two-sided confidence interval (Göb &amp; Lurz, 2012) for the proportion of nonconforming items is [0.0167; 0.1866]. This confidence interval contains the tolerance value and therefore no decision can be made in the first stage. The auditor therefore continues to the second stage.</p>
+<p>In the first stage, the auditor inspects <span class="math inline">\(n_1 = 32\)</span> items and observes <span class="math inline">\(k_1 = 2\)</span> nonconforming items. The shortest
+two-sided confidence interval (Göb &amp; Lurz, 2012) for the proportion
+of nonconforming items is [0.0167; 0.1866]. This confidence interval
+contains the tolerance value and therefore no decision can be made in
+the first stage. The auditor therefore continues to the second
+stage.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ISO28596<span class="sc">:::</span><span class="fu">CI.binom.shortest</span>(<span class="at">size =</span> <span class="dv">32</span>, <span class="at">x =</span> <span class="dv">2</span>, <span class="at">level =</span> confidence)<span class="sc">$</span>bounds</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#      x estimate      lower     upper</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># [1,] 2   0.0625 0.01674365 0.1866428</span></span></code></pre></div>
-<p>In the second stage, the auditor inspects an additional <span class="math inline">\(n_2 = 50\)</span> items and observes <span class="math inline">\(k_2 = 0\)</span> nonconforming items. After observing these data, the shortest two-sided confidence interval for the proportion of nonconforming items (using <span class="math inline">\(n = n_1 + n_2\)</span> and <span class="math inline">\(k = k_1 + k_2\)</span>) is [0.0065; 0.0734]. At this point, the confidence interval still contains the tolerance value but the auditor determines that the portion of the confidence interval that lies below the tolerance value is larger than the portion above the tolerance value. Therefore, they accept the lot.</p>
+<p>In the second stage, the auditor inspects an additional <span class="math inline">\(n_2 = 50\)</span> items and observes <span class="math inline">\(k_2 = 0\)</span> nonconforming items. After
+observing these data, the shortest two-sided confidence interval for the
+proportion of nonconforming items (using <span class="math inline">\(n =
+n_1 + n_2\)</span> and <span class="math inline">\(k = k_1 +
+k_2\)</span>) is [0.0065; 0.0734]. At this point, the confidence
+interval still contains the tolerance value but the auditor determines
+that the portion of the confidence interval that lies below the
+tolerance value is larger than the portion above the tolerance value.
+Therefore, they accept the lot.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ISO28596<span class="sc">:::</span><span class="fu">CI.binom.shortest</span>(<span class="at">size =</span> <span class="dv">32</span> <span class="sc">+</span> <span class="dv">50</span>, <span class="at">x =</span> <span class="dv">2</span> <span class="sc">+</span> <span class="dv">0</span>, <span class="at">level =</span> confidence)<span class="sc">$</span>bounds</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#      x   estimate       lower      upper</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># [1,] 2 0.02439024 0.006504196 0.07341118</span></span></code></pre></div>
@@ -199,16 +445,38 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="bayes-factors" class="section level2">
 <h2>Bayes factors</h2>
-<p>The <code>jfa</code> package can be used to calculate Bayes factors for the hypothesis of tolerable deviations <span class="math inline">\(H_1\)</span> in the lot versus the hypothesis of intolerable deviations <span class="math inline">\(H_0\)</span> in the lot. The Bayes factor can provide insight into the weight of evidence in favor of acceptance of the lot versus the evidence in favor of rejection of the lot. Especially in the situation where the confidence interval contains the tolerance value the Bayes factor can provide an easy interpretation of the evidence in favor of acceptance versus rejection.</p>
-<p><span class="math display">\[BF_{10} = \underbrace{\frac{p(\text{data} | H_1)}{p(\text{data} | H_0)}}_{\text{Relative evidence}} \]</span></p>
+<p>The <code>jfa</code> package can be used to calculate Bayes factors
+for the hypothesis of tolerable deviations <span class="math inline">\(H_1\)</span> in the lot versus the hypothesis of
+intolerable deviations <span class="math inline">\(H_0\)</span> in the
+lot. The Bayes factor can provide insight into the weight of evidence in
+favor of acceptance of the lot versus the evidence in favor of rejection
+of the lot. Especially in the situation where the confidence interval
+contains the tolerance value the Bayes factor can provide an easy
+interpretation of the evidence in favor of acceptance versus
+rejection.</p>
+<p><span class="math display">\[BF_{10} =
+\underbrace{\frac{p(\text{data} | H_1)}{p(\text{data} |
+H_0)}}_{\text{Relative evidence}} \]</span></p>
 <div id="prior-distribution" class="section level3">
 <h3>Prior distribution</h3>
-<p>To calculate the Bayes factor the auditor must first specify the prior distribution for the proportion of nonconforming items in the lot. An appropriate prior distribution can be one that assigns equal probability to the event of acceptance and the event of rejection (Derks et al., 2021), see also the vignette <a href="https://koenderks.github.io/jfa/articles/v3_prior_distributions.html">Prior distributions</a>. The code below creates this prior distribution.</p>
+<p>To calculate the Bayes factor the auditor must first specify the
+prior distribution for the proportion of nonconforming items in the lot.
+An appropriate prior distribution can be one that assigns equal
+probability to the event of acceptance and the event of rejection (Derks
+et al., 2021), see also the vignette <a href="https://koenderks.github.io/jfa/articles/v3_prior_distributions.html">Prior
+distributions</a>. The code below creates this prior distribution.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>prior <span class="ot">&lt;-</span> <span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="st">&quot;impartial&quot;</span>, <span class="at">likelihood =</span> <span class="st">&quot;binomial&quot;</span>, <span class="at">materiality =</span> <span class="fl">0.05</span>)</span></code></pre></div>
 </div>
 <div id="bayes-factor-after-stage-1" class="section level3">
 <h3>Bayes factor after stage 1</h3>
-<p>Using the <code>evaluation()</code> function the auditor can create the prior distribution and calculate the Bayes factor in favor of acceptance of the lot versus rejection of the lot. In this case, the Bayes factor in favor of acceptance (<span class="math inline">\(BF_{-+}\)</span>) is 0.66. This Bayes factor represents only anecdotal evidence in favor of rejection of the lot, since the data is 1 / 0.66 = 1.51 times more likely under the hypothesis <span class="math inline">\(H_0\)</span> than under the hypothesis <span class="math inline">\(H_1\)</span> (see the vignette <a href="https://koenderks.github.io/jfa/articles/v6_testing_misstatement.html">Testing misstatement</a> for the interpretation of <span class="math inline">\(BF_{-+}\)</span>).</p>
+<p>Using the <code>evaluation()</code> function the auditor can create
+the prior distribution and calculate the Bayes factor in favor of
+acceptance of the lot versus rejection of the lot. In this case, the
+Bayes factor in favor of acceptance (<span class="math inline">\(BF_{-+}\)</span>) is 0.66. This Bayes factor
+represents only anecdotal evidence in favor of rejection of the lot,
+since the data is 1 / 0.66 = 1.51 times more likely under the hypothesis
+<span class="math inline">\(H_0\)</span> than under the hypothesis <span class="math inline">\(H_1\)</span> (see the vignette <a href="https://koenderks.github.io/jfa/articles/v6_testing_misstatement.html">Testing
+misstatement</a> for the interpretation of <span class="math inline">\(BF_{-+}\)</span>).</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">evaluation</span>(<span class="at">materiality =</span> tolerance, <span class="at">x =</span> <span class="dv">2</span>, <span class="at">n =</span> <span class="dv">32</span>, <span class="at">prior =</span> prior)</span></code></pre></div>
 <pre><code>## Warning in evaluation(materiality = tolerance, x = 2, n = 32, prior = prior):
 ## using &#39;method = binomial&#39; from &#39;prior&#39;</code></pre>
@@ -216,7 +484,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##  Bayesian Audit Sample Evaluation
 ## 
 ## data:  2 and 32
-## number of errors = 2, number of samples = 32, taint = 2, BF10 = 0.66487
+## number of errors = 2, number of samples = 32, taint = 2, BF₁₀ = 0.66487
 ## alternative hypothesis: true misstatement rate is less than 0.05
 ## 95 percent credible interval:
 ##  0.0000000 0.1319424
@@ -226,7 +494,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="bayes-factor-after-stage-2" class="section level3">
 <h3>Bayes factor after stage 2</h3>
-<p>The Bayes factor in favor of acceptance after the second sample of items is 6.24 which represents moderate evidence in favor of acceptance. Hence, we should continue selecting and inspecting items to gather sufficient evidence for one of the two hypotheses.</p>
+<p>The Bayes factor in favor of acceptance after the second sample of
+items is 6.24 which represents moderate evidence in favor of acceptance.
+Hence, we should continue selecting and inspecting items to gather
+sufficient evidence for one of the two hypotheses.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">evaluation</span>(<span class="at">materiality =</span> tolerance, <span class="at">x =</span> <span class="dv">2</span> <span class="sc">+</span> <span class="dv">0</span>, <span class="at">n =</span> <span class="dv">32</span> <span class="sc">+</span> <span class="dv">50</span>, <span class="at">prior =</span> prior)</span></code></pre></div>
 <pre><code>## Warning in evaluation(materiality = tolerance, x = 2 + 0, n = 32 + 50, prior =
 ## prior): using &#39;method = binomial&#39; from &#39;prior&#39;</code></pre>
@@ -234,7 +505,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##  Bayesian Audit Sample Evaluation
 ## 
 ## data:  2 and 82
-## number of errors = 2, number of samples = 82, taint = 2, BF10 = 6.2413
+## number of errors = 2, number of samples = 82, taint = 2, BF₁₀ = 6.2413
 ## alternative hypothesis: true misstatement rate is less than 0.05
 ## 95 percent credible interval:
 ##  0.00000000 0.06444852
@@ -246,9 +517,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="references" class="section level2">
 <h2>References</h2>
 <ul>
-<li><p>Derks, K., de Swart, J., Wagenmakers, E.-J., and Wetzels, R. (2021). A default Bayesian hypothesis test for audit sampling. <em>Working paper</em>.</p></li>
-<li><p>Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J., and Wetzels, R. (2021). Priors in a Bayesian audit: How integration of existing information into the prior distribution can improve audit transparency and efficiency. <em>International Journal of Auditing</em>, 25(3), 621-636.</p></li>
-<li><p>Göb R. &amp; Lurz, K. (2014). Shortest two-sided confidence intervals for a probability under prior information. <em>Metrika: International Journal for Theoretical and Applied Statistics</em>, 77 (3), 389-413.</p></li>
+<li><p>Derks, K., de Swart, J., Wagenmakers, E.-J., and Wetzels, R.
+(2021). A default Bayesian hypothesis test for audit sampling.
+<em>Working paper</em>.</p></li>
+<li><p>Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J.,
+and Wetzels, R. (2021). Priors in a Bayesian audit: How integration of
+existing information into the prior distribution can improve audit
+transparency and efficiency. <em>International Journal of Auditing</em>,
+25(3), 621-636.</p></li>
+<li><p>Göb R. &amp; Lurz, K. (2014). Shortest two-sided confidence
+intervals for a probability under prior information. <em>Metrika:
+International Journal for Theoretical and Applied Statistics</em>, 77
+(3), 389-413.</p></li>
 </ul>
 </div>
 
