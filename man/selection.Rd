@@ -2,33 +2,51 @@
 % Please edit documentation in R/selection.R
 \name{selection}
 \alias{selection}
-\title{Select a Statistical Audit Sample}
+\title{Audit Sampling: Selection}
 \usage{
-selection(data, size, units = c('items', 'values'),
-          method = c('interval', 'cell', 'random', 'sieve'), values = NULL,
-          order = NULL, decreasing = FALSE, randomize = FALSE,
-          replace = FALSE, start = 1)
+selection(data, size, units = c("items", "values"),
+          method = c("interval", "cell", "random", "sieve"),
+          values = NULL,
+          order = NULL,
+          decreasing = FALSE,
+          randomize = FALSE,
+          replace = FALSE,
+          start = 1)
 }
 \arguments{
 \item{data}{a data frame containing the population data.}
 
-\item{size}{an integer larger than 0 specifying the number of units to select. Can also be an object of class \code{jfaPlanning}.}
+\item{size}{an integer larger than 0 specifying the number of units to
+select. Can also be an object of class \code{jfaPlanning}.}
 
-\item{units}{a character specifying the type of sampling units. Possible options are \code{items} (default) for selection on the level of items (rows) or \code{values} for selection on the level of monetary units.}
+\item{units}{a character specifying the type of sampling units. Possible
+options are \code{items} (default) for selection on the level of items
+(rows) or \code{values} for selection on the level of monetary units.}
 
-\item{method}{a character specifying the sampling algorithm. Possible options are \code{interval} (default) for fixed interval sampling, \code{cell} for cell sampling, \code{random} for random sampling, or \code{sieve} for modified sieve sampling.}
+\item{method}{a character specifying the sampling algorithm. Possible
+options are \code{interval} (default) for fixed interval sampling,
+\code{cell} for cell sampling, \code{random} for random sampling, or
+\code{sieve} for modified sieve sampling.}
 
-\item{values}{a character specifying the name of a column in \code{data} containing the book values of the items.}
+\item{values}{a character specifying the name of a column in \code{data}
+containing the book values of the items.}
 
-\item{order}{a character specifying the name of a column in \code{data} containing the ranks of the items. The items in the \code{data} are ordered according to these values in the order indicated by \code{decreasing}.}
+\item{order}{a character specifying the name of a column in \code{data}
+containing the ranks of the items. The items in the \code{data} are ordered
+according to these values in the order indicated by \code{decreasing}.}
 
-\item{decreasing}{a logical specifying whether to order the items from smallest to largest. Only used if \code{order} is specified.}
+\item{decreasing}{a logical specifying whether to order the items from
+smallest to largest. Only used if \code{order} is specified.}
 
-\item{randomize}{a logical specifying if items should be randomly shuffled prior to selection. Note that \code{randomize = TRUE} overrules \code{order}.}
+\item{randomize}{a logical specifying if items should be randomly shuffled
+prior to selection. Note that \code{randomize = TRUE} overrules
+\code{order}.}
 
-\item{replace}{a logical specifying if sampling units should be selected with replacement. Only used for method \code{random}.}
+\item{replace}{a logical specifying if sampling units should be selected
+with replacement. Only used for method \code{random}.}
 
-\item{start}{an integer larger than 0 specifying index of the unit that should be selected. Only used for method \code{interval}.}
+\item{start}{an integer larger than 0 specifying index of the unit that
+should be selected. Only used for method \code{interval}.}
 }
 \value{
 An object of class \code{jfaSelection} containing:
@@ -38,42 +56,62 @@ An object of class \code{jfaSelection} containing:
 \item{n.req}{an integer giving the requested sample size.}
 \item{n.units}{an integer giving the number of obtained sampling units.}
 \item{n.items}{an integer giving the number of obtained sample items.}
-\item{N.units}{an integer giving the number of sampling units in the population data.}
+\item{N.units}{an integer giving the number of sampling units in the
+  population data.}
 \item{N.items}{an integer giving the number of items in the population data.}
-\item{interval}{if \code{method = 'interval'}, a numeric value giving the size of the selection interval.}
+\item{interval}{if \code{method = "interval"}, a numeric value giving the
+  size of the selection interval.}
 \item{units}{a character indicating the type of sampling units.}
 \item{method}{a character indicating the sampling algorithm.}
-\item{values}{if \code{values} is specified, a character indicating the book value column.}
-\item{start}{if \code{method = 'interval'}, an integer giving the index of the selected unit in each interval.}
+\item{values}{if \code{values} is specified, a character indicating the book
+  value column.}
+\item{start}{if \code{method = "interval"}, an integer giving the index of
+  the selected unit in each interval.}
 \item{data.name}{a character indicating the name of the population data.}
 }
 \description{
-\code{selection()} is used to perform statistical selection of audit samples. It offers flexible implementations of the most common audit sampling algorithms for attributes sampling and monetary unit sampling. \code{selection()} returns an object of class \code{jfaSelection} which can be used with associated \code{summary()} and a \code{plot()} methods.
-
-For more details on how to use this function, see the package vignette:
-\code{vignette('jfa', package = 'jfa')}
+\code{selection()} is used to perform statistical selection of
+audit samples. It offers flexible implementations of the most common audit
+sampling algorithms for attributes sampling and monetary unit sampling. The
+function returns an object of class \code{jfaSelection} that can be used with
+the associated \code{summary()} method.
 }
 \details{
-This section elaborates on the possible options for the \code{units} argument:
+This section elaborates on the possible options for the \code{units}
+  argument:
 
 \itemize{
- \item{\code{items}:  In attributes sampling each item in the population is a sampling unit. An item with a book value of $5000 is therefore equally likely to be selected as an item with a book value of $500.}
- \item{\code{values}: In monetary unit sampling each monetary unit in the population is a sampling unit. An item with a book value of $5000 is therefore ten times more likely to be selected as an item with a book value of $500.}
+ \item{\code{items}: In attributes sampling each item in the population is a
+   sampling unit. An item with a book value of $5000 is therefore equally
+   likely to be selected as an item with a book value of $500.}
+ \item{\code{values}: In monetary unit sampling each monetary unit in the
+   population is a sampling unit. An item with a book value of $5000 is
+   therefore ten times more likely to be selected as an item with a book
+   value of $500.}
 }
 
-This section elaborates on the possible options for the \code{method} argument:
+This section elaborates on the possible options for the
+  \code{method} argument:
 
 \itemize{
- \item{\code{interval}: In fixed interval sampling the sampling units are divided into a number of equally large intervals. In each interval, a single sampling unit is selected according to a fixed starting point (specified by \code{start}).}
- \item{\code{cell}:     In cell sampling the sampling units in the population are divided into a number (equal to the sample size) of equally large intervals. In each interval, a single sampling unit is selected randomly.}
- \item{\code{random}:   In random sampling all sampling units are drawn with equal probability.}
- \item{\code{sieve}:    In modified sieve sampling items are selected with the largest sieve ratio (Hoogduin, Hall, & Tsay, 2010).}
+ \item{\code{interval}: In fixed interval sampling the sampling units are
+   divided into a number of equally large intervals. In each interval, a
+   single sampling unit is selected according to a fixed starting point
+   (specified by \code{start}).}
+ \item{\code{cell}:     In cell sampling the sampling units in the population
+   are divided into a number (equal to the sample size) of equally large
+   intervals. In each interval, a single sampling unit is selected randomly.}
+ \item{\code{random}:   In random sampling all sampling units are drawn with
+   equal probability.}
+ \item{\code{sieve}:    In modified sieve sampling items are selected with
+   the largest sieve ratio (Hoogduin, Hall, & Tsay, 2010).}
 }
 }
 \examples{
 data("BuildIt")
 
 # Select 100 items using random sampling
+set.seed(1)
 selection(data = BuildIt, size = 100, method = "random")
 
 # Select 150 monetary units using fixed interval sampling
@@ -83,14 +121,26 @@ selection(
 )
 }
 \references{
-Hoogduin, L. A., Hall, T. W., & Tsay, J. J. (2010). Modified sieve sampling: A method for single-and multi-stage probability-proportional-to-size sampling. \emph{Auditing: A Journal of Practice & Theory}, 29(1), 125-148.
+Derks, K., de Swart, J., Wagenmakers, E.-J., Wille, J., &
+  Wetzels, R. (2021). JASP for audit: Bayesian tools for the auditing
+  practice. \emph{Journal of Open Source Software}, \emph{6}(68), 2733.
+  \doi{10.21105/joss.02733}
 
-Leslie, D. A., Teitlebaum, A. D., & Anderson, R. J. (1979). \emph{Dollar-unit Sampling: A Practical Guide for Auditors}. Copp Clark Pitman; Belmont, Calif.: distributed by Fearon-Pitman.
+Hoogduin, L. A., Hall, T. W., & Tsay, J. J. (2010). Modified
+  sieve sampling: A method for single-and multi-stage
+  probability-proportional-to-size sampling. \emph{Auditing: A Journal of
+  Practice & Theory}, 29(1), 125-148.
+  \doi{10.2308/aud.2010.29.1.125}
 
-Wampler, B., & McEacharn, M. (2005). Monetary-unit sampling using Microsoft Excel. \emph{The CPA journal}, 75(5), 36.
+Leslie, D. A., Teitlebaum, A. D., & Anderson, R. J. (1979).
+  \emph{Dollar-unit Sampling: A Practical Guide for Auditors}. Copp Clark
+  Pitman; Belmont, CA. ISBN: 9780773042780.
 }
 \seealso{
-\code{\link{auditPrior}} \code{\link{planning}} \code{\link{evaluation}} \code{\link{report}}
+\code{\link{auditPrior}}
+         \code{\link{planning}}
+         \code{\link{evaluation}}
+         \code{\link{report}}
 }
 \author{
 Koen Derks, \email{k.derks@nyenrode.nl}

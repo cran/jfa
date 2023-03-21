@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2022 Koen Derks
+# Copyright (C) 2020-2023 Koen Derks
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 .stringer <- function(taints, conf.level, n, correction = NULL) {
   mle <- sum(taints) / n
@@ -21,7 +21,7 @@
   bound <- 1 - (1 - conf.level)^(1 / n)
   if (length(t) > 0) {
     propSum <- 0
-    for (i in 1:length(t)) {
+    for (i in seq_along(t)) {
       propSum <- propSum + (stats::qbeta(p = conf.level, shape1 = i + 1, shape2 = n - i) - stats::qbeta(p = conf.level, shape1 = (i - 1) + 1, shape2 = n - (i - 1))) * t[i]
     }
     bound <- bound + propSum
@@ -50,7 +50,7 @@
     tmin <- sort(subset(taints, taints > 0))
     if (length(tmin) > 0) {
       constant <- 0
-      for (i in 1:length(tmin)) {
+      for (i in seq_along(tmin)) {
         constant <- constant + (((n - 2 * i + 1) / (2 * sqrt(i * (n - i + 1)))) * rev(tmin)[i])
       }
       constant <- (1 / n) * constant
@@ -68,9 +68,7 @@
 }
 
 .rohrbach <- function(taints, conf.level, n, alternative, N.units = NULL, r.delta) {
-  if (is.null(N.units)) {
-    stop("'N.units' missing for evaluation")
-  }
+  stopifnot("missing value for 'N.units'" = !is.null(N.units))
   w <- 1 - taints
   mu <- mean(taints)
   vars <- sum(w^2) / n - (2 - (r.delta / n)) * ((1 / 2) * ((sum(w^2) / n) - stats::var(w)))
@@ -90,19 +88,17 @@
   return(result)
 }
 
-.moment <- function(taints, conf.level, n, alternative, m.type) {
-  if (!(m.type %in% c("inventory", "accounts"))) {
-    stop("Specify a valid population type. Either inventory or accounts.")
-  }
+.moment <- function(taints, conf.level, n, alternative, m.type = c("inventory", "accounts")) {
+  m.type <- match.arg(m.type)
   tall <- subset(taints, taints != 0)
-  if (m.type == "inventory" & length(tall) > 0) {
+  if (m.type == "inventory" && length(tall) > 0) {
     tstar <- 0.81 * (1 - 0.667 * tanh(10 * abs(mean(tall))))
-  } else if (m.type == "inventory" & length(tall) == 0) {
+  } else if (m.type == "inventory" && length(tall) == 0) {
     tstar <- 0.81 * (1 - 0.667 * tanh(10 * 0))
   }
-  if (m.type == "accounts" & length(tall) > 0) {
+  if (m.type == "accounts" && length(tall) > 0) {
     tstar <- 0.81 * (1 - 0.667 * tanh(10 * mean(tall))) * (1 + 0.667 * tanh(length(tall) / 10))
-  } else if (m.type == "accounts" & length(tall) == 0) {
+  } else if (m.type == "accounts" && length(tall) == 0) {
     tstar <- 0.81 * (1 - 0.667 * tanh(10 * 0)) * (1 + 0.667 * tanh(0 / 10))
   }
   ncm1_z <- (tstar^1 + sum(tall^1)) / (length(tall) + 1)
@@ -173,12 +169,10 @@
 }
 
 .direct <- function(bookvalues, auditvalues, conf.level, alternative, N.items = NULL, n, N.units = NULL, correction = FALSE) {
-  if (is.null(N.items)) {
-    stop("missing value for 'N.items'")
-  }
-  if (is.null(N.units)) {
-    stop("missing value for 'N.units'")
-  }
+  stopifnot(
+    "missing value for 'N.items'" = !is.null(N.items),
+    "missing value for 'N.units'" = !is.null(N.units)
+  )
   w <- mean(auditvalues)
   s <- stats::sd(auditvalues)
   tVal <- if (alternative == "two.sided") stats::qt(p = conf.level + ((1 - conf.level) / 2), df = n - 1) else stats::qt(p = conf.level, df = n - 1)
@@ -197,9 +191,7 @@
 }
 
 .difference <- function(bookvalues, auditvalues, conf.level, alternative, N.items = NULL, n, correction = FALSE) {
-  if (is.null(N.items)) {
-    stop("missing value for 'N.items'")
-  }
+  stopifnot("missing value for 'N.items'" = !is.null(N.items))
   we <- mean(bookvalues - auditvalues)
   s <- stats::sd(bookvalues - auditvalues)
   tVal <- if (alternative == "two.sided") stats::qt(p = conf.level + ((1 - conf.level) / 2), df = n - 1) else stats::qt(p = conf.level, df = n - 1)
@@ -218,9 +210,7 @@
 }
 
 .quotient <- function(bookvalues, auditvalues, conf.level, alternative, N.items = NULL, n, correction = FALSE) {
-  if (is.null(N.items)) {
-    stop("missing value for 'N.items'")
-  }
+  stopifnot("missing value for 'N.items'" = !is.null(N.items))
   w <- mean(auditvalues)
   sw <- stats::sd(auditvalues)
   b <- mean(bookvalues)
@@ -244,12 +234,10 @@
 }
 
 .regression <- function(bookvalues, auditvalues, conf.level, alternative, N.items = NULL, n, N.units = NULL, correction = FALSE) {
-  if (is.null(N.items)) {
-    stop("missing value for 'N.items'")
-  }
-  if (is.null(N.units)) {
-    stop("missing value for 'N.units'")
-  }
+  stopifnot(
+    "missing value for 'N.items'" = !is.null(N.items),
+    "missing value for 'N.units'" = !is.null(N.units)
+  )
   w <- mean(auditvalues)
   sw <- stats::sd(auditvalues)
   b <- mean(bookvalues)

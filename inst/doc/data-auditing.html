@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Koen Derks" />
+
+<meta name="date" content="2023-03-20" />
+
+<title>Data auditing: Get started</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Data auditing: Get started</h1>
+<h4 class="author">Koen Derks</h4>
+<h4 class="date">2023-03-20</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction" id="toc-introduction">Introduction</a></li>
+<li><a href="#functions-and-intended-usage" id="toc-functions-and-intended-usage">Functions and intended usage</a>
+<ul>
+<li><a href="#test-digit-distributions-with-digit_test" id="toc-test-digit-distributions-with-digit_test">Test digit
+distributions with <code>digit_test()</code></a></li>
+<li><a href="#test-for-repeated-values-with-repeated_test" id="toc-test-for-repeated-values-with-repeated_test">Test for repeated
+values with <code>repeated_test()</code></a></li>
+</ul></li>
+<li><a href="#benchmarks" id="toc-benchmarks">Benchmarks</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
+</ul>
+</div>
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Welcome to the ‘Data auditing’ vignette of the <strong>jfa</strong>
+package. Here you can find a simple explanation of the functions in the
+package that facilitate data auditing. For more detailed explanations of
+each function, read the other vignettes on the <a href="https://koenderks.github.io/jfa/">package website</a>.</p>
+</div>
+<div id="functions-and-intended-usage" class="section level2">
+<h2>Functions and intended usage</h2>
+<p>Below you can find an explanation of the available data auditing
+functions in <strong>jfa</strong>.</p>
+<ul>
+<li><a href="#test-digit-distributions-with-digit-test"><code>digit_test()</code></a></li>
+<li><a href="#test-for-repeated-values-with-repeated-test"><code>repeated_test()</code></a></li>
+</ul>
+<div id="test-digit-distributions-with-digit_test" class="section level3">
+<h3>Test digit distributions with <code>digit_test()</code></h3>
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable"><img src="data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iOTgiIGhlaWdodD0iMjAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0ibGlmZWN5Y2xlOiBzdGFibGUiPjx0aXRsZT5saWZlY3ljbGU6IHN0YWJsZTwvdGl0bGU+PGxpbmVhckdyYWRpZW50IGlkPSJzIiB4Mj0iMCIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2JiYiIgc3RvcC1vcGFjaXR5PSIuMSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1vcGFjaXR5PSIuMSIvPjwvbGluZWFyR3JhZGllbnQ+PGNsaXBQYXRoIGlkPSJyIj48cmVjdCB3aWR0aD0iOTgiIGhlaWdodD0iMjAiIHJ4PSIzIiBmaWxsPSIjZmZmIi8+PC9jbGlwUGF0aD48ZyBjbGlwLXBhdGg9InVybCgjcikiPjxyZWN0IHdpZHRoPSI1NSIgaGVpZ2h0PSIyMCIgZmlsbD0iIzU1NSIvPjxyZWN0IHg9IjU1IiB3aWR0aD0iNDMiIGhlaWdodD0iMjAiIGZpbGw9IiM0YzEiLz48cmVjdCB3aWR0aD0iOTgiIGhlaWdodD0iMjAiIGZpbGw9InVybCgjcykiLz48L2c+PGcgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IlZlcmRhbmEsR2VuZXZhLERlamFWdSBTYW5zLHNhbnMtc2VyaWYiIHRleHQtcmVuZGVyaW5nPSJnZW9tZXRyaWNQcmVjaXNpb24iIGZvbnQtc2l6ZT0iMTEwIj48dGV4dCBhcmlhLWhpZGRlbj0idHJ1ZSIgeD0iMjg1IiB5PSIxNTAiIGZpbGw9IiMwMTAxMDEiIGZpbGwtb3BhY2l0eT0iLjMiIHRyYW5zZm9ybT0ic2NhbGUoLjEpIiB0ZXh0TGVuZ3RoPSI0NTAiPmxpZmVjeWNsZTwvdGV4dD48dGV4dCB4PSIyODUiIHk9IjE0MCIgdHJhbnNmb3JtPSJzY2FsZSguMSkiIGZpbGw9IiNmZmYiIHRleHRMZW5ndGg9IjQ1MCI+bGlmZWN5Y2xlPC90ZXh0Pjx0ZXh0IGFyaWEtaGlkZGVuPSJ0cnVlIiB4PSI3NTUiIHk9IjE1MCIgZmlsbD0iIzAxMDEwMSIgZmlsbC1vcGFjaXR5PSIuMyIgdHJhbnNmb3JtPSJzY2FsZSguMSkiIHRleHRMZW5ndGg9IjMzMCI+c3RhYmxlPC90ZXh0Pjx0ZXh0IHg9Ijc1NSIgeT0iMTQwIiB0cmFuc2Zvcm09InNjYWxlKC4xKSIgZmlsbD0iI2ZmZiIgdGV4dExlbmd0aD0iMzMwIj5zdGFibGU8L3RleHQ+PC9nPjwvc3ZnPg==" alt="Lifecycle: stable" /></a></p>
+<p>The function <code>digit_test()</code> takes a vector of numeric
+values, extract the requested digits, and compares the frequencies of
+these digits to a reference distribution. By default, the function
+performs a frequentist hypothesis test of the null hypothesis that the
+digits are distributed according to the reference distribution and
+produces a <em>p</em> value. When a prior is specified, the function
+performs a Bayesian hypothesis test of the null hypothesis that the
+digits are distributed according to the reference distribution against
+the alternative hypothesis that the digits are not distributed according
+to the reference distribution and produces a Bayes factor (Kass &amp;
+Raftery, 1995).</p>
+<p><em>Full function with default arguments:</em></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">digit_test</span>(x,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">check =</span> <span class="fu">c</span>(<span class="st">&quot;first&quot;</span>, <span class="st">&quot;last&quot;</span>, <span class="st">&quot;firsttwo&quot;</span>),</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">reference =</span> <span class="st">&quot;benford&quot;</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">prior =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p><em>Supported options for the <code>check</code> argument:</em></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left"><code>check</code></th>
+<th align="left">Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>fist</code></td>
+<td align="left">First digit</td>
+</tr>
+<tr class="even">
+<td align="left"><code>firsttwo</code></td>
+<td align="left">First and second digit</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>last</code></td>
+<td align="left">Last digit</td>
+</tr>
+</tbody>
+</table>
+<p><em>Supported options for the <code>reference</code>
+argument:</em></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left"><code>check</code></th>
+<th align="left">Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>benford</code></td>
+<td align="left">Benford’s law</td>
+</tr>
+<tr class="even">
+<td align="left"><code>uniform</code></td>
+<td align="left">Uniform distribution</td>
+</tr>
+<tr class="odd">
+<td align="left">Vector of probabilities</td>
+<td align="left">Custom distribution</td>
+</tr>
+</tbody>
+</table>
+<p><em>Example usage:</em></p>
+<p>Benford’s law (Benford, 1938) is a principle that describes a pattern
+in many naturally-occurring numbers. According to Benford’s law, each
+possible leading digit <em>d</em> in a naturally occurring, or
+non-manipulated, set of numbers occurs with a probability:</p>
+<p><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnPz4KPCEtLSBHZW5lcmF0ZWQgYnkgQ29kZUNvZ3Mgd2l0aCBkdmlzdmdtIDIuMTMuMyAtLT4KPHN2ZyB2ZXJzaW9uPScxLjEnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZycgeG1sbnM6eGxpbms9J2h0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsnIHdpZHRoPScxODUuOTA1MjczcHQnIGhlaWdodD0nMTMuNTIyODQ5cHQnIHZpZXdCb3g9Jy0uMjM3NDgxIC0uMjQwNjM1IDE4NS45MDUyNzMgMTMuNTIyODQ5Jz4KPGRlZnM+CjxwYXRoIGlkPSdnMi00OCcgZD0nTTMuODk3Mzg1LTIuNTQyNDY2QzMuODk3Mzg1LTMuMzk1MjY4IDMuODA5NzE0LTMuOTEzMzI1IDMuNTQ2Ny00LjQyMzQxMkMzLjE5NjAxNS01LjEyNDc4MiAyLjU1MDQzNi01LjMwMDEyNSAyLjExMjA4LTUuMzAwMTI1QzEuMTA3ODQ2LTUuMzAwMTI1IC43NDEyMi00LjU1MDkzNCAuNjI5NjM5LTQuMzI3NzcxQy4zNDI3MTUtMy43NDU5NTMgLjMyNjc3NS0yLjk1NjkxMiAuMzI2Nzc1LTIuNTQyNDY2Qy4zMjY3NzUtMi4wMTY0MzggLjM1MDY4NS0xLjIxMTQ1NyAuNzMzMjUtLjU3Mzg0OEMxLjA5OTg3NSAuMDE1OTQgMS42ODk2NjQgLjE2NzM3MiAyLjExMjA4IC4xNjczNzJDMi40OTQ2NDUgLjE2NzM3MiAzLjE4MDA3NSAuMDQ3ODIxIDMuNTc4NTgtLjc0MTIyQzMuODczNDc0LTEuMzE1MDY4IDMuODk3Mzg1LTIuMDI0NDA4IDMuODk3Mzg1LTIuNTQyNDY2Wk0yLjExMjA4LS4wNTU3OTFDMS44NDEwOTYtLjA1NTc5MSAxLjI5MTE1OC0uMTgzMzEzIDEuMTIzNzg2LTEuMDIwMTc0QzEuMDM2MTE1LTEuNDc0NDcxIDEuMDM2MTE1LTIuMjIzNjYxIDEuMDM2MTE1LTIuNjM4MTA3QzEuMDM2MTE1LTMuMTg4MDQ1IDEuMDM2MTE1LTMuNzQ1OTUzIDEuMTIzNzg2LTQuMTg0MzA5QzEuMjkxMTU4LTQuOTk3MjYgMS45MTI4MjctNS4wNzY5NjEgMi4xMTIwOC01LjA3Njk2MUMyLjM4MzA2NC01LjA3Njk2MSAyLjkzMzAwMS00Ljk0MTQ2OSAzLjA5MjQwMy00LjIxNjE4OUMzLjE4ODA0NS0zLjc3NzgzMyAzLjE4ODA0NS0zLjE4MDA3NSAzLjE4ODA0NS0yLjYzODEwN0MzLjE4ODA0NS0yLjE2Nzg3IDMuMTg4MDQ1LTEuNDUwNTYgMy4wOTI0MDMtMS4wMDQyMzRDMi45MjUwMzEtLjE2NzM3MiAyLjM3NTA5My0uMDU1NzkxIDIuMTEyMDgtLjA1NTc5MVonLz4KPHBhdGggaWQ9J2cyLTQ5JyBkPSdNMi41MDI2MTUtNS4wNzY5NjFDMi41MDI2MTUtNS4yOTIxNTQgMi40ODY2NzUtNS4zMDAxMjUgMi4yNzE0ODItNS4zMDAxMjVDMS45NDQ3MDctNC45ODEzMiAxLjUyMjI5MS00Ljc5MDAzNyAuNzY1MTMxLTQuNzkwMDM3Vi00LjUyNzAyNEMuOTgwMzI0LTQuNTI3MDI0IDEuNDEwNzEtNC41MjcwMjQgMS44NzI5NzYtNC43NDIyMTdWLS42NTM1NDlDMS44NzI5NzYtLjM1ODY1NSAxLjg0OTA2Ni0uMjYzMDE0IDEuMDkxOTA1LS4yNjMwMTRILjgxMjk1MVYwQzEuMTM5NzI2LS4wMjM5MSAxLjgyNTE1Ni0uMDIzOTEgMi4xODM4MTEtLjAyMzkxUzMuMjM1ODY2LS4wMjM5MSAzLjU2MjY0IDBWLS4yNjMwMTRIMy4yODM2ODZDMi41MjY1MjYtLjI2MzAxNCAyLjUwMjYxNS0uMzU4NjU1IDIuNTAyNjE1LS42NTM1NDlWLTUuMDc2OTYxWicvPgo8cGF0aCBpZD0nZzAtMTA1JyBkPSdNMi4zNzUwOTMtNC45NzMzNUMyLjM3NTA5My01LjE0ODY5MiAyLjI0NzU3Mi01LjI3NjIxNCAyLjA2NDI1OS01LjI3NjIxNEMxLjg1NzAzNi01LjI3NjIxNCAxLjYyNTkwMy01LjA4NDkzMiAxLjYyNTkwMy00Ljg0NTgyOEMxLjYyNTkwMy00LjY3MDQ4NiAxLjc1MzQyNS00LjU0Mjk2NCAxLjkzNjczNy00LjU0Mjk2NEMyLjE0Mzk2LTQuNTQyOTY0IDIuMzc1MDkzLTQuNzM0MjQ3IDIuMzc1MDkzLTQuOTczMzVaTTEuMjExNDU3LTIuMDQ4MzE5TC43ODEwNzEtLjk0ODQ0M0MuNzQxMjItLjgyODg5MiAuNzAxMzctLjczMzI1IC43MDEzNy0uNTk3NzU4Qy43MDEzNy0uMjA3MjIzIDEuMDA0MjM0IC4wNzk3MDEgMS40MjY2NSAuMDc5NzAxQzIuMTk5NzUxIC4wNzk3MDEgMi41MjY1MjYtMS4wMzYxMTUgMi41MjY1MjYtMS4xMzk3MjZDMi41MjY1MjYtMS4yMTk0MjcgMi40NjI3NjUtMS4yNDMzMzcgMi40MDY5NzQtMS4yNDMzMzdDMi4zMTEzMzMtMS4yNDMzMzcgMi4yOTUzOTItMS4xODc1NDcgMi4yNzE0ODItMS4xMDc4NDZDMi4wODgxNjktLjQ3MDIzNyAxLjc2MTM5NS0uMTQzNDYyIDEuNDQyNTktLjE0MzQ2MkMxLjM0Njk0OS0uMTQzNDYyIDEuMjUxMzA4LS4xODMzMTMgMS4yNTEzMDgtLjM5ODUwNkMxLjI1MTMwOC0uNTg5Nzg4IDEuMzA3MDk4LS43MzMyNSAxLjQxMDcxLS45ODAzMjRDMS40OTA0MTEtMS4xOTU1MTcgMS41NzAxMTItMS40MTA3MSAxLjY1Nzc4My0xLjYyNTkwM0wxLjkwNDg1Ny0yLjI3MTQ4MkMxLjk3NjU4OC0yLjQ1NDc5NSAyLjA3MjIyOS0yLjcwMTg2OCAyLjA3MjIyOS0yLjgzNzM2QzIuMDcyMjI5LTMuMjM1ODY2IDEuNzUzNDI1LTMuNTE0ODE5IDEuMzQ2OTQ5LTMuNTE0ODE5Qy41NzM4NDgtMy41MTQ4MTkgLjIzOTEwMy0yLjM5OTAwNCAuMjM5MTAzLTIuMjk1MzkyQy4yMzkxMDMtMi4yMjM2NjEgLjI5NDg5NC0yLjE5MTc4MSAuMzU4NjU1LTIuMTkxNzgxQy40NjIyNjctMi4xOTE3ODEgLjQ3MDIzNy0yLjIzOTYwMSAuNDk0MTQ3LTIuMzE5MzAzQy43MTczMS0zLjA3NjQ2MyAxLjA4MzkzNS0zLjI5MTY1NiAxLjMyMzAzOS0zLjI5MTY1NkMxLjQzNDYyLTMuMjkxNjU2IDEuNTE0MzIxLTMuMjUxODA2IDEuNTE0MzIxLTMuMDI4NjQzQzEuNTE0MzIxLTIuOTQ4OTQxIDEuNTA2MzUxLTIuODM3MzYgMS40MjY2NS0yLjU5ODI1N0wxLjIxMTQ1Ny0yLjA0ODMxOVonLz4KPHBhdGggaWQ9J2czLTQwJyBkPSdNMy44ODU0MyAyLjkwNTEwNkMzLjg4NTQzIDIuODY5MjQgMy44ODU0MyAyLjg0NTMzIDMuNjgyMTkyIDIuNjQyMDkyQzIuNDg2Njc1IDEuNDM0NjIgMS44MTcxODYtLjUzNzk4MyAxLjgxNzE4Ni0yLjk3NjgzN0MxLjgxNzE4Ni01LjI5NjEzOSAyLjM3OTA3OC03LjI5MjY1MyAzLjc2NTg3OC04LjcwMzM2MkMzLjg4NTQzLTguODEwOTU5IDMuODg1NDMtOC44MzQ4NjkgMy44ODU0My04Ljg3MDczNUMzLjg4NTQzLTguOTQyNDY2IDMuODI1NjU0LTguOTY2Mzc2IDMuNzc3ODMzLTguOTY2Mzc2QzMuNjIyNDE2LTguOTY2Mzc2IDIuNjQyMDkyLTguMTA1NjA0IDIuMDU2Mjg5LTYuOTMzOTk4QzEuNDQ2NTc1LTUuNzI2NTI2IDEuMTcxNjA2LTQuNDQ3MzIzIDEuMTcxNjA2LTIuOTc2ODM3QzEuMTcxNjA2LTEuOTEyODI3IDEuMzM4OTc5LS40OTAxNjIgMS45NjA2NDggLjc4OTA0MUMyLjY2NjAwMiAyLjIyMzY2MSAzLjY0NjMyNiAzLjAwMDc0NyAzLjc3NzgzMyAzLjAwMDc0N0MzLjgyNTY1NCAzLjAwMDc0NyAzLjg4NTQzIDIuOTc2ODM3IDMuODg1NDMgMi45MDUxMDZaJy8+CjxwYXRoIGlkPSdnMy00MScgZD0nTTMuMzcxMzU3LTIuOTc2ODM3QzMuMzcxMzU3LTMuODg1NDMgMy4yNTE4MDYtNS4zNjc4NyAyLjU4MjMxNi02Ljc1NDY3QzEuODc2OTYxLTguMTg5MjkgLjg5NjYzOC04Ljk2NjM3NiAuNzY1MTMxLTguOTY2Mzc2Qy43MTczMS04Ljk2NjM3NiAuNjU3NTM0LTguOTQyNDY2IC42NTc1MzQtOC44NzA3MzVDLjY1NzUzNC04LjgzNDg2OSAuNjU3NTM0LTguODEwOTU5IC44NjA3NzItOC42MDc3MjFDMi4wNTYyODktNy40MDAyNDkgMi43MjU3NzgtNS40Mjc2NDYgMi43MjU3NzgtMi45ODg3OTJDMi43MjU3NzgtLjY2OTQ4OSAyLjE2Mzg4NSAxLjMyNzAyNCAuNzc3MDg2IDIuNzM3NzMzQy42NTc1MzQgMi44NDUzMyAuNjU3NTM0IDIuODY5MjQgLjY1NzUzNCAyLjkwNTEwNkMuNjU3NTM0IDIuOTc2ODM3IC43MTczMSAzLjAwMDc0NyAuNzY1MTMxIDMuMDAwNzQ3Qy45MjA1NDggMy4wMDA3NDcgMS45MDA4NzIgMi4xMzk5NzUgMi40ODY2NzUgLjk2ODM2OUMzLjA5NjM4OS0uMjUxMDU5IDMuMzcxMzU3LTEuNTQyMjE3IDMuMzcxMzU3LTIuOTc2ODM3WicvPgo8cGF0aCBpZD0nZzMtNDMnIGQ9J000Ljc3MDExMi0yLjc2MTY0NEg4LjA2OTczOEM4LjIzNzExMS0yLjc2MTY0NCA4LjQ1MjMwNC0yLjc2MTY0NCA4LjQ1MjMwNC0yLjk3NjgzN0M4LjQ1MjMwNC0zLjIwMzk4NSA4LjI0OTA2Ni0zLjIwMzk4NSA4LjA2OTczOC0zLjIwMzk4NUg0Ljc3MDExMlYtNi41MDM2MTFDNC43NzAxMTItNi42NzA5ODQgNC43NzAxMTItNi44ODYxNzcgNC41NTQ5MTktNi44ODYxNzdDNC4zMjc3NzEtNi44ODYxNzcgNC4zMjc3NzEtNi42ODI5MzkgNC4zMjc3NzEtNi41MDM2MTFWLTMuMjAzOTg1SDEuMDI4MTQ0Qy44NjA3NzItMy4yMDM5ODUgLjY0NTU3OS0zLjIwMzk4NSAuNjQ1NTc5LTIuOTg4NzkyQy42NDU1NzktMi43NjE2NDQgLjg0ODgxNy0yLjc2MTY0NCAxLjAyODE0NC0yLjc2MTY0NEg0LjMyNzc3MVYuNTM3OTgzQzQuMzI3NzcxIC43MDUzNTUgNC4zMjc3NzEgLjkyMDU0OCA0LjU0Mjk2NCAuOTIwNTQ4QzQuNzcwMTEyIC45MjA1NDggNC43NzAxMTIgLjcxNzMxIDQuNzcwMTEyIC41Mzc5ODNWLTIuNzYxNjQ0WicvPgo8cGF0aCBpZD0nZzMtNDknIGQ9J00zLjQ0MzA4OC03LjY2MzI2M0MzLjQ0MzA4OC03LjkzODIzMiAzLjQ0MzA4OC03Ljk1MDE4NyAzLjIwMzk4NS03Ljk1MDE4N0MyLjkxNzA2MS03LjYyNzM5NyAyLjMxOTMwMy03LjE4NTA1NiAxLjA4NzkyLTcuMTg1MDU2Vi02LjgzODM1NkMxLjM2Mjg4OS02LjgzODM1NiAxLjk2MDY0OC02LjgzODM1NiAyLjYxODE4Mi03LjE0OTE5MVYtLjkyMDU0OEMyLjYxODE4Mi0uNDkwMTYyIDIuNTgyMzE2LS4zNDY3IDEuNTMwMjYyLS4zNDY3SDEuMTU5NjUxVjBDMS40ODI0NDEtLjAyMzkxIDIuNjQyMDkyLS4wMjM5MSAzLjAzNjYxMy0uMDIzOTFTNC41Nzg4MjktLjAyMzkxIDQuOTAxNjE5IDBWLS4zNDY3SDQuNTMxMDA5QzMuNDc4OTU0LS4zNDY3IDMuNDQzMDg4LS40OTAxNjIgMy40NDMwODgtLjkyMDU0OFYtNy42NjMyNjNaJy8+CjxwYXRoIGlkPSdnMy02MScgZD0nTTguMDY5NzM4LTMuODczNDc0QzguMjM3MTExLTMuODczNDc0IDguNDUyMzA0LTMuODczNDc0IDguNDUyMzA0LTQuMDg4NjY3QzguNDUyMzA0LTQuMzE1ODE2IDguMjQ5MDY2LTQuMzE1ODE2IDguMDY5NzM4LTQuMzE1ODE2SDEuMDI4MTQ0Qy44NjA3NzItNC4zMTU4MTYgLjY0NTU3OS00LjMxNTgxNiAuNjQ1NTc5LTQuMTAwNjIzQy42NDU1NzktMy44NzM0NzQgLjg0ODgxNy0zLjg3MzQ3NCAxLjAyODE0NC0zLjg3MzQ3NEg4LjA2OTczOFpNOC4wNjk3MzgtMS42NDk4MTNDOC4yMzcxMTEtMS42NDk4MTMgOC40NTIzMDQtMS42NDk4MTMgOC40NTIzMDQtMS44NjUwMDZDOC40NTIzMDQtMi4wOTIxNTQgOC4yNDkwNjYtMi4wOTIxNTQgOC4wNjk3MzgtMi4wOTIxNTRIMS4wMjgxNDRDLjg2MDc3Mi0yLjA5MjE1NCAuNjQ1NTc5LTIuMDkyMTU0IC42NDU1NzktMS44NzY5NjFDLjY0NTU3OS0xLjY0OTgxMyAuODQ4ODE3LTEuNjQ5ODEzIDEuMDI4MTQ0LTEuNjQ5ODEzSDguMDY5NzM4WicvPgo8cGF0aCBpZD0nZzEtNjEnIGQ9J001LjEyODc2Ny04LjUyNDAzNUM1LjEyODc2Ny04LjUzNTk5IDUuMjAwNDk4LTguNzE1MzE4IDUuMjAwNDk4LTguNzM5MjI4QzUuMjAwNDk4LTguODgyNjkgNS4wODA5NDYtOC45NjYzNzYgNC45ODUzMDUtOC45NjYzNzZDNC45MjU1MjktOC45NjYzNzYgNC44MTc5MzMtOC45NjYzNzYgNC43MjIyOTEtOC43MDMzNjJMLjcxNzMxIDIuNTQ2NDUxQy43MTczMSAyLjU1ODQwNiAuNjQ1NTc5IDIuNzM3NzMzIC42NDU1NzkgMi43NjE2NDRDLjY0NTU3OSAyLjkwNTEwNiAuNzY1MTMxIDIuOTg4NzkyIC44NjA3NzIgMi45ODg3OTJDLjkzMjUwMyAyLjk4ODc5MiAxLjA0MDEgMi45NzY4MzcgMS4xMjM3ODYgMi43MjU3NzhMNS4xMjg3NjctOC41MjQwMzVaJy8+CjxwYXRoIGlkPSdnMS05NycgZD0nTTMuNTk4NTA2LTEuNDIyNjY1QzMuNTM4NzMtMS4yMTk0MjcgMy41Mzg3My0xLjE5NTUxNyAzLjM3MTM1Ny0uOTY4MzY5QzMuMTA4MzQ0LS42MzM2MjQgMi41ODIzMTYtLjExOTU1MiAyLjAyMDQyMy0uMTE5NTUyQzEuNTMwMjYyLS4xMTk1NTIgMS4yNTUyOTMtLjU2MTg5MyAxLjI1NTI5My0xLjI2NzI0OEMxLjI1NTI5My0xLjkyNDc4MiAxLjYyNTkwMy0zLjI2Mzc2MSAxLjg1MzA1MS0zLjc2NTg3OEMyLjI1OTUyNy00LjYwMjc0IDIuODIxNDItNS4wMzMxMjYgMy4yODc2NzEtNS4wMzMxMjZDNC4wNzY3MTItNS4wMzMxMjYgNC4yMzIxMy00LjA1MjgwMiA0LjIzMjEzLTMuOTU3MTYxQzQuMjMyMTMtMy45NDUyMDUgNC4xOTYyNjQtMy43ODk3ODggNC4xODQzMDktMy43NjU4NzhMMy41OTg1MDYtMS40MjI2NjVaTTQuMzYzNjM2LTQuNDgzMTg4QzQuMjMyMTMtNC43OTQwMjIgMy45MDkzNC01LjI3MjIyOSAzLjI4NzY3MS01LjI3MjIyOUMxLjkzNjczNy01LjI3MjIyOSAuNDc4MjA3LTMuNTI2Nzc1IC40NzgyMDctMS43NTc0MUMuNDc4MjA3LS41NzM4NDggMS4xNzE2MDYgLjExOTU1MiAxLjk4NDU1OCAuMTE5NTUyQzIuNjQyMDkyIC4xMTk1NTIgMy4yMDM5ODUtLjM5NDUyMSAzLjUzODczLS43ODkwNDFDMy42NTgyODEtLjA4MzY4NiA0LjIyMDE3NCAuMTE5NTUyIDQuNTc4ODI5IC4xMTk1NTJTNS4yMjQ0MDgtLjA5NTY0MSA1LjQzOTYwMS0uNTI2MDI3QzUuNjMwODg0LS45MzI1MDMgNS43OTgyNTctMS42NjE3NjggNS43OTgyNTctMS43MDk1ODlDNS43OTgyNTctMS43NjkzNjUgNS43NTA0MzYtMS44MTcxODYgNS42Nzg3MDUtMS44MTcxODZDNS41NzExMDgtMS44MTcxODYgNS41NTkxNTMtMS43NTc0MSA1LjUxMTMzMy0xLjU3ODA4MkM1LjMzMjAwNS0uODcyNzI3IDUuMTA0ODU3LS4xMTk1NTIgNC42MTQ2OTUtLjExOTU1MkM0LjI2Nzk5NS0uMTE5NTUyIDQuMjQ0MDg1LS40MzAzODYgNC4yNDQwODUtLjY2OTQ4OUM0LjI0NDA4NS0uOTQ0NDU4IDQuMjc5OTUtMS4wNzU5NjUgNC4zODc1NDctMS41NDIyMTdDNC40NzEyMzMtMS44NDEwOTYgNC41MzEwMDktMi4xMDQxMSA0LjYyNjY1LTIuNDUwODA5QzUuMDY4OTkxLTQuMjQ0MDg1IDUuMTc2NTg4LTQuNjc0NDcxIDUuMTc2NTg4LTQuNzQ2MjAyQzUuMTc2NTg4LTQuOTEzNTc0IDUuMDQ1MDgxLTUuMDQ1MDgxIDQuODY1NzUzLTUuMDQ1MDgxQzQuNDgzMTg4LTUuMDQ1MDgxIDQuMzg3NTQ3LTQuNjI2NjUgNC4zNjM2MzYtNC40ODMxODhaJy8+CjxwYXRoIGlkPSdnMS05OScgZD0nTTQuNjc0NDcxLTQuNDk1MTQzQzQuNDQ3MzIzLTQuNDk1MTQzIDQuMzM5NzI2LTQuNDk1MTQzIDQuMTcyMzU0LTQuMzUxNjgxQzQuMTAwNjIzLTQuMjkxOTA1IDMuOTY5MTE2LTQuMTEyNTc4IDMuOTY5MTE2LTMuOTIxMjk1QzMuOTY5MTE2LTMuNjgyMTkyIDQuMTQ4NDQzLTMuNTM4NzMgNC4zNzU1OTItMy41Mzg3M0M0LjY2MjUxNi0zLjUzODczIDQuOTg1MzA1LTMuNzc3ODMzIDQuOTg1MzA1LTQuMjU2MDRDNC45ODUzMDUtNC44Mjk4ODggNC40MzUzNjctNS4yNzIyMjkgMy42MTA0NjEtNS4yNzIyMjlDMi4wNDQzMzQtNS4yNzIyMjkgLjQ3ODIwNy0zLjU2MjY0IC40NzgyMDctMS44NjUwMDZDLjQ3ODIwNy0uODI0OTA3IDEuMTIzNzg2IC4xMTk1NTIgMi4zNDMyMTMgLjExOTU1MkMzLjk2OTExNiAuMTE5NTUyIDQuOTk3MjYtMS4xNDc2OTYgNC45OTcyNi0xLjMwMzExM0M0Ljk5NzI2LTEuMzc0ODQ0IDQuOTI1NTI5LTEuNDM0NjIgNC44Nzc3MDktMS40MzQ2MkM0Ljg0MTg0My0xLjQzNDYyIDQuODI5ODg4LTEuNDIyNjY1IDQuNzIyMjkxLTEuMzE1MDY4QzMuOTU3MTYxLS4yOTg4NzkgMi44MjE0Mi0uMTE5NTUyIDIuMzY3MTIzLS4xMTk1NTJDMS41NDIyMTctLjExOTU1MiAxLjI3OTIwMy0uODM2ODYyIDEuMjc5MjAzLTEuNDM0NjJDMS4yNzkyMDMtMS44NTMwNTEgMS40ODI0NDEtMy4wMTI3MDIgMS45MTI4MjctMy44MjU2NTRDMi4yMjM2NjEtNC4zODc1NDcgMi44NjkyNC01LjAzMzEyNiAzLjYyMjQxNi01LjAzMzEyNkMzLjc3NzgzMy01LjAzMzEyNiA0LjQzNTM2Ny01LjAwOTIxNSA0LjY3NDQ3MS00LjQ5NTE0M1onLz4KPHBhdGggaWQ9J2cxLTEwMCcgZD0nTTYuMDEzNDUtNy45OTgwMDdDNi4wMjU0MDUtOC4wNDU4MjggNi4wNDkzMTUtOC4xMTc1NTkgNi4wNDkzMTUtOC4xNzczMzVDNi4wNDkzMTUtOC4yOTY4ODcgNS45Mjk3NjMtOC4yOTY4ODcgNS45MDU4NTMtOC4yOTY4ODdDNS44OTM4OTgtOC4yOTY4ODcgNS4zMDgwOTUtOC4yNDkwNjYgNS4yNDgzMTktOC4yMzcxMTFDNS4wNDUwODEtOC4yMjUxNTYgNC44NjU3NTMtOC4yMDEyNDUgNC42NTA1Ni04LjE4OTI5QzQuMzUxNjgxLTguMTY1MzggNC4yNjc5OTUtOC4xNTM0MjUgNC4yNjc5OTUtNy45MzgyMzJDNC4yNjc5OTUtNy44MTg2OCA0LjM2MzYzNi03LjgxODY4IDQuNTMxMDA5LTcuODE4NjhDNS4xMTY4MTItNy44MTg2OCA1LjEyODc2Ny03LjcxMTA4MyA1LjEyODc2Ny03LjU5MTUzMkM1LjEyODc2Ny03LjUxOTgwMSA1LjEwNDg1Ny03LjQyNDE1OSA1LjA5MjkwMi03LjM4ODI5NEw0LjM2MzYzNi00LjQ4MzE4OEM0LjIzMjEzLTQuNzk0MDIyIDMuOTA5MzQtNS4yNzIyMjkgMy4yODc2NzEtNS4yNzIyMjlDMS45MzY3MzctNS4yNzIyMjkgLjQ3ODIwNy0zLjUyNjc3NSAuNDc4MjA3LTEuNzU3NDFDLjQ3ODIwNy0uNTczODQ4IDEuMTcxNjA2IC4xMTk1NTIgMS45ODQ1NTggLjExOTU1MkMyLjY0MjA5MiAuMTE5NTUyIDMuMjAzOTg1LS4zOTQ1MjEgMy41Mzg3My0uNzg5MDQxQzMuNjU4MjgxLS4wODM2ODYgNC4yMjAxNzQgLjExOTU1MiA0LjU3ODgyOSAuMTE5NTUyUzUuMjI0NDA4LS4wOTU2NDEgNS40Mzk2MDEtLjUyNjAyN0M1LjYzMDg4NC0uOTMyNTAzIDUuNzk4MjU3LTEuNjYxNzY4IDUuNzk4MjU3LTEuNzA5NTg5QzUuNzk4MjU3LTEuNzY5MzY1IDUuNzUwNDM2LTEuODE3MTg2IDUuNjc4NzA1LTEuODE3MTg2QzUuNTcxMTA4LTEuODE3MTg2IDUuNTU5MTUzLTEuNzU3NDEgNS41MTEzMzMtMS41NzgwODJDNS4zMzIwMDUtLjg3MjcyNyA1LjEwNDg1Ny0uMTE5NTUyIDQuNjE0Njk1LS4xMTk1NTJDNC4yNjc5OTUtLjExOTU1MiA0LjI0NDA4NS0uNDMwMzg2IDQuMjQ0MDg1LS42Njk0ODlDNC4yNDQwODUtLjcxNzMxIDQuMjQ0MDg1LS45NjgzNjkgNC4zMjc3NzEtMS4zMDMxMTNMNi4wMTM0NS03Ljk5ODAwN1pNMy41OTg1MDYtMS40MjI2NjVDMy41Mzg3My0xLjIxOTQyNyAzLjUzODczLTEuMTk1NTE3IDMuMzcxMzU3LS45NjgzNjlDMy4xMDgzNDQtLjYzMzYyNCAyLjU4MjMxNi0uMTE5NTUyIDIuMDIwNDIzLS4xMTk1NTJDMS41MzAyNjItLjExOTU1MiAxLjI1NTI5My0uNTYxODkzIDEuMjU1MjkzLTEuMjY3MjQ4QzEuMjU1MjkzLTEuOTI0NzgyIDEuNjI1OTAzLTMuMjYzNzYxIDEuODUzMDUxLTMuNzY1ODc4QzIuMjU5NTI3LTQuNjAyNzQgMi44MjE0Mi01LjAzMzEyNiAzLjI4NzY3MS01LjAzMzEyNkM0LjA3NjcxMi01LjAzMzEyNiA0LjIzMjEzLTQuMDUyODAyIDQuMjMyMTMtMy45NTcxNjFDNC4yMzIxMy0zLjk0NTIwNSA0LjE5NjI2NC0zLjc4OTc4OCA0LjE4NDMwOS0zLjc2NTg3OEwzLjU5ODUwNi0xLjQyMjY2NVonLz4KPHBhdGggaWQ9J2cxLTEwMScgZD0nTTIuMTM5OTc1LTIuNzczNTk5QzIuNDYyNzY1LTIuNzczNTk5IDMuMjc1NzE2LTIuNzk3NTA5IDMuODQ5NTY0LTMuMDEyNzAyQzQuNzU4MTU3LTMuMzU5NDAyIDQuODQxODQzLTQuMDUyODAyIDQuODQxODQzLTQuMjY3OTk1QzQuODQxODQzLTQuNzk0MDIyIDQuMzg3NTQ3LTUuMjcyMjI5IDMuNTk4NTA2LTUuMjcyMjI5QzIuMzQzMjEzLTUuMjcyMjI5IC41Mzc5ODMtNC4xMzY0ODggLjUzNzk4My0yLjAwODQ2OEMuNTM3OTgzLS43NTMxNzYgMS4yNTUyOTMgLjExOTU1MiAyLjM0MzIxMyAuMTE5NTUyQzMuOTY5MTE2IC4xMTk1NTIgNC45OTcyNi0xLjE0NzY5NiA0Ljk5NzI2LTEuMzAzMTEzQzQuOTk3MjYtMS4zNzQ4NDQgNC45MjU1MjktMS40MzQ2MiA0Ljg3NzcwOS0xLjQzNDYyQzQuODQxODQzLTEuNDM0NjIgNC44Mjk4ODgtMS40MjI2NjUgNC43MjIyOTEtMS4zMTUwNjhDMy45NTcxNjEtLjI5ODg3OSAyLjgyMTQyLS4xMTk1NTIgMi4zNjcxMjMtLjExOTU1MkMxLjY4NTY3OS0uMTE5NTUyIDEuMzI3MDI0LS42NTc1MzQgMS4zMjcwMjQtMS41NDIyMTdDMS4zMjcwMjQtMS43MDk1ODkgMS4zMjcwMjQtMi4wMDg0NjggMS41MDYzNTEtMi43NzM1OTlIMi4xMzk5NzVaTTEuNTY2MTI3LTMuMDEyNzAyQzIuMDgwMTk5LTQuODUzNzk4IDMuMjE1OTQtNS4wMzMxMjYgMy41OTg1MDYtNS4wMzMxMjZDNC4xMjQ1MzMtNS4wMzMxMjYgNC40ODMxODgtNC43MjIyOTEgNC40ODMxODgtNC4yNjc5OTVDNC40ODMxODgtMy4wMTI3MDIgMi41NzAzNjEtMy4wMTI3MDIgMi4wNjgyNDQtMy4wMTI3MDJIMS41NjYxMjdaJy8+CjxwYXRoIGlkPSdnMS0xMDInIGQ9J001LjMzMjAwNS00LjgwNTk3OEM1LjU3MTEwOC00LjgwNTk3OCA1LjY2Njc1LTQuODA1OTc4IDUuNjY2NzUtNS4wMzMxMjZDNS42NjY3NS01LjE1MjY3NyA1LjU3MTEwOC01LjE1MjY3NyA1LjM1NTkxNS01LjE1MjY3N0g0LjM4NzU0N0M0LjYxNDY5NS02LjM4NDA2IDQuNzgyMDY3LTcuMjMyODc3IDQuODc3NzA5LTcuNjE1NDQyQzQuOTQ5NDQtNy45MDIzNjYgNS4yMDA0OTgtOC4xNzczMzUgNS41MTEzMzMtOC4xNzczMzVDNS43NjIzOTEtOC4xNzczMzUgNi4wMTM0NS04LjA2OTczOCA2LjEzMzAwMS03Ljk2MjE0MkM1LjY2Njc1LTcuOTE0MzIxIDUuNTIzMjg4LTcuNTY3NjIxIDUuNTIzMjg4LTcuMzY0Mzg0QzUuNTIzMjg4LTcuMTI1MjggNS43MDI2MTUtNi45ODE4MTggNS45Mjk3NjMtNi45ODE4MThDNi4xNjg4NjctNi45ODE4MTggNi41Mjc1MjItNy4xODUwNTYgNi41Mjc1MjItNy42MzkzNTJDNi41Mjc1MjItOC4xNDE0NjkgNi4wMjU0MDUtOC40MTY0MzggNS40OTkzNzctOC40MTY0MzhDNC45ODUzMDUtOC40MTY0MzggNC40ODMxODgtOC4wMzM4NzMgNC4yNDQwODUtNy41Njc2MjFDNC4wMjg4OTItNy4xNDkxOTEgMy45MDkzNC02LjcxODgwNCAzLjYzNDM3MS01LjE1MjY3N0gyLjgzMzM3NUMyLjYwNjIyNy01LjE1MjY3NyAyLjQ4NjY3NS01LjE1MjY3NyAyLjQ4NjY3NS00LjkzNzQ4NEMyLjQ4NjY3NS00LjgwNTk3OCAyLjU1ODQwNi00LjgwNTk3OCAyLjc5NzUwOS00LjgwNTk3OEgzLjU2MjY0QzMuMzQ3NDQ3LTMuNjk0MTQ3IDIuODU3Mjg1LS45OTIyNzkgMi41ODIzMTYgLjI4NjkyNEMyLjM3OTA3OCAxLjMyNzAyNCAyLjE5OTc1MSAyLjE5OTc1MSAxLjYwMTk5MyAyLjE5OTc1MUMxLjU2NjEyNyAyLjE5OTc1MSAxLjIxOTQyNyAyLjE5OTc1MSAxLjAwNDIzNCAxLjk3MjYwM0MxLjYxMzk0OCAxLjkyNDc4MiAxLjYxMzk0OCAxLjM5ODc1NSAxLjYxMzk0OCAxLjM4NjhDMS42MTM5NDggMS4xNDc2OTYgMS40MzQ2MiAxLjAwNDIzNCAxLjIwNzQ3MiAxLjAwNDIzNEMuOTY4MzY5IDEuMDA0MjM0IC42MDk3MTQgMS4yMDc0NzIgLjYwOTcxNCAxLjY2MTc2OEMuNjA5NzE0IDIuMTc1ODQxIDEuMTM1NzQxIDIuNDM4ODU0IDEuNjAxOTkzIDIuNDM4ODU0QzIuODIxNDIgMi40Mzg4NTQgMy4zMjM1MzcgLjI1MTA1OSAzLjQ1NTA0NC0uMzQ2N0MzLjY3MDIzNy0xLjI2NzI0OCA0LjI1NjA0LTQuNDQ3MzIzIDQuMzE1ODE2LTQuODA1OTc4SDUuMzMyMDA1WicvPgo8cGF0aCBpZD0nZzEtMTAzJyBkPSdNNC4wNDA4NDctMS41MTgzMDZDMy45OTMwMjYtMS4zMjcwMjQgMy45NjkxMTYtMS4yNzkyMDMgMy44MTM2OTktMS4wOTk4NzVDMy4zMjM1MzctLjQ2NjI1MiAyLjgyMTQyLS4yMzkxMDMgMi40NTA4MDktLjIzOTEwM0MyLjA1NjI4OS0uMjM5MTAzIDEuNjg1Njc5LS41NDk5MzggMS42ODU2NzktMS4zNzQ4NDRDMS42ODU2NzktMi4wMDg0NjggMi4wNDQzMzQtMy4zNDc0NDcgMi4zMDczNDctMy44ODU0M0MyLjY1NDA0Ny00LjU1NDkxOSAzLjE5MjAzLTUuMDMzMTI2IDMuNjk0MTQ3LTUuMDMzMTI2QzQuNDgzMTg4LTUuMDMzMTI2IDQuNjM4NjA1LTQuMDUyODAyIDQuNjM4NjA1LTMuOTgxMDcxTDQuNjAyNzQtMy44MTM2OTlMNC4wNDA4NDctMS41MTgzMDZaTTQuNzgyMDY3LTQuNDgzMTg4QzQuNjI2NjUtNC44Mjk4ODggNC4yOTE5MDUtNS4yNzIyMjkgMy42OTQxNDctNS4yNzIyMjlDMi4zOTEwMzQtNS4yNzIyMjkgLjkwODU5My0zLjYzNDM3MSAuOTA4NTkzLTEuODUzMDUxQy45MDg1OTMtLjYwOTcxNCAxLjY2MTc2OCAwIDIuNDI2ODk5IDBDMy4wNjA1MjMgMCAzLjYyMjQxNi0uNTAyMTE3IDMuODM3NjA5LS43NDEyMkwzLjU3NDU5NSAuMzM0NzQ1QzMuNDA3MjIzIC45OTIyNzkgMy4zMzU0OTIgMS4yOTExNTggMi45MDUxMDYgMS43MDk1ODlDMi40MTQ5NDQgMi4xOTk3NTEgMS45NjA2NDggMi4xOTk3NTEgMS42OTc2MzQgMi4xOTk3NTFDMS4zMzg5NzkgMi4xOTk3NTEgMS4wNDAxIDIuMTc1ODQxIC43NDEyMiAyLjA4MDE5OUMxLjEyMzc4NiAxLjk3MjYwMyAxLjIxOTQyNyAxLjYzNzg1OCAxLjIxOTQyNyAxLjUwNjM1MUMxLjIxOTQyNyAxLjMxNTA2OCAxLjA3NTk2NSAxLjEyMzc4NiAuODEyOTUxIDEuMTIzNzg2Qy41MjYwMjcgMS4xMjM3ODYgLjIxNTE5MyAxLjM2Mjg4OSAuMjE1MTkzIDEuNzU3NDFDLjIxNTE5MyAyLjI0NzU3MiAuNzA1MzU1IDIuNDM4ODU0IDEuNzIxNTQ0IDIuNDM4ODU0QzMuMjYzNzYxIDIuNDM4ODU0IDQuMDY0NzU3IDEuNDQ2NTc1IDQuMjIwMTc0IC44MDA5OTZMNS41NDcxOTgtNC41NTQ5MTlDNS41ODMwNjQtNC42OTgzODEgNS41ODMwNjQtNC43MjIyOTEgNS41ODMwNjQtNC43NDYyMDJDNS41ODMwNjQtNC45MTM1NzQgNS40NTE1NTctNS4wNDUwODEgNS4yNzIyMjktNS4wNDUwODFDNC45ODUzMDUtNS4wNDUwODEgNC44MTc5MzMtNC44MDU5NzggNC43ODIwNjctNC40ODMxODhaJy8+CjxwYXRoIGlkPSdnMS0xMDgnIGQ9J00zLjAzNjYxMy03Ljk5ODAwN0MzLjA0ODU2OC04LjA0NTgyOCAzLjA3MjQ3OC04LjExNzU1OSAzLjA3MjQ3OC04LjE3NzMzNUMzLjA3MjQ3OC04LjI5Njg4NyAyLjk1MjkyNy04LjI5Njg4NyAyLjkyOTAxNi04LjI5Njg4N0MyLjkxNzA2MS04LjI5Njg4NyAyLjQ4NjY3NS04LjI2MTAyMSAyLjI3MTQ4Mi04LjIzNzExMUMyLjA2ODI0NC04LjIyNTE1NiAxLjg4ODkxNy04LjIwMTI0NSAxLjY3MzcyNC04LjE4OTI5QzEuMzg2OC04LjE2NTM4IDEuMzAzMTEzLTguMTUzNDI1IDEuMzAzMTEzLTcuOTM4MjMyQzEuMzAzMTEzLTcuODE4NjggMS40MjI2NjUtNy44MTg2OCAxLjU0MjIxNy03LjgxODY4QzIuMTUxOTMtNy44MTg2OCAyLjE1MTkzLTcuNzExMDgzIDIuMTUxOTMtNy41OTE1MzJDMi4xNTE5My03LjU0MzcxMSAyLjE1MTkzLTcuNTE5ODAxIDIuMDkyMTU0LTcuMzA0NjA4TC42MDk3MTQtMS4zNzQ4NDRDLjU3Mzg0OC0xLjI0MzMzNyAuNTQ5OTM4LTEuMTQ3Njk2IC41NDk5MzgtLjk1NjQxM0MuNTQ5OTM4LS4zNTg2NTUgLjk5MjI3OSAuMTE5NTUyIDEuNjAxOTkzIC4xMTk1NTJDMS45OTY1MTMgLjExOTU1MiAyLjI1OTUyNy0uMTQzNDYyIDIuNDUwODA5LS41MTQwNzJDMi42NTQwNDctLjkwODU5MyAyLjgyMTQyLTEuNjYxNzY4IDIuODIxNDItMS43MDk1ODlDMi44MjE0Mi0xLjc2OTM2NSAyLjc3MzU5OS0xLjgxNzE4NiAyLjcwMTg2OC0xLjgxNzE4NkMyLjU5NDI3MS0xLjgxNzE4NiAyLjU4MjMxNi0xLjc1NzQxIDIuNTM0NDk2LTEuNTc4MDgyQzIuMzE5MzAzLS43NTMxNzYgMi4xMDQxMS0uMTE5NTUyIDEuNjI1OTAzLS4xMTk1NTJDMS4yNjcyNDgtLjExOTU1MiAxLjI2NzI0OC0uNTAyMTE3IDEuMjY3MjQ4LS42Njk0ODlDMS4yNjcyNDgtLjcxNzMxIDEuMjY3MjQ4LS45NjgzNjkgMS4zNTA5MzQtMS4zMDMxMTNMMy4wMzY2MTMtNy45OTgwMDdaJy8+CjxwYXRoIGlkPSdnMS0xMTEnIGQ9J001LjQ1MTU1Ny0zLjI4NzY3MUM1LjQ1MTU1Ny00LjQyMzQxMiA0LjcxMDMzNi01LjI3MjIyOSAzLjYyMjQxNi01LjI3MjIyOUMyLjA0NDMzNC01LjI3MjIyOSAuNDkwMTYyLTMuNTUwNjg1IC40OTAxNjItMS44NjUwMDZDLjQ5MDE2Mi0uNzI5MjY1IDEuMjMxMzgyIC4xMTk1NTIgMi4zMTkzMDMgLjExOTU1MkMzLjkwOTM0IC4xMTk1NTIgNS40NTE1NTctMS42MDE5OTMgNS40NTE1NTctMy4yODc2NzFaTTIuMzMxMjU4LS4xMTk1NTJDMS43MzM0OTktLjExOTU1MiAxLjI5MTE1OC0uNTk3NzU4IDEuMjkxMTU4LTEuNDM0NjJDMS4yOTExNTgtMS45ODQ1NTggMS41NzgwODItMy4yMDM5ODUgMS45MTI4MjctMy44MDE3NDNDMi40NTA4MDktNC43MjIyOTEgMy4xMjAyOTktNS4wMzMxMjYgMy42MTA0NjEtNS4wMzMxMjZDNC4xOTYyNjQtNS4wMzMxMjYgNC42NTA1Ni00LjU1NDkxOSA0LjY1MDU2LTMuNzE4MDU3QzQuNjUwNTYtMy4yMzk4NTEgNC4zOTk1MDItMS45NjA2NDggMy45NDUyMDUtMS4yMzEzODJDMy40NTUwNDQtLjQzMDM4NiAyLjc5NzUwOS0uMTE5NTUyIDIuMzMxMjU4LS4xMTk1NTJaJy8+CjxwYXRoIGlkPSdnMS0xMTInIGQ9J00uNTE0MDcyIDEuNTE4MzA2Qy40MzAzODYgMS44NzY5NjEgLjM4MjU2NSAxLjk3MjYwMy0uMTA3NTk3IDEuOTcyNjAzQy0uMjUxMDU5IDEuOTcyNjAzLS4zNzA2MSAxLjk3MjYwMy0uMzcwNjEgMi4xOTk3NTFDLS4zNzA2MSAyLjIyMzY2MS0uMzU4NjU1IDIuMzE5MzAzLS4yMjcxNDggMi4zMTkzMDNDLS4wNzE3MzEgMi4zMTkzMDMgLjA5NTY0MSAyLjI5NTM5MiAuMjUxMDU5IDIuMjk1MzkySC43NjUxMzFDMS4wMTYxODkgMi4yOTUzOTIgMS42MjU5MDMgMi4zMTkzMDMgMS44NzY5NjEgMi4zMTkzMDNDMS45NDg2OTIgMi4zMTkzMDMgMi4wOTIxNTQgMi4zMTkzMDMgMi4wOTIxNTQgMi4xMDQxMUMyLjA5MjE1NCAxLjk3MjYwMyAyLjAwODQ2OCAxLjk3MjYwMyAxLjgwNTIzIDEuOTcyNjAzQzEuMjU1MjkzIDEuOTcyNjAzIDEuMjE5NDI3IDEuODg4OTE3IDEuMjE5NDI3IDEuNzkzMjc1QzEuMjE5NDI3IDEuNjQ5ODEzIDEuNzU3NDEtLjQwNjQ3NiAxLjgyOTE0MS0uNjgxNDQ1QzEuOTYwNjQ4LS4zNDY3IDIuMjgzNDM3IC4xMTk1NTIgMi45MDUxMDYgLjExOTU1MkM0LjI1NjA0IC4xMTk1NTIgNS43MTQ1Ny0xLjYzNzg1OCA1LjcxNDU3LTMuMzk1MjY4QzUuNzE0NTctNC40OTUxNDMgNS4wOTI5MDItNS4yNzIyMjkgNC4xOTYyNjQtNS4yNzIyMjlDMy40MzExMzMtNS4yNzIyMjkgMi43ODU1NTQtNC41MzEwMDkgMi42NTQwNDctNC4zNjM2MzZDMi41NTg0MDYtNC45NjEzOTUgMi4wOTIxNTQtNS4yNzIyMjkgMS42MTM5NDgtNS4yNzIyMjlDMS4yNjcyNDgtNS4yNzIyMjkgLjk5MjI3OS01LjEwNDg1NyAuNzY1MTMxLTQuNjUwNTZDLjU0OTkzOC00LjIyMDE3NCAuMzgyNTY1LTMuNDkwOTA5IC4zODI1NjUtMy40NDMwODhTLjQzMDM4Ni0zLjMzNTQ5MiAuNTE0MDcyLTMuMzM1NDkyQy42MDk3MTQtMy4zMzU0OTIgLjYyMTY2OS0zLjM0NzQ0NyAuNjkzNC0zLjYyMjQxNkMuODcyNzI3LTQuMzI3NzcxIDEuMDk5ODc1LTUuMDMzMTI2IDEuNTc4MDgyLTUuMDMzMTI2QzEuODUzMDUxLTUuMDMzMTI2IDEuOTQ4NjkyLTQuODQxODQzIDEuOTQ4NjkyLTQuNDgzMTg4QzEuOTQ4NjkyLTQuMTk2MjY0IDEuOTEyODI3LTQuMDc2NzEyIDEuODY1MDA2LTMuODYxNTE5TC41MTQwNzIgMS41MTgzMDZaTTIuNTgyMzE2LTMuNzMwMDEyQzIuNjY2MDAyLTQuMDY0NzU3IDMuMDAwNzQ3LTQuNDExNDU3IDMuMTkyMDMtNC41Nzg4MjlDMy4zMjM1MzctNC42OTgzODEgMy43MTgwNTctNS4wMzMxMjYgNC4xNzIzNTQtNS4wMzMxMjZDNC42OTgzODEtNS4wMzMxMjYgNC45Mzc0ODQtNC41MDcwOTggNC45Mzc0ODQtMy44ODU0M0M0LjkzNzQ4NC0zLjMxMTU4MiA0LjYwMjc0LTEuOTYwNjQ4IDQuMzAzODYxLTEuMzM4OTc5QzQuMDA0OTgxLS42OTM0IDMuNDU1MDQ0LS4xMTk1NTIgMi45MDUxMDYtLjExOTU1MkMyLjA5MjE1NC0uMTE5NTUyIDEuOTYwNjQ4LTEuMTQ3Njk2IDEuOTYwNjQ4LTEuMTk1NTE3QzEuOTYwNjQ4LTEuMjMxMzgyIDEuOTg0NTU4LTEuMzI3MDI0IDEuOTk2NTEzLTEuMzg2OEwyLjU4MjMxNi0zLjczMDAxMlonLz4KPHBhdGggaWQ9J2cxLTExNCcgZD0nTTQuNjUwNTYtNC44ODk2NjRDNC4yNzk5NS00LjgxNzkzMyA0LjA4ODY2Ny00LjU1NDkxOSA0LjA4ODY2Ny00LjI5MTkwNUM0LjA4ODY2Ny00LjAwNDk4MSA0LjMxNTgxNi0zLjkwOTM0IDQuNDgzMTg4LTMuOTA5MzRDNC44MTc5MzMtMy45MDkzNCA1LjA5MjkwMi00LjE5NjI2NCA1LjA5MjkwMi00LjU1NDkxOUM1LjA5MjkwMi00LjkzNzQ4NCA0LjcyMjI5MS01LjI3MjIyOSA0LjEyNDUzMy01LjI3MjIyOUMzLjY0NjMyNi01LjI3MjIyOSAzLjA5NjM4OS01LjA1NzAzNiAyLjU5NDI3MS00LjMyNzc3MUMyLjUxMDU4NS00Ljk2MTM5NSAyLjAzMjM3OS01LjI3MjIyOSAxLjU1NDE3Mi01LjI3MjIyOUMxLjA4NzkyLTUuMjcyMjI5IC44NDg4MTctNC45MTM1NzQgLjcwNTM1NS00LjY1MDU2Qy41MDIxMTctNC4yMjAxNzQgLjMyMjc5LTMuNTAyODY0IC4zMjI3OS0zLjQ0MzA4OEMuMzIyNzktMy4zOTUyNjggLjM3MDYxLTMuMzM1NDkyIC40NTQyOTYtMy4zMzU0OTJDLjU0OTkzOC0zLjMzNTQ5MiAuNTYxODkzLTMuMzQ3NDQ3IC42MzM2MjQtMy42MjI0MTZDLjgxMjk1MS00LjMzOTcyNiAxLjA0MDEtNS4wMzMxMjYgMS41MTgzMDYtNS4wMzMxMjZDMS44MDUyMy01LjAzMzEyNiAxLjg4ODkxNy00LjgyOTg4OCAxLjg4ODkxNy00LjQ4MzE4OEMxLjg4ODkxNy00LjIyMDE3NCAxLjc2OTM2NS0zLjc1MzkyMyAxLjY4NTY3OS0zLjM4MzMxM0wxLjM1MDkzNC0yLjA5MjE1NEMxLjMwMzExMy0xLjg2NTAwNiAxLjE3MTYwNi0xLjMyNzAyNCAxLjExMTgzMS0xLjExMTgzMUMxLjAyODE0NC0uODAwOTk2IC44OTY2MzgtLjIzOTEwMyAuODk2NjM4LS4xNzkzMjhDLjg5NjYzOC0uMDExOTU1IDEuMDI4MTQ0IC4xMTk1NTIgMS4yMDc0NzIgLjExOTU1MkMxLjMzODk3OSAuMTE5NTUyIDEuNTY2MTI3IC4wMzU4NjYgMS42Mzc4NTgtLjIwMzIzOEMxLjY3MzcyNC0uMjk4ODc5IDIuMTE2MDY1LTIuMTA0MTEgMi4xODc3OTYtMi4zNzkwNzhDMi4yNDc1NzItMi42NDIwOTIgMi4zMTkzMDMtMi44OTMxNTEgMi4zNzkwNzgtMy4xNTYxNjRDMi40MjY4OTktMy4zMjM1MzcgMi40NzQ3Mi0zLjUxNDgxOSAyLjUxMDU4NS0zLjY3MDIzN0MyLjU0NjQ1MS0zLjc3NzgzMyAyLjg2OTI0LTQuMzYzNjM2IDMuMTY4MTItNC42MjY2NUMzLjMxMTU4Mi00Ljc1ODE1NyAzLjYyMjQxNi01LjAzMzEyNiA0LjExMjU3OC01LjAzMzEyNkM0LjMwMzg2MS01LjAzMzEyNiA0LjQ5NTE0My00Ljk5NzI2IDQuNjUwNTYtNC44ODk2NjRaJy8+CjxwYXRoIGlkPSdnMS0xMTYnIGQ9J00yLjQwMjk4OS00LjgwNTk3OEgzLjUwMjg2NEMzLjczMDAxMi00LjgwNTk3OCAzLjg0OTU2NC00LjgwNTk3OCAzLjg0OTU2NC01LjAyMTE3MUMzLjg0OTU2NC01LjE1MjY3NyAzLjc3NzgzMy01LjE1MjY3NyAzLjUzODczLTUuMTUyNjc3SDIuNDg2Njc1TDIuOTI5MDE2LTYuODk4MTMyQzIuOTc2ODM3LTcuMDY1NTA0IDIuOTc2ODM3LTcuMDg5NDE1IDIuOTc2ODM3LTcuMTczMTAxQzIuOTc2ODM3LTcuMzY0Mzg0IDIuODIxNDItNy40NzE5OCAyLjY2NjAwMi03LjQ3MTk4QzIuNTcwMzYxLTcuNDcxOTggMi4yOTUzOTItNy40MzYxMTUgMi4xOTk3NTEtNy4wNTM1NDlMMS43MzM0OTktNS4xNTI2NzdILjYwOTcxNEMuMzcwNjEtNS4xNTI2NzcgLjI2MzAxNC01LjE1MjY3NyAuMjYzMDE0LTQuOTI1NTI5Qy4yNjMwMTQtNC44MDU5NzggLjM0NjctNC44MDU5NzggLjU3Mzg0OC00LjgwNTk3OEgxLjYzNzg1OEwuODQ4ODE3LTEuNjQ5ODEzQy43NTMxNzYtMS4yMzEzODIgLjcxNzMxLTEuMTExODMxIC43MTczMS0uOTU2NDEzQy43MTczMS0uMzk0NTIxIDEuMTExODMxIC4xMTk1NTIgMS43ODEzMiAuMTE5NTUyQzIuOTg4NzkyIC4xMTk1NTIgMy42MzQzNzEtMS42MjU5MDMgMy42MzQzNzEtMS43MDk1ODlDMy42MzQzNzEtMS43ODEzMiAzLjU4NjU1LTEuODE3MTg2IDMuNTE0ODE5LTEuODE3MTg2QzMuNDkwOTA5LTEuODE3MTg2IDMuNDQzMDg4LTEuODE3MTg2IDMuNDE5MTc4LTEuNzY5MzY1QzMuNDA3MjIzLTEuNzU3NDEgMy4zOTUyNjgtMS43NDU0NTUgMy4zMTE1ODItMS41NTQxNzJDMy4wNjA1MjMtLjk1NjQxMyAyLjUxMDU4NS0uMTE5NTUyIDEuODE3MTg2LS4xMTk1NTJDMS40NTg1MzEtLjExOTU1MiAxLjQzNDYyLS40MTg0MzEgMS40MzQ2Mi0uNjgxNDQ1QzEuNDM0NjItLjY5MzQgMS40MzQ2Mi0uOTIwNTQ4IDEuNDcwNDg2LTEuMDY0MDFMMi40MDI5ODktNC44MDU5NzhaJy8+CjxwYXRoIGlkPSdnMS0xMjAnIGQ9J001LjY2Njc1LTQuODc3NzA5QzUuMjg0MTg0LTQuODA1OTc4IDUuMTQwNzIyLTQuNTE5MDU0IDUuMTQwNzIyLTQuMjkxOTA1QzUuMTQwNzIyLTQuMDA0OTgxIDUuMzY3ODctMy45MDkzNCA1LjUzNTI0My0zLjkwOTM0QzUuODkzODk4LTMuOTA5MzQgNi4xNDQ5NTYtNC4yMjAxNzQgNi4xNDQ5NTYtNC41NDI5NjRDNi4xNDQ5NTYtNS4wNDUwODEgNS41NzExMDgtNS4yNzIyMjkgNS4wNjg5OTEtNS4yNzIyMjlDNC4zMzk3MjYtNS4yNzIyMjkgMy45MzMyNS00LjU1NDkxOSAzLjgyNTY1NC00LjMyNzc3MUMzLjU1MDY4NS01LjIyNDQwOCAyLjgwOTQ2NS01LjI3MjIyOSAyLjU5NDI3MS01LjI3MjIyOUMxLjM3NDg0NC01LjI3MjIyOSAuNzI5MjY1LTMuNzA2MTAyIC43MjkyNjUtMy40NDMwODhDLjcyOTI2NS0zLjM5NTI2OCAuNzc3MDg2LTMuMzM1NDkyIC44NjA3NzItMy4zMzU0OTJDLjk1NjQxMy0zLjMzNTQ5MiAuOTgwMzI0LTMuNDA3MjIzIDEuMDA0MjM0LTMuNDU1MDQ0QzEuNDEwNzEtNC43ODIwNjcgMi4yMTE3MDYtNS4wMzMxMjYgMi41NTg0MDYtNS4wMzMxMjZDMy4wOTYzODktNS4wMzMxMjYgMy4yMDM5ODUtNC41MzEwMDkgMy4yMDM5ODUtNC4yNDQwODVDMy4yMDM5ODUtMy45ODEwNzEgMy4xMzIyNTQtMy43MDYxMDIgMi45ODg3OTItMy4xMzIyNTRMMi41ODIzMTYtMS40OTQzOTZDMi40MDI5ODktLjc3NzA4NiAyLjA1NjI4OS0uMTE5NTUyIDEuNDIyNjY1LS4xMTk1NTJDMS4zNjI4ODktLjExOTU1MiAxLjA2NDAxLS4xMTk1NTIgLjgxMjk1MS0uMjc0OTY5QzEuMjQzMzM3LS4zNTg2NTUgMS4zMzg5NzktLjcxNzMxIDEuMzM4OTc5LS44NjA3NzJDMS4zMzg5NzktMS4wOTk4NzUgMS4xNTk2NTEtMS4yNDMzMzcgLjkzMjUwMy0xLjI0MzMzN0MuNjQ1NTc5LTEuMjQzMzM3IC4zMzQ3NDUtLjk5MjI3OSAuMzM0NzQ1LS42MDk3MTRDLjMzNDc0NS0uMTA3NTk3IC44OTY2MzggLjExOTU1MiAxLjQxMDcxIC4xMTk1NTJDMS45ODQ1NTggLjExOTU1MiAyLjM5MTAzNC0uMzM0NzQ1IDIuNjQyMDkyLS44MjQ5MDdDMi44MzMzNzUtLjExOTU1MiAzLjQzMTEzMyAuMTE5NTUyIDMuODczNDc0IC4xMTk1NTJDNS4wOTI5MDIgLjExOTU1MiA1LjczODQ4MS0xLjQ0NjU3NSA1LjczODQ4MS0xLjcwOTU4OUM1LjczODQ4MS0xLjc2OTM2NSA1LjY5MDY2LTEuODE3MTg2IDUuNjE4OTI5LTEuODE3MTg2QzUuNTExMzMzLTEuODE3MTg2IDUuNDk5Mzc3LTEuNzU3NDEgNS40NjM1MTItMS42NjE3NjhDNS4xNDA3MjItLjYwOTcxNCA0LjQ0NzMyMy0uMTE5NTUyIDMuOTA5MzQtLjExOTU1MkMzLjQ5MDkwOS0uMTE5NTUyIDMuMjYzNzYxLS40MzAzODYgMy4yNjM3NjEtLjkyMDU0OEMzLjI2Mzc2MS0xLjE4MzU2MiAzLjMxMTU4Mi0xLjM3NDg0NCAzLjUwMjg2NC0yLjE2Mzg4NUwzLjkyMTI5NS0zLjc4OTc4OEM0LjEwMDYyMy00LjUwNzA5OCA0LjUwNzA5OC01LjAzMzEyNiA1LjA1NzAzNi01LjAzMzEyNkM1LjA4MDk0Ni01LjAzMzEyNiA1LjQxNTY5MS01LjAzMzEyNiA1LjY2Njc1LTQuODc3NzA5WicvPgo8L2RlZnM+CjxnIGlkPSdwYWdlMScgdHJhbnNmb3JtPSdtYXRyaXgoMS4xMyAwIDAgMS4xMyAtNjMuNTY1NjgzIC02NC40MSknPgo8dXNlIHg9JzU2LjQxMzI2NycgeT0nNjUuNzUzNDI1JyB4bGluazpocmVmPScjZzEtMTEyJy8+Cjx1c2UgeD0nNjIuMjg4NDEnIHk9JzY1Ljc1MzQyNScgeGxpbms6aHJlZj0nI2czLTQwJy8+Cjx1c2UgeD0nNjYuODQwNzM2JyB5PSc2NS43NTM0MjUnIHhsaW5rOmhyZWY9JyNnMS0xMDAnLz4KPHVzZSB4PSc3Mi45MjM0MjknIHk9JzY3LjU0NjY4OCcgeGxpbms6aHJlZj0nI2cwLTEwNScvPgo8dXNlIHg9Jzc2LjMwNDcwMScgeT0nNjUuNzUzNDI1JyB4bGluazpocmVmPScjZzMtNDEnLz4KPHVzZSB4PSc4NC4xNzc4NTYnIHk9JzY1Ljc1MzQyNScgeGxpbms6aHJlZj0nI2czLTYxJy8+Cjx1c2UgeD0nOTYuNjAzMzM3JyB5PSc2NS43NTM0MjUnIHhsaW5rOmhyZWY9JyNnMS02MScvPgo8dXNlIHg9JzEwMi40NTYzMjcnIHk9JzY1Ljc1MzQyNScgeGxpbms6aHJlZj0nI2cxLTExNicvPgo8dXNlIHg9JzEwNi42ODM0ODYnIHk9JzY1Ljc1MzQyNScgeGxpbms6aHJlZj0nI2cxLTEwMScvPgo8dXNlIHg9JzExMi4xMDg5MjcnIHk9JzY1Ljc1MzQyNScgeGxpbms6aHJlZj0nI2cxLTEyMCcvPgo8dXNlIHg9JzExOC43NjEwMTQnIHk9JzY1Ljc1MzQyNScgeGxpbms6aHJlZj0nI2cxLTExNicvPgo8dXNlIHg9JzEyMi45ODgxNzMnIHk9JzY1Ljc1MzQyNScgeGxpbms6aHJlZj0nI2cxLTEwOCcvPgo8dXNlIHg9JzEyNi43Mzc5ODInIHk9JzY1Ljc1MzQyNScgeGxpbms6aHJlZj0nI2cxLTExMScvPgo8dXNlIHg9JzEzMi4zNjU0MTknIHk9JzY1Ljc1MzQyNScgeGxpbms6aHJlZj0nI2cxLTEwMycvPgo8dXNlIHg9JzEzOC4zOTk2NjQnIHk9JzY4LjU3NjE1MicgeGxpbms6aHJlZj0nI2cyLTQ5Jy8+Cjx1c2UgeD0nMTQyLjYzMzg0NycgeT0nNjguNTc2MTUyJyB4bGluazpocmVmPScjZzItNDgnLz4KPHVzZSB4PScxNDcuMzY2MTYyJyB5PSc2NS43NTM0MjUnIHhsaW5rOmhyZWY9JyNnMy00MCcvPgo8dXNlIHg9JzE1MS45MTg0ODgnIHk9JzY1Ljc1MzQyNScgeGxpbms6aHJlZj0nI2czLTQ5Jy8+Cjx1c2UgeD0nMTYwLjQyODE0MScgeT0nNjUuNzUzNDI1JyB4bGluazpocmVmPScjZzMtNDMnLz4KPHVzZSB4PScxNzIuMTg5NDU2JyB5PSc2NS43NTM0MjUnIHhsaW5rOmhyZWY9JyNnMS02MScvPgo8dXNlIHg9JzE3OC4wNDI0NDcnIHk9JzY1Ljc1MzQyNScgeGxpbms6aHJlZj0nI2cxLTEwMicvPgo8dXNlIHg9JzE4NS4wODg4ODMnIHk9JzY1Ljc1MzQyNScgeGxpbms6aHJlZj0nI2cxLTExNCcvPgo8dXNlIHg9JzE5MC42ODkzNTcnIHk9JzY1Ljc1MzQyNScgeGxpbms6aHJlZj0nI2cxLTk3Jy8+Cjx1c2UgeD0nMTk2LjgzNDMwMScgeT0nNjUuNzUzNDI1JyB4bGluazpocmVmPScjZzEtOTknLz4KPHVzZSB4PScyMDEuODcyMjknIHk9JzY1Ljc1MzQyNScgeGxpbms6aHJlZj0nI2czLTQ5Jy8+Cjx1c2UgeD0nMjA3LjcyNTI4JyB5PSc2NS43NTM0MjUnIHhsaW5rOmhyZWY9JyNnMS0xMDAnLz4KPHVzZSB4PScyMTMuODA3OTczJyB5PSc2Ny41NDY2ODgnIHhsaW5rOmhyZWY9JyNnMC0xMDUnLz4KPHVzZSB4PScyMTcuMTg5MjQxJyB5PSc2NS43NTM0MjUnIHhsaW5rOmhyZWY9JyNnMy00MScvPgo8L2c+Cjwvc3ZnPg==" title="p(d_i) = \text{log}_{10}(\frac{1}{d_i})" /></p>
+<p>The distribution of leading digits in a data set of financial
+transaction values (e.g., the <code>sinoForest</code> data) can be
+extracted and tested against the expected frequencies under Benford’s
+law using the code below.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Frequentist hypothesis test</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">digit_test</span>(sinoForest<span class="sc">$</span>value, <span class="at">check =</span> <span class="st">&quot;first&quot;</span>, <span class="at">reference =</span> <span class="st">&quot;benford&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+##  Digit distribution test
+## 
+## data:  sinoForest$value
+## n = 772, X-squared = 7.6517, df = 8, p-value = 0.4682
+## alternative hypothesis: leading digit(s) are not distributed according to the benford distribution.</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Bayesian hypothesis test using default prior</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">digit_test</span>(sinoForest<span class="sc">$</span>value, <span class="at">check =</span> <span class="st">&quot;first&quot;</span>, <span class="at">reference =</span> <span class="st">&quot;benford&quot;</span>, <span class="at">prior =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## 
+##  Digit distribution test
+## 
+## data:  sinoForest$value
+## n = 772, BF10 = 1.4493e-07
+## alternative hypothesis: leading digit(s) are not distributed according to the benford distribution.</code></pre>
+</div>
+<div id="test-for-repeated-values-with-repeated_test" class="section level3">
+<h3>Test for repeated values with <code>repeated_test()</code></h3>
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable"><img src="data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iOTgiIGhlaWdodD0iMjAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0ibGlmZWN5Y2xlOiBzdGFibGUiPjx0aXRsZT5saWZlY3ljbGU6IHN0YWJsZTwvdGl0bGU+PGxpbmVhckdyYWRpZW50IGlkPSJzIiB4Mj0iMCIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2JiYiIgc3RvcC1vcGFjaXR5PSIuMSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1vcGFjaXR5PSIuMSIvPjwvbGluZWFyR3JhZGllbnQ+PGNsaXBQYXRoIGlkPSJyIj48cmVjdCB3aWR0aD0iOTgiIGhlaWdodD0iMjAiIHJ4PSIzIiBmaWxsPSIjZmZmIi8+PC9jbGlwUGF0aD48ZyBjbGlwLXBhdGg9InVybCgjcikiPjxyZWN0IHdpZHRoPSI1NSIgaGVpZ2h0PSIyMCIgZmlsbD0iIzU1NSIvPjxyZWN0IHg9IjU1IiB3aWR0aD0iNDMiIGhlaWdodD0iMjAiIGZpbGw9IiM0YzEiLz48cmVjdCB3aWR0aD0iOTgiIGhlaWdodD0iMjAiIGZpbGw9InVybCgjcykiLz48L2c+PGcgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IlZlcmRhbmEsR2VuZXZhLERlamFWdSBTYW5zLHNhbnMtc2VyaWYiIHRleHQtcmVuZGVyaW5nPSJnZW9tZXRyaWNQcmVjaXNpb24iIGZvbnQtc2l6ZT0iMTEwIj48dGV4dCBhcmlhLWhpZGRlbj0idHJ1ZSIgeD0iMjg1IiB5PSIxNTAiIGZpbGw9IiMwMTAxMDEiIGZpbGwtb3BhY2l0eT0iLjMiIHRyYW5zZm9ybT0ic2NhbGUoLjEpIiB0ZXh0TGVuZ3RoPSI0NTAiPmxpZmVjeWNsZTwvdGV4dD48dGV4dCB4PSIyODUiIHk9IjE0MCIgdHJhbnNmb3JtPSJzY2FsZSguMSkiIGZpbGw9IiNmZmYiIHRleHRMZW5ndGg9IjQ1MCI+bGlmZWN5Y2xlPC90ZXh0Pjx0ZXh0IGFyaWEtaGlkZGVuPSJ0cnVlIiB4PSI3NTUiIHk9IjE1MCIgZmlsbD0iIzAxMDEwMSIgZmlsbC1vcGFjaXR5PSIuMyIgdHJhbnNmb3JtPSJzY2FsZSguMSkiIHRleHRMZW5ndGg9IjMzMCI+c3RhYmxlPC90ZXh0Pjx0ZXh0IHg9Ijc1NSIgeT0iMTQwIiB0cmFuc2Zvcm09InNjYWxlKC4xKSIgZmlsbD0iI2ZmZiIgdGV4dExlbmd0aD0iMzMwIj5zdGFibGU8L3RleHQ+PC9nPjwvc3ZnPg==" alt="Lifecycle: stable" /></a></p>
+<p>The function <code>repeated_test()</code> analyzes the frequency with
+which values get repeated within a set of numbers. Unlike Benford’s law,
+and its generalizations, this approach examines the entire number at
+once, not only the first or last digit. For the technical details of
+this procedure, see Simohnsohn (2019).</p>
+<p><em>Full function with default arguments:</em></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">repeated_test</span>(x,</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">check =</span> <span class="st">&quot;last&quot;</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">method =</span> <span class="st">&quot;af&quot;</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">samples =</span> <span class="dv">2000</span>)</span></code></pre></div>
+<p><em>Supported options for the <code>check</code> argument:</em></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left"><code>check</code></th>
+<th align="left">Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>last</code></td>
+<td align="left">Last decimal</td>
+</tr>
+<tr class="even">
+<td align="left"><code>lasttwo</code></td>
+<td align="left">Last two decimals</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>all</code></td>
+<td align="left">All decimals</td>
+</tr>
+</tbody>
+</table>
+<p><em>Supported options for the <code>method</code> argument:</em></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left"><code>check</code></th>
+<th align="left">Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>af</code></td>
+<td align="left">Average frequency</td>
+</tr>
+<tr class="even">
+<td align="left"><code>entropy</code></td>
+<td align="left">Entropy</td>
+</tr>
+</tbody>
+</table>
+<p><em>Example usage:</em></p>
+<p>In this example, we analyze a data set from a (retracted) paper that
+describes three experiments run in Chinese factories, where workers were
+nudged to use more hand-sanitizer. These data were shown to exhibited
+two classic markers of data tampering: impossibly similar means and the
+uneven distribution of last digits (Yu, Nelson, &amp; Simohnson, 2018).
+We can use the <code>rv.test()</code> function to test if these data
+also contain a greater amount of repeated values than expected if the
+data were not tampered with.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">repeated_test</span>(sanitizer<span class="sc">$</span>value, <span class="at">check =</span> <span class="st">&quot;lasttwo&quot;</span>, <span class="at">samples =</span> <span class="dv">5000</span>)</span></code></pre></div>
+<pre><code>## 
+##  Repeated values test
+## 
+## data:  sanitizer$value
+## n = 1600, AF = 1.5225, p-value = 0.0024
+## alternative hypothesis: average frequency in data is greater than for random data.</code></pre>
+</div>
+</div>
+<div id="benchmarks" class="section level2">
+<h2>Benchmarks</h2>
+<p>To validate the statistical results, <strong>jfa</strong>’s automated
+<a href="https://github.com/koenderks/jfa/tree/development/tests/testthat">unit
+tests</a> regularly verify the main output from the package against the
+following benchmarks:</p>
+<ul>
+<li><a href="https://cran.r-project.org/package=benford.analysis">benford.analysis</a>
+(R package version 0.1.5)</li>
+<li><a href="https://cran.r-project.org/package=BenfordTests">BenfordTests</a>
+(R package version 1.2.0)</li>
+<li><a href="https://cran.r-project.org/package=BeyondBenford">BeyondBenford</a>
+(R package version 1.4)</li>
+</ul>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li>Benford, F. (1938). The law of anomalous numbers. In <em>Proceedings
+of the American Philosophical Society</em>, 551-572. - <a href="https://www.jstor.org/stable/984802">View online</a></li>
+<li>Kass, R. E., &amp; Raftery, A. E. (1995). Bayes factors. <em>Journal
+of the American Statistical Association</em>, <em>90</em>(430), 773-795.
+- <a href="https://www.tandfonline.com/doi/abs/10.1080/01621459.1995.10476572">View
+online</a></li>
+<li>Simohnsohn, U. (2019, May 25). <em>Number-Bunching: A New Tool for
+Forensic Data Analysis</em>. - <a href="https://datacolada.org/77">View
+online</a></li>
+<li>Yo, F., Nelson, L., &amp; Simonsohn, U. (2018, December 5). <em>In
+Press at Psychological Science: A New ‘Nudge’ Supported by Implausible
+Data</em>. - <a href="https://datacolada.org/74">View online</a></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

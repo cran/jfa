@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2022 Koen Derks
+# Copyright (C) 2020-2023 Koen Derks
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,11 +11,14 @@
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #' BuildIt Construction Financial Statements
 #'
-#' Fictional data from a construction company in the United States, containing 3500 observations identification numbers, book values, and audit values. The audit values are added for illustrative purposes, as these would need to be assessed by the auditor in the execution stage of the audit.
+#' Fictional data from a construction company in the United States, containing
+#' 3500 observations identification numbers, book values, and audit values. The
+#' audit values are added for illustrative purposes, as these would need to be
+#' assessed by the auditor in the execution stage of the audit.
 #'
 #' @docType data
 #'
@@ -30,7 +33,9 @@
 #'
 #' @keywords datasets
 #'
-#' @references Derks, K., de Swart, J., Wagenmakers, E.-J., Wille, J., & Wetzels, R. (2019). JASP for audit: Bayesian tools for the auditing practice.
+#' @references Derks, K., de Swart, J., Wagenmakers, E.-J., Wille, J., &
+#' Wetzels, R. (2021). JASP for audit: Bayesian tools for the auditing practice.
+#' \emph{Journal of Open Source Software}, \emph{6}(68), 2733.
 #'
 #' @examples
 #' data(BuildIt)

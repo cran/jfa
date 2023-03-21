@@ -1,0 +1,19 @@
+## ---- include = FALSE---------------------------------------------------------
+library(jfa)
+
+## ----fig.align="center", fig.height=4, fig.width=6----------------------------
+# Frequentist hypothesis test
+x <- digit_test(sinoForest$value, check = "first", reference = "benford")
+print(x)
+plot(x)
+
+# Bayesian hypothesis test using default prior
+x <- digit_test(sinoForest$value, check = "first", reference = "benford", prior = TRUE)
+print(x)
+plot(x)
+
+## ----fig.align="center", fig.height=4, fig.width=6----------------------------
+x <- repeated_test(sanitizer$value, check = "lasttwo", samples = 2000)
+print(x)
+plot(x)
+

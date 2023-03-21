@@ -2,162 +2,285 @@
 % Please edit documentation in R/evaluation.R
 \name{evaluation}
 \alias{evaluation}
-\title{Evaluate a Statistical Audit Sample}
+\title{Audit Sampling: Evaluation}
 \usage{
-evaluation(materiality = NULL, min.precision = NULL, method = 'poisson',
-           alternative = c('less', 'two.sided', 'greater'), conf.level = 0.95,
-           data = NULL, values = NULL, values.audit = NULL, times = NULL,
-           x = NULL, n = NULL, N.units = NULL, N.items = NULL,
-           r.delta = 2.7, m.type = 'accounts', cs.a = 1, cs.b = 3, cs.mu = 0.5,
+evaluation(materiality = NULL,
+           method = c(
+             "poisson", "binomial", "hypergeometric", "stringer",
+             "stringer.meikle", "stringer.lta", "stringer.pvz", "rohrbach",
+             "moment", "coxsnell", "direct", "difference", "quotient",
+             "regression", "mpu"
+           ),
+           alternative = c("less", "two.sided", "greater"),
+           conf.level = 0.95,
+           data = NULL,
+           values = NULL,
+           values.audit = NULL,
+           strata = NULL,
+           times = NULL,
+           x = NULL,
+           n = NULL,
+           N.units = NULL,
+           N.items = NULL,
+           pooling = c("none", "complete", "partial"),
            prior = FALSE)
 }
 \arguments{
-\item{materiality}{a numeric value between 0 and 1 specifying the performance materiality (i.e., the maximum tolerable misstatement) as a fraction of the total number of units in the population. Can be \code{NULL}, but \code{min.precision} should be specified in that case. Not used for methods \code{direct}, \code{difference}, \code{quotient}, and \code{regression}.}
+\item{materiality}{a numeric value between 0 and 1 specifying the
+performance materiality (i.e., the maximum tolerable misstatement in the
+population) as a fraction of the total number of units in the population.
+Can be \code{NULL}. Not used for methods \code{direct}, \code{difference},
+\code{quotient}, and \code{regression}.}
 
-\item{min.precision}{a numeric value between 0 and 1 specifying the minimum precision (i.e., upper bound minus most likely error) as a fraction of the total population size. Can be \code{NULL}, but \code{materiality} should be specified in that case.}
+\item{method}{a character specifying the statistical method. Possible
+options are \code{poisson} (default), \code{binomial},
+\code{hypergeometric}, \code{mpu}, \code{stringer}, \code{stringer.meikle},
+\code{stringer.lta}, \code{stringer.pvz}, \code{rohrbach}, \code{moment},
+\code{direct}, \code{difference}, \code{quotient}, or \code{regression}.
+See the details section for more information.}
 
-\item{method}{a character specifying the inference method. Possible options are \code{poisson} (default), \code{binomial}, \code{hypergeometric}, \code{mpu}, \code{stringer}, \code{stringer.meikle}, \code{stringer.lta}, \code{stringer.pvz}, \code{rohrbach}, \code{moment}, \code{direct}, \code{difference}, \code{quotient}, or \code{regression}. See the details section for more information.}
+\item{alternative}{a character indicating the alternative hypothesis and
+the type of confidence / credible interval returned by the function.
+Possible options are  \code{less} (default), \code{two.sided}, or
+\code{greater}.}
 
-\item{alternative}{a character indicating the alternative hypothesis and the type of confidence / credible interval. Possible options are \code{less} (default), \code{two.sided}, or \code{greater}.}
-
-\item{conf.level}{a numeric value between 0 and 1 specifying the confidence level.}
+\item{conf.level}{a numeric value between 0 and 1 specifying the
+confidence level (i.e., 1 - audit risk / detection risk).}
 
 \item{data}{a data frame containing a data sample.}
 
-\item{values}{a character specifying name of a column in \code{data} containing the book values of the items.}
+\item{values}{a character specifying name of a numeric column in
+\code{data} containing the book values of the items.}
 
-\item{values.audit}{a character specifying name of a column in \code{data} containing the audit (true) values of the items.}
+\item{values.audit}{a character specifying name of a numeric column in
+\code{data} containing the audit (true) values of the items.}
 
-\item{times}{a character specifying name of a column in \code{data} containing the number of times each item in \code{data} should be counted (e.g., due to being selected multiple times for the sample).}
+\item{strata}{a character specifying name of a factor column in
+\code{data} indicating to which stratum the item belongs.}
 
-\item{x}{a numeric value larger than 0 specifying the sum of (proportional) misstatements in the sample. If specified, overrides the \code{data}, \code{values} and \code{values.audit} arguments and assumes that the data come from summary statistics specified by both \code{x} and \code{n}.}
+\item{times}{a character specifying name of an integer column in
+\code{data} containing the number of times an item should be counted due
+to (not) being selected (multiple times) for the sample. Items for which
+this value is 0 will not be included in the evaluation.}
 
-\item{n}{an integer larger than 0 specifying the number of items in the sample. If specified, overrides the \code{data}, \code{values} and \code{values.audit} arguments and assumes that the data come from summary statistics specified by both \code{x} and \code{n}.}
+\item{x}{a numeric value or vector of values equal to or larger
+than 0 specifying the sum of (proportional) misstatements in the sample or,
+if this is a vector, the sum of taints in each stratum. If this argument is
+specified, the input for the \code{data}, \code{values} and
+\code{values.audit} arguments is discarded and it is assumed that the data
+come from summary statistics specified by \code{x} and \code{n}.}
 
-\item{N.units}{an integer larger than 0 specifying the number of units in the population. Only used for methods \code{hypergeometric}, \code{direct}, \code{difference}, \code{quotient}, and \code{regression}.}
+\item{n}{an integer or vector of integers larger than 0
+specifying the sum of (proportional) misstatements in the sample or, if
+this is a vector, the sum of taints in each stratum. If this argument is
+specified, the input for the \code{data}, \code{values} and
+\code{values.audit} arguments is discarded and it is assumed that the data
+come from summary statistics specified by \code{x} and \code{n}.}
 
-\item{N.items}{an integer larger than 0 specifying the number of items in the population. Only used for methods \code{direct}, \code{difference}, \code{quotient}, and \code{regression}.}
+\item{N.units}{a numeric value or vector of values than 0 specifying
+the total number of units in the population or, if this is a vector, the
+total number of units in each stratum of the population.
+This argument is strictly required for the \code{hypergeometric},
+\code{direct}, \code{difference}, \code{quotient}, and \code{regression}
+methods, but is also used in stratification to weigh the estimates of each
+individual stratum to arrive at the population estimate. If \code{NULL},
+each stratum is assumed to be equally represented in the population.}
 
-\item{r.delta}{a numeric value specifying \eqn{\Delta} in Rohrbach's augmented variance bound (Rohrbach, 1993). Only used for method \code{rohrbach}.}
+\item{N.items}{an integer larger than 0 specifying the number of items
+in the population. Only used for methods \code{direct}, \code{difference},
+\code{quotient}, and \code{regression}.}
 
-\item{m.type}{a character specifying the type of population (Dworin and Grimlund, 1984). Possible options are \code{accounts} and \code{inventory}. Only used for method \code{moment}.}
+\item{pooling}{a character specifying the type of model to use when
+analyzing stratified samples. Possible options are \code{none} (default)
+for no pooling (i.e., no information is shared between strata),
+\code{complete} for complete pooling (i.e., all information is shared
+between strata) or \code{partial} for partial pooling (i.e., some
+information is shared between strata). The latter two options fit a
+Bayesian model to the data using a MCMC sampling procedure whose options
+can be set globally using \code{options("mc.iterations")} (otherwise:
+2000), \code{options("mc.warmup")} (otherwise: 1000),
+\code{options("mc.chains")} (otherwise: 4) and \code{options("mc.cores")}
+(otherwise: 1).}
 
-\item{cs.a}{a numeric value specifying the \eqn{\alpha} parameter of the prior distribution on the mean taint. Only used for method \code{coxsnell}.}
-
-\item{cs.b}{a numeric value specifying the \eqn{\beta} parameter of the prior distribution on the mean taint. Only used for method \code{coxsnell}.}
-
-\item{cs.mu}{a numeric value between 0 and 1 specifying the mean of the prior distribution on the mean taint. Only used for method \code{coxsnell}.}
-
-\item{prior}{a logical specifying whether to use a prior distribution, or an object of class \code{jfaPrior} or \code{jfaPosterior} containing the prior distribution. If \code{FALSE} (default), performs classical planning. If \code{TRUE}, performs Bayesian planning using a default conjugate prior.}
+\item{prior}{a logical specifying whether to use a prior
+distribution, or an object of class \code{jfaPrior} or \code{jfaPosterior}.
+If this argument is specified as \code{FALSE} (default), the function
+performs classical evaluation. If this argument is specified as \code{TRUE}
+or as a prior from \code{auditPrior}, this function performs Bayesian
+evaluation using the specified prior.}
 }
 \value{
 An object of class \code{jfaEvaluation} containing:
 
-\item{conf.level}{a numeric value between 0 and 1 giving the confidence level.}
-\item{mle}{a numeric value between 0 and 1 giving the most likely error in the population.}
-\item{ub}{a numeric value between 0 and 1 giving the upper bound for the population misstatement.}
-\item{lb}{{a numeric value between 0 and 1 giving the lower bound for the population misstatement.}}
-\item{precision}{a numeric value between 0 and 1 giving the difference between the most likely error and the upper bound.}
-\item{p.value}{for classical tests, a numeric value giving the one-sided p-value.}
-\item{x}{an integer larger than, or equal to, 0 giving the number of sample errors.}
-\item{t}{a value larger than, or equal to, 0, giving the sum of proportional sample errors.}
+\item{conf.level}{a numeric value between 0 and 1 giving the confidence
+  level.}
+\item{mle}{a numeric value between 0 and 1 giving the most likely
+  misstatement in the population as a fraction.}
+\item{ub}{a numeric value between 0 and 1 giving the upper bound for the
+  misstatement in the population.}
+\item{lb}{a numeric value between 0 and 1 giving the lower bound for the
+  misstatement in the population.}
+\item{precision}{a numeric value between 0 and 1 giving the difference
+  between the most likely misstatement and the bound relative to
+  \code{alternative}.}
+\item{p.value}{for classical tests, a numeric value giving the p-value.}
+\item{x}{an integer larger than, or equal to, 0 giving the number of
+  misstatements in the sample.}
+\item{t}{a value larger than, or equal to, 0, giving the sum of proportional
+  misstatements in the sample.}
 \item{n}{an integer larger than 0 giving the sample size.}
-\item{materiality}{if \code{materiality} is specified, a numeric value between 0 and 1 giving the performance materiality as a fraction of the number of units in the population.}
-\item{min.precision}{if \code{min.precision} is specified, a numeric value between 0 and 1 giving the minimum precision as a fraction of the number of units in the population.}
+\item{materiality}{if \code{materiality} is specified, a numeric value
+  between 0 and 1 giving the performance materiality as a fraction.}
 \item{alternative}{a character indicating the alternative hypothesis.}
-\item{method}{a character indicating the inference method.}
-\item{N.units}{if \code{N.units} is specified, in integer larger than 0 indicating the number of units in the population.}
-\item{N.items}{if \code{N.items} is specified, in integer larger than 0 indicating the number of items in the population.}
-\item{K}{if \code{method = 'hypergeometric'}, an integer indicating the assumed total errors in the population.}
-\item{prior}{an object of class 'jfaPrior' that contains the prior distribution.}
-\item{posterior}{an object of class 'jfaPosterior' that contains the posterior distribution.}
-\item{data}{a data frame containing the relevant columns from the \code{data}.}
+\item{method}{a character the method used.}
+\item{N.units}{if \code{N.units} is specified, in integer larger than 0
+  indicating the number of units in the population}
+\item{N.items}{if \code{N.items} is specified, in integer larger than 0
+  indicating the number of items in the population.}
+\item{K}{if \code{method = 'hypergeometric'}, an integer indicating the
+  assumed total errors in the population.}
+\item{prior}{an object of class \code{jfaPrior} that contains the prior
+  distribution.}
+\item{posterior}{an object of class \code{jfaPosterior} that contains the
+  posterior distribution.}
+\item{data}{a data frame containing the relevant columns from the
+  \code{data}.}
+\item{strata}{a data frame containing the relevant statistical results for
+  the strata.}
 \item{data.name}{a character giving the name of the data.}
 }
 \description{
-\code{evaluation()} is used to perform statistical inference about the misstatement in an audit population. It allows specification of statistical requirements for the sample with respect to the performance materiality or the precision. \code{evaluation()} returns an object of class \code{jfaEvaluation} which can be used with associated \code{summary()} and \code{plot()} methods.
-
-For more details on how to use this function, see the package vignette:
-\code{vignette('jfa', package = 'jfa')}
+\code{evaluation()} is used to perform statistical inference
+about the misstatement in a population after auditing a statistical sample.
+It allows specification of statistical requirements for the sample with
+respect to the performance materiality or the precision. The function returns
+an object of class \code{jfaEvaluation} that can be used with associated
+\code{summary()} and \code{plot()} methods.
 }
 \details{
-This section lists the available options for the \code{methods} argument.
+This section lists the available options for the \code{method}
+  argument.
 
 \itemize{
- \item{\code{poisson}:         Evaluates the sample with the Poisson distribution. If combined with \code{prior = TRUE}, performs Bayesian evaluation using a \emph{gamma} prior and posterior.}
- \item{\code{binomial}:        Evaluates the sample with the binomial distribution. If combined with \code{prior = TRUE}, performs Bayesian evaluation using a \emph{beta} prior and posterior.}
- \item{\code{hypergeometric}:  Evaluates the sample with the hypergeometric distribution. If combined with \code{prior = TRUE}, performs Bayesian evaluation using a \emph{beta-binomial} prior and posterior.}
-	\item{\code{mpu}:             Evaluates the sample with the mean-per-unit estimator.}
- \item{\code{stringer}:        Evaluates the sample with the Stringer bound (Stringer, 1963).}
- \item{\code{stringer.meikle}: Evaluates the sample with the Stringer bound with Meikle's correction for understatements (Meikle, 1972).}
- \item{\code{stringer.lta}:    Evaluates the sample with the Stringer bound with LTA correction for understatements (Leslie, Teitlebaum, and Anderson, 1979).}
- \item{\code{stringer.pvz}:    Evaluates the sample with the Stringer bound with Pap and van Zuijlen's correction for understatements (Pap and van Zuijlen, 1996).}
- \item{\code{rohrbach}:        Evaluates the sample with Rohrbach's augmented variance bound (Rohrbach, 1993).}
- \item{\code{moment}:          Evaluates the sample with the modified moment bound (Dworin and Grimlund, 1984).}
- \item{\code{coxsnell}:        Evaluates the sample with the Cox and Snell bound (Cox and Snell, 1979).}
- \item{\code{direct}:          Evaluates the sample with the direct estimator (Touw and Hoogduin, 2011).}
- \item{\code{difference}:      Evaluates the sample with the difference estimator (Touw and Hoogduin, 2011).}
- \item{\code{quotient}:        Evaluates the sample with the quotient estimator (Touw and Hoogduin, 2011).}
- \item{\code{regression}:      Evaluates the sample with the regression estimator (Touw and Hoogduin, 2011).}
+ \item{\code{poisson}:         Evaluates the sample with the Poisson
+   distribution. If combined with \code{prior = TRUE}, performs Bayesian
+   evaluation using a \emph{gamma} prior.}
+ \item{\code{binomial}:        Evaluates the sample with the binomial
+   distribution. If combined with \code{prior = TRUE}, performs Bayesian
+   evaluation using a \emph{beta} prior.}
+ \item{\code{hypergeometric}:  Evaluates the sample with the hypergeometric
+   distribution. If combined with \code{prior = TRUE}, performs Bayesian
+   evaluation using a \emph{beta-binomial} prior.}
+ \item{\code{mpu}:             Evaluates the sample using the mean-per-unit
+   estimator.}
+ \item{\code{stringer}:        Evaluates the sample using the Stringer
+   bound (Stringer, 1963).}
+ \item{\code{stringer.meikle}: Evaluates the sample using the Stringer bound
+   with Meikle's correction for understatements (Meikle, 1972).}
+ \item{\code{stringer.lta}:    Evaluates the sample using the Stringer bound
+   with LTA correction for understatements (Leslie, Teitlebaum, and Anderson,
+   1979).}
+ \item{\code{stringer.pvz}:    Evaluates the sample using the Stringer bound
+   with Pap and van Zuijlen's correction for understatements (Pap and van
+   Zuijlen, 1996).}
+ \item{\code{rohrbach}:        Evaluates the sample using Rohrbach's
+   augmented variance bound (Rohrbach, 1993).}
+ \item{\code{moment}:          Evaluates the sample using the modified moment
+   bound (Dworin and Grimlund, 1984).}
+ \item{\code{coxsnell}:        Evaluates the sample using the Cox and Snell
+   bound (Cox and Snell, 1979).}
+ \item{\code{direct}:          Evaluates the sample using the direct
+   estimator (Touw and Hoogduin, 2011).}
+ \item{\code{difference}:      Evaluates the sample using the difference
+   estimator (Touw and Hoogduin, 2011).}
+ \item{\code{quotient}:        Evaluates the sample using the quotient
+   estimator (Touw and Hoogduin, 2011).}
+ \item{\code{regression}:      Evaluates the sample using the regression
+   estimator (Touw and Hoogduin, 2011).}
 }
 }
 \examples{
+# Using summary statistics
+evaluation(materiality = 0.05, x = 0, n = 100)
+evaluation(materiality = 0.05, x = c(2, 1, 0), n = c(50, 70, 40))
+
+# Using data
 data("BuildIt")
+BuildIt$inSample <- c(rep(1, 100), rep(0, 3400))
+levs <- c("low", "medium", "high")
+BuildIt$stratum <- factor(c(levs[3], levs[2], rep(levs, times = 1166)))
+sample <- subset(BuildIt, BuildIt$inSample == 1)
 
-# Draw a sample of 100 monetary units from the population using
-# fixed interval monetary unit sampling
-sample <- selection(
-  data = BuildIt, size = 100, units = "values",
-  method = "interval", values = "bookValue"
-)$sample
-
-# Classical evaluation using the Stringer bound
 evaluation(
-  materiality = 0.05, method = "stringer", conf.level = 0.95,
-  data = sample, values = "bookValue", values.audit = "auditValue"
+  materiality = 0.05, data = sample,
+  values = "bookValue", values.audit = "auditValue"
 )
-
-# Classical evaluation using the Poisson likelihood
 evaluation(
-  materiality = 0.05, method = "poisson", conf.level = 0.95,
-  data = sample, values = "bookValue", values.audit = "auditValue"
-)
-
-# Bayesian evaluation using a noninformative gamma prior distribution
-evaluation(
-  materiality = 0.05, method = "poisson", conf.level = 0.95,
-  data = sample, values = "bookValue", values.audit = "auditValue",
-  prior = TRUE
-)
-
-# Bayesian evaluation using an informed prior distribution
-evaluation(
-  materiality = 0.05, method = "poisson", conf.level = 0.95,
-  data = sample, values = "bookValue", values.audit = "auditValue",
-  prior = auditPrior(method = "param", alpha = 1, beta = 10)
+  materiality = 0.05, data = sample, values = "bookValue",
+  values.audit = "auditValue", strata = "stratum"
 )
 }
 \references{
-Cox, D. and Snell, E. (1979). On sampling and the estimation of rare errors. \emph{Biometrika}, 66(1), 125-132.
+Cox, D. and Snell, E. (1979). On sampling and the estimation of
+  rare errors. \emph{Biometrika}, 66(1), 125-132.
+  \doi{10.1093/biomet/66.1.125}.
 
-Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J., & Wetzels, R. (2021). Priors in a Bayesian audit: How integration of existing information into the prior distribution can improve audit transparency and efficiency. \emph{International Journal of Auditing}, 25(3), 621-636.
+Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J.,
+  & Wetzels, R. (2021). Priors in a Bayesian audit: How integration of
+  existing information into the prior distribution can improve audit
+  transparency and efficiency. \emph{International Journal of Auditing},
+  25(3), 621-636. \doi{10.1111/ijau.12240}
 
-Dworin, L. D. and Grimlund, R. A. (1984). Dollar-unit sampling for accounts receivable and inventory. \emph{The Accounting Review}, 59(2), 218–241
+Derks, K., de Swart, J., Wagenmakers, E.-J., Wille, J., &
+  Wetzels, R. (2021). JASP for audit: Bayesian tools for the auditing
+  practice. \emph{Journal of Open Source Software}, \emph{6}(68), 2733.
+  \doi{10.21105/joss.02733}
 
-Leslie, D. A., Teitlebaum, A. D., & Anderson, R. J. (1979). \emph{Dollar-unit Sampling: A Practical Guide for Auditors}. Copp Clark Pitman; Belmont, Calif.: distributed by Fearon-Pitman.
+Derks, K., de Swart, J., Wagenmakers, E.-J., & Wetzels, R.
+  (2021). The Bayesian approach to audit evidence: Quantifying statistical
+  evidence using the Bayes factor. \emph{PsyArXiv}.
+  \doi{10.31234/osf.io/kzqp5}
 
-Meikle, G. R. (1972). \emph{Statistical Sampling in an Audit Context: An Audit Technique}. Canadian Institute of Chartered Accountants.
+Derks, K., de Swart, J., Wagenmakers, E.-J., & Wetzels, R.
+  (2022). An impartial Bayesian hypothesis test for audit sampling.
+  \emph{PsyArXiv}. \doi{10.31234/osf.io/8nf3e}
 
-Pap, G., and van Zuijlen, M. C. (1996). On the asymptotic behavior of the Stringer bound. \emph{Statistica Neerlandica}, 50(3), 367-389.
+Derks, K., de Swart, J., Wagenmakers, E.-J., & Wetzels, R.
+  (2022). Bayesian generalized linear modeling for audit sampling: How to
+  incorporate audit information into the statistical model. \emph{PsyArXiv}.
+  \doi{10.31234/osf.io/byj2a}
 
-Rohrbach, K. J. (1993). Variance augmentation to achieve nominal coverage probability in sampling from audit populations. \emph{Auditing}, 12(2), 79.
+Dworin, L. D. and Grimlund, R. A. (1984). Dollar-unit sampling
+  for accounts receivable and inventory. \emph{The Accounting Review}, 59(2),
+  218-241. \url{https://www.jstor.org/stable/247296}
 
-Stringer, K. W. (1963). Practical aspects of statistical sampling in auditing. \emph{In Proceedings of the Business and Economic Statistics Section} (pp. 405-411). American Statistical Association.
+Leslie, D. A., Teitlebaum, A. D., & Anderson, R. J. (1979).
+  \emph{Dollar-unit Sampling: A Practical Guide for Auditors}. Copp Clark
+  Pitman; Belmont, CA. ISBN: 9780773042780.
 
-Touw, P., and Hoogduin, L. (2011). \emph{Statistiek voor Audit en Controlling}. Boom uitgevers Amsterdam.
+Meikle, G. R. (1972). \emph{Statistical Sampling in an Audit
+  Context}. Canadian Institute of Chartered Accountants.
+
+Pap, G., and van Zuijlen, M. C. (1996). On the asymptotic
+  behavior of the Stringer bound. \emph{Statistica Neerlandica}, 50(3),
+  367-389. \doi{10.1111/j.1467-9574.1996.tb01503.x}.
+
+Rohrbach, K. J. (1993). Variance augmentation to achieve nominal
+  coverage probability in sampling from audit populations. \emph{Auditing},
+  12(2), 79.
+
+Stringer, K. W. (1963). Practical aspects of statistical sampling
+  in auditing. \emph{In Proceedings of the Business and Economic Statistics
+  Section} (pp. 405-411). American Statistical Association.
+
+Touw, P., and Hoogduin, L. (2011). \emph{Statistiek voor Audit en
+  Controlling}. Boom uitgevers Amsterdam.
 }
 \seealso{
-\code{\link{auditPrior}} \code{\link{planning}} \code{\link{selection}} \code{\link{report}}
+\code{\link{auditPrior}}
+         \code{\link{planning}}
+         \code{\link{selection}}
+         \code{\link{report}}
 }
 \author{
 Koen Derks, \email{k.derks@nyenrode.nl}

@@ -1,3 +1,19 @@
+# jfa 0.6.5
+
+**New features**
+
+- Additional possibilities to create, plan and evaluate using nonparametric prior distributions.
+- Added functionality for stratified evaluation in the `evaluation()` function.
+- Integrated the auditing functionality of the `digitTests` package via the `digit_test()` and `repeated_test()` functions.
+
+**Bug fixes**
+
+- Fixed a bug where the proportion of value in `summary(selection)` was displayed incorrectly.
+
+**Minor changes**
+
+- Improved the error handling and error messages.
+
 # jfa 0.6.4
 
 **Minor changes**

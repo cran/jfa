@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Koen Derks" />
+
+<meta name="date" content="2023-03-20" />
+
+<title>Selecting statistical audit samples</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Selecting statistical audit samples</h1>
+<h4 class="author">Koen Derks</h4>
+<h4 class="date">2023-03-20</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction" id="toc-introduction">Introduction</a>
+<ul>
+<li><a href="#sampling-units" id="toc-sampling-units">Sampling
+units</a></li>
+<li><a href="#sampling-methods" id="toc-sampling-methods">Sampling
+methods</a></li>
+<li><a href="#ordering-or-randomizing-the-population" id="toc-ordering-or-randomizing-the-population">Ordering or randomizing
+the population</a></li>
+</ul></li>
+<li><a href="#references" id="toc-references">References</a></li>
+</ul>
+</div>
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>This vignette outlines the most commonly used sampling methodology
+for auditing and shows how to select a sample using these methods with
+the <strong>jfa</strong> package.</p>
+<p align="center">
+<img src="data:image/png;base64,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" alt="selection" width="100%">
+</p>
+<p>Auditors are often required to assess balances or processes that
+involve a large number of items. Since they cannot inspect all of these
+items individually, they need to select a subset (i.e., a sample) from
+the total population to make a statement about a certain characteristic
+of the population. For this purpose, various selection methodologies are
+available that have become standard in an audit context.</p>
+<div id="sampling-units" class="section level3">
+<h3>Sampling units</h3>
+<p>Selecting a subset from the population requires knowledge of the
+sampling units; physical representations of the population that needs to
+be audited. Generally, the auditor has to choose between two types of
+sampling units: individual items in the population or individual
+monetary units in the population. In order to perform statistical
+selection, the population must be divided into individual sampling units
+that can be assigned a probability to be included in the sample. The
+total collection of all sampling units which have been assigned a
+selection probability is called the sampling frame.</p>
+<div id="items" class="section level4">
+<h4>Items</h4>
+<p>A sampling unit for record (i.e., attributes) sampling is generally a
+characteristic of an item in the population. For example, suppose that
+you inspect a population of receipts. A possible sampling unit for
+record sampling can be the date of payment of the receipt. When a
+sampling unit (e.g., date of payment) is selected by the sampling
+method, the population item that corresponds to the sampled unit is
+included in the sample.</p>
+</div>
+<div id="monetary-units" class="section level4">
+<h4>Monetary units</h4>
+<p>A sampling unit for monetary unit sampling is different than a
+sampling unit for record sampling in that it is an individual monetary
+unit within an item or transaction, like an individual dollar. For
+example, a single sampling unit can be the 10<span class="math inline">\(^{th}\)</span> dollar from a specific receipt in
+the population. When a sampling unit (e.g., individual dollar) is
+selected by the sampling method, the population item that includes the
+sampling unit is included in the sample.</p>
+</div>
+</div>
+<div id="sampling-methods" class="section level3">
+<h3>Sampling methods</h3>
+<p>This section discusses the four sampling methods implemented in
+<strong>jfa</strong>. First, for notation, let the the population <span class="math inline">\(N\)</span> be defined as the total set of
+individual sampling units <span class="math inline">\(x_i\)</span>.</p>
+<p><span class="math display">\[N = \{x_1, x_2, \dots,
+x_N\}.\]</span></p>
+<p>In statistical sampling, every sampling unit <span class="math inline">\(x_i\)</span> in the population must receive a
+selection probability <span class="math inline">\(p(x_i)\)</span>. The
+purpose of the sampling method is to provide a framework to assign
+selection probabilities to each of the sampling units, and subsequently
+draw sampling units from the population until a set of size <span class="math inline">\(n\)</span> has been created.</p>
+<p>The next section discusses which sampling methods are available in
+<strong>jfa</strong>. To illustrate the outcomes for different sampling
+methods, we will use the <code>BuildIt</code> data set that can be
+loaded using the code below.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(BuildIt)</span></code></pre></div>
+<div id="fixed-interval-sampling-systematic-sampling" class="section level4">
+<h4>Fixed interval sampling (Systematic sampling)</h4>
+<p>Fixed interval sampling is a method designed for yielding
+representative samples from monetary populations. The algorithm
+determines a uniform interval on the (optionally ranked) sampling units.
+Next, a starting point is handpicked or randomly selected in the first
+interval and a sampling unit is selected throughout the population at
+each of the uniform intervals from the starting point. For example, if
+the interval has a width of 10 sampling units and sampling unit number 5
+is chosen as the starting point, the sampling units 5, 15, 25, etc. are
+selected to be included in the sample.</p>
+<p>The number of required intervals <span class="math inline">\(I\)</span> can be determined by dividing the
+number of sampling units in the population by the required sample
+size:</p>
+<p><span class="math display">\[I = \frac{N}{n},\]</span></p>
+<p>in which <span class="math inline">\(n\)</span> is the required
+sample size and <span class="math inline">\(N\)</span> is the total
+number of sampling units in the population.</p>
+<p>If the space between the selected sampling units is equal, the
+selection probability for each sampling unit is theoretically defined
+as:</p>
+<p><span class="math display">\[p(x) = \frac{1}{I},\]</span></p>
+<p>with the property that the space between selected units <span class="math inline">\(i\)</span> is the same as the interval <span class="math inline">\(I\)</span>, see Figure 1. However, in practice the
+selection is deterministic and completely depends on the chosen starting
+points (using <code>start</code>).</p>
+<center>
+<div class="figure">
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAdsAAACJCAMAAABTlWJOAAABp1BMVEX///+rq6sAAACJaEj/+YHfv58gICCB/4H/gYGBgf8qKqmpoSqpKioqqSoAfgAAAH5ePh5+AAB+dgCJif+Hh4f/iYnhxaf/+Ynb29uJ/4laWloHBwb9/v0ZGBiMjIxYWFifn5/7+ftnZmbw8PHFxcXNzc0ODg7z8/UwMDCUlJSoqKj29vWvr6+QkJA/Pz/7+/Vubm6bm5tMTEx1dXJSUVHR0dFeYF7k5OT/+ZApIySCgoKX/pfm6eb16eF7e3s8ODRJSUngwqL/vb3x287//dThyK29vb3/ioq2trbC/8KWlv/W1taYmJjLy8sOEg7a2v/tz73p6emDg///+YOF/4Vvb3gMBx/p4WmOcVUeNwDp/+n8nJzExP9493itrf9kAAD3eHhpaem5ubmlpaXS/9L/+7U4lTjRsZEAAFobXACdmDMamhqEU0P/pKRgTxuaGhr/7+//+qR+fn5sZQChMjKt/60mGAyZmd/Ly9P/q6s8PLmr/6s+KBSzqzTRs5M6Orv/+6urLCwsqyyPiRASEpOxqzQkADLV08lMTKen/6ciIqHf25UyagANz6bJAAAJZElEQVR4Ae2di1cTRxSHJ6OgVrS1iYrZTcg7wQgJBOQhIPIQEVARtb7AVLC1Ht+2Vo+29bQerdY/ujO72c1mN7uoudc69g4kzM4kd+98v7mzjxkSxigRASJABIgAESACRIAIEAEiQASIABEgAkSACHgIJAaWPWVwBWPRRThjXktKO+9tDnBJWuPHgU06zVV4r+7chs0r7TwsiqbWHvY1LQYqzJY7gSw1NaO0801bRIVEgAgQASLwJRLIpA4v4LWrOHo4jngmpbTzeNRrljPlZCVWxNqNnsqmeQ+Wdaa082hULMPFfp2lOFrgdofYMh+wdgb9V2nnoWF47SXE5c+IlvRWgJTo4sp2nUdAbDUxorTzTdoDXBTJswxeYA11M30Sb1RQ2nlgIZubS/ETzStASod4AcSOjxGlnfdpE1xxMRdDPJFlEd4N56vHktLOe1oDXrDOK+A2HQZHtDRi11HaeQclpGw/H9TTCSTjbIkP6Kwb7RpLaeexmNt2i5o4HkZC9jZwZpQfYvleYKO2OaWdt1uBllniEyx5FGvY1Ce1IutJYHmvtPNYUOp2l3M9enmpvg2cq+TYYArYZt2c0s7Xm4GWO951GHFmPlmJTqAdbRlT2nk0SckwESACRIAIEAEiQASIABEgAkSACBABZQhkQyBprHmDiyDGTSOD3l1kAM17rSM7790hdMlEO0jyuW81BGLcNBL3Nr0MaN5rHdl57w6phAgQASJABL40AnmsJakmqDQqL3I+EG8KbyG/2O/QqcCdt1pJzgcSjKIt9pa77dQCd95qJTkfSJDw+OJRumPKVpG2pK0vgcAKpbu+0s5LWShufTsnaeuLRlYojUdp5yV9iltJoWkibZtisQqVxqO081IBilurH3r+krYeJM4CpfEo7bxUgeLW2Rcb8qRtAw73htJ4lHZeKkFx6+6P9jZpa6NollEaj9LOSzUobpv1SaNMYW0Xsra2esZndaJvuzevOCGn5U08Yz7r4zY34vsKct4XjawI5XozRtzqB0di4P8wrffmRvOGtkMpDf4fpsn5QG1ZOh4r69FIcXIkhLGwJjMQy4q4PZFD+bhrcj5YXDZWKEcjvQP5TV72kdX64qnr2vEc1oeNkfPBuqRjsRjaZ5MwFo/x2Amsjz5h5HywuNc57wx+RUu1R/nhlt4f/GZyPpjPSH9wfWu1IQ5+kuZ0iJx30vDkKwlPEWBBuh3QmNcUOe9l4ihZRjqRqu0Cc8BnjJx3KElZIkAEiAARIAJEgAgQASLwPyGQvLp2MrwDJJ0Nn1w77bpFOD51ZW47TJqbezp1v1GV0syL4f1bQdLK8PCNGZfzG/NHDpzbBpIOHHgzf9nl/PSZ2X1tIOnYvtnpcZfzLLl2FkTWupHwVUcLpqF0tXvHU4e6pRsgqjqMDDvV3TgComrdyLlnDnVL023HQHS1jcw2qnsaKGLr0u7YET5p3c5IPrUlgcvMTVl9ZwYoYh3abt36oGSa1/VndVHAcuc2LOfHgYU1FD5Tc769fYGdhg5aU2Mhbry9zJJX4BR1Wppiaen8zEqDKFAb+0tsQjhfgg7aWv+Yl84PsXE72kAz+0znOV847Qw3yHw4WeFd7I5TEMD83qk01wZnoMR02xkupXhUfwMWqy5DG2nOh5CkbWubTaYEec6fhHHCVvSStfNa1xSgnC5T0xp/jTEgmzK/SGld8y5FADc3xLQoxoBsDgBnyoa2v0KGqsvWeR619ajaOajMFc7/cYcb4LYYdGwtV+0cUObcEc5nQQfiBmPHzLj93qUH5Obf/HaDkFJfiIdptKpp3wFq6TZ1i//QIKTUF+JhGNm2qvHfG+SA3bgo4/YCprZ/8I4GbcE2jEGgeu05pra/8V2mtuBBK82uXnr8I6ycDdYMbW+ianvB1BZ+PJa9pHrtHaq2l/40tcV4Xl3d/RxV28cibm++/Uqktwg/wuzLV3s68NK9PY9u7cRLf73bvQsx7X6+BS9dvCu1/Ro1vdqDmh59i5ne7UZN36Cm51ErbmXsIqSXr+7hhW1Hx55HeFG7c6fKcbvltjEmf4rjLdg5VIOh6rW7yh5vt63+JI+3x1B+xFnVxVMibpHPk3+uq2Fd/BhXQa0/ba9Wr11C1VarnSfLs1rHo3YNI8+wjDPoD34yjKGfJwttOWbciutb8xQZ5US5yjmmtuL6VszsGcpJHYHTKse/vuW496W66nELnasi35cSt+2A9XSa+yT3pZ4gTPDV7m2tneeo95M5f+2+mQS3/UDctjPvJ6OE7hju/WRxM1yMyYN480D5CR5lV8xDay1qrYOuMUh/3JNlQswD8ewMnJiNluQ8UBdrNsX3wcfXhqN1raPML6POA+nS+UKhkyGJG86z7oL49nFz/tbQEXJYnmJ56TySuPvvs4hwXrfElZJYD+fQ+pH5eVYsFMaw5m9nS4bzxgIAlMn5JusuAPXda627SKKIO2yvu0CZwbXWXejjQCulGu4lW+suzMUdyTXI2R9p6+x7rpeqy/2+OSP279y3VqUwVnrROJq2vrUy4/gEAN/1UrXRtRbQZgA3K/OE9pvLzF6wJtZLASexXsq2bkLKX10Lh8/CJLnOsY7eyE3LdY579273/NTLNsvZb52741rnmEzeeDC8srKyFeJ3//ALp7LS+41fxDpHb6qXBeec7/Ssc9T1klznCJRm5TpHl7IuJVrexLbvcTDJklC/zBGznv18/gXIyn7+AMhDIkAEiAARIAJEgAgQASJABIgAESACRIAIEAEiQAQ+DwKdi4mDodB6H/wnkBvtW+9bD4UOJvpwvoJcOn/ooMLOI5IX+JciFY3nog9xtNW7R3s57y3HcbTNquw8Lnlz5NBzvBtxDInzGOY0jMrOI5MXomZxPym5XyzzwUvkfCBbEViB9a1Vir652JqFwHeT84F4KLB88Sg9KohWicDq821c6xXogUXO+4ukdN8k5/2FFTUUWL54lB7SZKvocOurrdKjgmiV0n2TnPftl7ICvW9GA3ffWiU5H8iPDre+eJQeFWSr+sX/5eElCix/trjkxX6V7pvkvH/PETUUWP54cAMLmbxoFvrhNuHPruUacj4Q4STq4XYJd4qJnPfX9lA8xXlhcR1n4rwzMVHg/GFCfL85RiLng6jqkUi8pyceGcXRNjMqzAvrOF9PTc4HSUt1RIAIEAEiQASIABEgAkSACBABIkAEiAAR+A8I/At1meGK9LjTMgAAAABJRU5ErkJggg==" alt />
+<p class="caption">Figure 1: Illustration of fixed interval sampling</p>
+</div>
+</center>
+<p>The fixed interval method yields a sample that allows every sampling
+unit in the population an equal chance of being selected. However, the
+fixed interval method has the property that all items in the population
+with a monetary value larger than the interval <span class="math inline">\(I\)</span> have an selection probability of one
+because one of these items’ sampling units are always selected from the
+interval. Note that, if the population is arranged randomly with respect
+to its deviation pattern, fixed interval sampling is equivalent to
+random selection.</p>
+<p><strong>Advantage(s):</strong> The advantage of the fixed interval
+sampling method is that it is often simple to understand and fast to
+perform. Another advantage is that, in monetary unit sampling, all items
+that are greater than the calculated interval will be included in the
+sample. In record sampling, since units can be ranked on the basis of
+value, there is also a guarantee that some large items will be in the
+sample.</p>
+<p><strong>Disadvantage(s):</strong> A pattern in the population can
+coincide with the selected interval, rendering the sample less
+representative. What is sometimes seen as an added complication for this
+method is that the sample is hard to extend after drawing the initial
+sample. This is due to the chance of selecting the same sampling unit.
+However, by removing the already selected sampling units from the
+population and redrawing the intervals this problem can be efficiently
+solved.</p>
+<p>As an example, the code below shows how to apply the fixed interval
+sampling method in a record sampling and a monetary unit sampling
+setting. Note that, by default, the first sampling unit from each
+interval is selected. However, this can be changed by setting the
+argument <code>start = 1</code> to a different value.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Record sampling</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&quot;items&quot;</span>, <span class="at">method =</span> <span class="st">&quot;interval&quot;</span>, <span class="at">start =</span> <span class="dv">1</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample<span class="sc">$</span>sample, <span class="at">n =</span> <span class="dv">6</span>)</span></code></pre></div>
+<pre><code>##   row times    ID bookValue auditValue
+## 1   1     1 82884    242.61     242.61
+## 2  36     1 80125    118.58     118.58
+## 3  71     1 27566    481.44     481.44
+## 4 106     1 88261    266.66     266.66
+## 5 141     1 58999    568.60     568.60
+## 6 176     1 27801    314.65     314.65</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Monetary unit sampling</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&quot;values&quot;</span>, <span class="at">method =</span> <span class="st">&quot;interval&quot;</span>, <span class="at">values =</span> <span class="st">&quot;bookValue&quot;</span>, <span class="at">start =</span> <span class="dv">1</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample<span class="sc">$</span>sample, <span class="at">n =</span> <span class="dv">6</span>)</span></code></pre></div>
+<pre><code>##   row times    ID bookValue auditValue
+## 1   1     1 82884    242.61     242.61
+## 2  38     1 57172    329.30     329.30
+## 3  73     1 90160    205.69     205.69
+## 4 110     1  4756    295.96     295.96
+## 5 146     1 90183    333.28     333.28
+## 6 183     1 96080    449.07     449.07</code></pre>
+</div>
+<div id="cell-sampling" class="section level4">
+<h4>Cell sampling</h4>
+<p>The cell sampling method divides the (optionally ranked) population
+into a set of intervals <span class="math inline">\(I\)</span> that are
+computed through the previously given equations. Within each interval, a
+sampling unit is selected by randomly drawing a number between 1 and the
+interval range <span class="math inline">\(I\)</span>. This causes the
+space <span class="math inline">\(i\)</span> between the sampling units
+to vary.</p>
+<p>Like in the fixed interval sampling method, the selection probability
+for each sampling unit is defined as:</p>
+<p><span class="math display">\[p(x) = \frac{1}{I}.\]</span></p>
+<center>
+<div class="figure">
+<img src="data:image/png;base64,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" alt />
+<p class="caption">Figure 2: Illustration of cell sampling</p>
+</div>
+</center>
+<p>The cell sampling method has the property that all items in the
+population with a monetary value larger than twice the interval <span class="math inline">\(I\)</span> have a selection probability of
+one.</p>
+<p><strong>Advantage(s):</strong> More sets of samples are possible than
+in fixed interval sampling, as there is no systematic interval <span class="math inline">\(i\)</span> to determine the selections. It is
+argued that the cell sampling algorithm offers a solution to the pattern
+problem in fixed interval sampling.</p>
+<p><strong>Disadvantage(s):</strong> A disadvantage of this sampling
+method is that not all items in the population with a monetary value
+larger than the interval have a selection probability of one. Besides,
+population items can be in two adjacent cells, thereby creating the
+possibility that an items is included in the sample twice.</p>
+<p>As an example, the code below shows how to apply the cell sampling
+method in a record sampling and a monetary unit sampling setting. It is
+important to set a seed to make the results reproducible.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Record sampling</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&quot;items&quot;</span>, <span class="at">method =</span> <span class="st">&quot;cell&quot;</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample<span class="sc">$</span>sample, <span class="at">n =</span> <span class="dv">6</span>)</span></code></pre></div>
+<pre><code>##   row times    ID bookValue auditValue
+## 1   9     1 14608    216.48     216.48
+## 2  48     1 45437    347.94     139.18
+## 3  90     1 90333    241.17     241.17
+## 4 136     1 45746    440.72     440.72
+## 5 147     1 72906    677.62     677.62
+## 6 206     1 93529    528.79     528.79</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Monetary unit sampling</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&quot;values&quot;</span>, <span class="at">method =</span> <span class="st">&quot;cell&quot;</span>, <span class="at">values =</span> <span class="st">&quot;bookValue&quot;</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample<span class="sc">$</span>sample, <span class="at">n =</span> <span class="dv">6</span>)</span></code></pre></div>
+<pre><code>##   row times    ID bookValue auditValue
+## 1   8     1 81460    295.20     295.20
+## 2  53     1 80645    677.88     677.88
+## 3  92     1 75133    355.16     355.16
+## 4 142     1 68676    612.46     612.46
+## 5 153     1 63777    552.83     552.83
+## 6 214     1 25379   1021.07    1021.07</code></pre>
+</div>
+<div id="random-sampling" class="section level4">
+<h4>Random sampling</h4>
+<p>Random sampling is the most simple and straight-forward selection
+method The random sampling method provides a method that allows every
+sampling unit in the population an equal chance of being selected,
+meaning that every combination of sampling units has the same
+probability of being selected as every other combination of the same
+number of sampling units. Simply put, the algorithm draws a random
+selection of size <span class="math inline">\(n\)</span> of the sampling
+units. Therefore, the selection probability for each sampling unit is
+defined as:</p>
+<p><span class="math display">\[p(x) = \frac{1}{N},\]</span></p>
+<p>where <span class="math inline">\(N\)</span> is the number of units
+in the population. To clarify this procedure, Figure 3 provides an
+illustration of the random sampling method.</p>
+<center>
+<div class="figure">
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAdsAAAA+CAMAAABUWkGDAAAAUVBMVEX///+Hh4c/Pz/Nzc0GBgbb29taWloAAAC7u7vv7+/4+PhYWFhnZ2cODg7T09N6enqkpKSWlpZQUFDs7OwqKioaGhpra2vg4OBfX1/ExMSBgYGRs/oRAAADS0lEQVR4Ae2b7W6yUBCEFbD4+Sp+2/u/0FdqTYxu3J09ZNKY4UeFddh5dk5IaaCjkTYloASUgBJQAkpACSgBJaAElIASUAJKQAl8dALzNTTe5gLJb2LQI+HQn5JCS3q9P40z73uG/ttJ42seFOfxw0F0F/SItn3SpdCeegxzyJnXZwU5UgGCHj60qUihmZ1Ki5x5fUqQ4+vvXrcpND+ghALMNOEQOwXkSAUIesTAX1QptJcuQxQ48/qkIEcqQNDDhzYVKTSzU2mRM69PCXKkAgQ9fGhTkUIzO5UWOfP6lCBHKkDQw4c2FSk0s1NpkTOvTwlypAIEPXxoU5FCMzuVFjnz+pQgRypA0MOHNhUpNLNTaZEzr08JcqQCBD18aFORQjM7lRY58/qUIEcqQNDDhzYVKTSzU2mRM69PCXKkAgQ9fGhTkUIzO5UWOfP6lCBHKkDQw4c2FSk0s1NpkTOvTwlypAIEPXxoU5FCMzuVFjnz+pQgRypA0MOHNhUpNLNTaZEzr08JcqQCBD18aFORQjM7lRY5876lrNaz3+e3p+PirbL/sttOrz9/AtxU/W5owzxCLV9FObTXPgNUKPMGOKfVYdw/m58fV+fa1e++D9WkX9vLft/NXfmvAPOIdn3S5dCemgxzSJk3hFrvz5NmXlW7kHr+vaq/xtO2C6nvIszjfhb4mUMDTWJyyrwRlNl+2Xxtw1fh5lAtVugbU6BHBNvQpNCMPuUlzrwBztOqPVx/60a3Y9PgL16AHlGWJ10K7anHMIeceQOs63YTUN0lu9Xhvgt8Yh5A40dpDu2xw2D7lHkDtHULXLaj0RZ75fUGAHoEqC1JCs1qVFzjzBvAxBZr499QG56Yh9EgUsqhRTrDGsq8MJVOUAJKQAkoASWgBJSAElACSkAJKAEloASUwIAJdF3s8dyAlmpFSODSTUdN+4/gJAt2Atcnr6NWa8uOneK3bBdaW0rSfBOtLT9zlqPWlpU030dry8+c5Xhb226q7fMS2P7cSzWttk9MoL9P1vaZCfRre5lp+7wEzvr7lnVrQ/fRfTI9cpqh1pYWNd1Ia0uPnGaotaVFTTdatnoORA+dZNhft3Ud/v9KEpVshkjgVJ+GaKMefzOB/zXbSvPrJ1xpAAAAAElFTkSuQmCC" alt />
+<p class="caption">Figure 3: Illustration of random sampling</p>
+</div>
+</center>
+<p><strong>Advantage(s):</strong> The random sampling method yields an
+optimal random selection, with the additional advantage that the sample
+can be easily extended by applying the same method again.</p>
+<p><strong>Disadvantages:</strong> Because the selection probabilities
+are equal for all sampling units there is no guarantee that items with a
+large monetary value in the population will be included in the
+sample.</p>
+<p>As an example, the code below shows how to apply the random sampling
+(with our without replacement using <code>replace</code>) method in a
+record sampling and a monetary unit sampling setting. It is important to
+set a seed to make results reproducible.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Record sampling</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&quot;items&quot;</span>, <span class="at">method =</span> <span class="st">&quot;random&quot;</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample<span class="sc">$</span>sample, <span class="at">n =</span> <span class="dv">6</span>)</span></code></pre></div>
+<pre><code>##    row times    ID bookValue auditValue
+## 1 1017     1 50755    618.24     618.24
+## 2  679     1 20237    669.75     669.75
+## 3 2177     1  9517    454.02     454.02
+## 4  930     1 85674    257.82     257.82
+## 5 1533     1 31051    308.53     308.53
+## 6  471     1 84375    824.66     824.66</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Monetary unit sampling</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&quot;values&quot;</span>, <span class="at">method =</span> <span class="st">&quot;random&quot;</span>, <span class="at">values =</span> <span class="st">&quot;bookValue&quot;</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample<span class="sc">$</span>sample, <span class="at">n =</span> <span class="dv">6</span>)</span></code></pre></div>
+<pre><code>##    row times    ID bookValue auditValue
+## 1 2174     1 90260    625.98     625.98
+## 2 2928     1 68595    548.21     548.21
+## 3 1627     1 98301    429.07     429.07
+## 4  700     1 29683    239.26     239.26
+## 5  147     1 72906    677.62     677.62
+## 6 3056     1 86317    246.22     246.22</code></pre>
+</div>
+<div id="modified-sieve-sampling" class="section level4">
+<h4>Modified Sieve Sampling</h4>
+<p>The fourth option for the sampling method is modified sieve sampling
+(Hoogduin, Hall, &amp; Tsay, 2010). The algorithm starts by selecting a
+standard uniform random number <span class="math inline">\(R_i\)</span>
+between 0 and 1 for each item in the population. Next, the sieve
+ratio:</p>
+<p><span class="math display">\[S_i = \frac{Y_i}{R_i}\]</span></p>
+<p>is computed for each item by dividing the book value of that item by
+the random number. Lastly, the items in the population are sorted by
+their sieve ratio <span class="math inline">\(S\)</span> (in decreasing
+order) and the top <span class="math inline">\(n\)</span> items are
+selected for inspection. In contrast to the classical sieve sampling
+method (Rietveld, 1978), the modified sieve sampling method provides
+precise control over sample sizes.</p>
+<p>As an example, the code below shows how to apply the modified sieve
+sampling method in a monetary unit sampling setting. It is important to
+set a seed to make results reproducible.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Monetary unit sampling</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&quot;values&quot;</span>, <span class="at">method =</span> <span class="st">&quot;sieve&quot;</span>, <span class="at">values =</span> <span class="st">&quot;bookValue&quot;</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample<span class="sc">$</span>sample, <span class="at">n =</span> <span class="dv">6</span>)</span></code></pre></div>
+<pre><code>##    row times    ID bookValue auditValue
+## 1 2329     1 29919    681.10     681.10
+## 2 2883     1 59402    279.29     279.29
+## 3 1949     1 56012    581.22     581.22
+## 4 3065     1 47482    621.73     621.73
+## 5 1072     1 79901    789.97     789.97
+## 6  488     1 50811    651.35     651.35</code></pre>
+</div>
+</div>
+<div id="ordering-or-randomizing-the-population" class="section level3">
+<h3>Ordering or randomizing the population</h3>
+<p>The <code>selection()</code> function has additional arguments
+(<code>order</code>, <code>decreasing</code>, and
+<code>randomize</code>) to preprocess your population before selection.
+The <code>order</code> argument takes as input a column name in
+<code>data</code> which determines the order of the population. For
+example, you can order the population from lowest book value to highest
+book value before engaging in selection. In this case, you should use
+the <code>decreasing = FALSE</code> argument.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ordering population from lowest &#39;bookValue&#39; to highest &#39;bookValue&#39; before MUS</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">units =</span> <span class="st">&quot;values&quot;</span>, <span class="at">values =</span> <span class="st">&quot;bookValue&quot;</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">order =</span> <span class="st">&quot;bookValue&quot;</span>, <span class="at">decreasing =</span> <span class="cn">FALSE</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample<span class="sc">$</span>sample, <span class="at">n =</span> <span class="dv">6</span>)</span></code></pre></div>
+<pre><code>##    row times    ID bookValue auditValue
+## 1 2662     1 30568     14.47      14.47
+## 2 2923     1 63567    125.21     125.21
+## 3 2542     1 95807    153.56     153.56
+## 4  101     1 64282    172.65     172.65
+## 5  838     1 43352    188.72     188.72
+## 6  302     1 94296    198.59     198.59</code></pre>
+<p>The <code>randomize</code> argument can be used to randomly shuffle
+the items in the population before selection.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Randomly shuffle population items before MUS</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">selection</span>(</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">units =</span> <span class="st">&quot;values&quot;</span>, <span class="at">values =</span> <span class="st">&quot;bookValue&quot;</span>, <span class="at">randomize =</span> <span class="cn">TRUE</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample<span class="sc">$</span>sample, <span class="at">n =</span> <span class="dv">6</span>)</span></code></pre></div>
+<pre><code>##    row times    ID bookValue auditValue
+## 1 1017     1 50755    618.24     618.24
+## 2 2159     1  3653    492.39     492.39
+## 3 1639     1 39570    307.54     307.54
+## 4 2698     1   225    507.18     507.18
+## 5  355     1 27934    749.38     749.38
+## 6 1242     1 64071    759.34     759.34</code></pre>
+</div>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li>Hoogduin, L. A., Hall, T. W., &amp; Tsay, J. J. (2010). Modified
+sieve sampling: A method for single-and multi-stage
+probability-proportional-to-size sampling. <em>Auditing: A Journal of
+Practice &amp; Theory</em>, 29(1), 125-148.</li>
+<li>Leslie, D. A., Teitlebaum, A. D., &amp; Anderson, R. J. (1979).
+<em>Dollar-unit Sampling: A Practical Guide for Auditors</em>. London:
+Pitman.</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

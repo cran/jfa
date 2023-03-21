@@ -2,48 +2,38 @@
 % Please edit documentation in R/report.R
 \name{report}
 \alias{report}
-\title{Create an Audit Sampling Report}
+\title{Audit Sampling: Reporting}
 \usage{
-report(object, file = 'report.html', format = c('html_document', 'pdf_document'))
+report(object,
+       file = "report.html")
 }
 \arguments{
-\item{object}{an object of class \code{jfaEvaluation} as returned by the \code{evaluation()} function.}
+\item{object}{an object of class \code{jfaEvaluation} as returned by the
+\code{evaluation()} function.}
 
-\item{file}{a character specifying the name of the report (e.g. \code{report.html}).}
-
-\item{format}{a character specifying the output format of the report. Possible options are \code{html_document} (default) and \code{pdf_document}, but compiling to \code{pdf} format requires a local version of MikTex.}
+\item{file}{a character specifying the name and format of the report (e.g.
+\code{report.html}).}
 }
 \value{
-A \code{html} or \code{pdf} file containing a report of the evaluation.
+A \code{html} or \code{pdf} file containing the report.
 }
 \description{
-\code{report()} takes an object of class \code{jfaEvaluation} as returned by the \code{evaluation()} function automatically generates a \code{html} or \code{pdf} report of the results.
-
-For more details on how to use this function, see the package vignette:
-\code{vignette('jfa', package = 'jfa')}
+\code{report()} takes an object of class \code{jfaEvaluation} as
+returned by the \code{evaluation()} function automatically generates a
+\code{html} or \code{pdf} report containing the most relevant statistical
+results and their interpretation.
 }
 \examples{
-data("BuildIt")
-
-# Draw a sample of 100 monetary units from the population using
-# fixed interval monetary unit sampling
-sample <- selection(
-  data = BuildIt, size = 100, method = "interval",
-  units = "values", values = "bookValue"
-)$sample
-
-# Evaluate using the Stringer bound
-result <- evaluation(
-  conf.level = 0.95, materiality = 0.05, method = "stringer",
-  data = sample, values = "bookValue", values.audit = "auditValue"
-)
+result <- evaluation(x = 0, n = 100)
 \dontrun{
 report(result)
 }
-
 }
 \seealso{
-\code{\link{auditPrior}} \code{\link{planning}} \code{\link{selection}} \code{\link{evaluation}}
+\code{\link{auditPrior}}
+         \code{\link{planning}}
+         \code{\link{selection}}
+         \code{\link{evaluation}}
 }
 \author{
 Koen Derks, \email{k.derks@nyenrode.nl}
