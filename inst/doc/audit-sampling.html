@@ -12,7 +12,7 @@
 
 <meta name="author" content="Koen Derks" />
 
-<meta name="date" content="2023-04-07" />
+<meta name="date" content="2023-07-16" />
 
 <title>Audit sampling: Get started</title>
 
@@ -340,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Audit sampling: Get started</h1>
 <h4 class="author">Koen Derks</h4>
-<h4 class="date">2023-04-07</h4>
+<h4 class="date">2023-07-16</h4>
 
 
 <div id="TOC">
@@ -417,29 +417,29 @@ input for the <code>prior</code> argument in other functions. Moreover,
 <code>predict()</code> function to produce the predictions of the prior
 distribution on the data level.</p>
 <p><em>Full function with default arguments:</em></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="fu">c</span>(</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>             <span class="st">&quot;default&quot;</span>, <span class="st">&quot;strict&quot;</span>, <span class="st">&quot;param&quot;</span>, <span class="st">&quot;impartial&quot;</span>, <span class="st">&quot;hyp&quot;</span>,</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>             <span class="st">&quot;arm&quot;</span>, <span class="st">&quot;bram&quot;</span>, <span class="st">&quot;sample&quot;</span>, <span class="st">&quot;factor&quot;</span>, <span class="st">&quot;nonparam&quot;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>           ),</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">likelihood =</span> <span class="fu">c</span>(</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>             <span class="st">&quot;poisson&quot;</span>, <span class="st">&quot;binomial&quot;</span>, <span class="st">&quot;hypergeometric&quot;</span>,</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>             <span class="st">&quot;normal&quot;</span>, <span class="st">&quot;uniform&quot;</span>, <span class="st">&quot;cauchy&quot;</span>, <span class="st">&quot;t&quot;</span>, <span class="st">&quot;chisq&quot;</span>,</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>             <span class="st">&quot;exponential&quot;</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>           ),</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">N.units =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">alpha =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">beta =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>           <span class="at">materiality =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>           <span class="at">expected =</span> <span class="dv">0</span>,</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>           <span class="at">ir =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>           <span class="at">cr =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>           <span class="at">ub =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>           <span class="at">p.hmin =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>           <span class="at">x =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>           <span class="at">n =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>           <span class="at">factor =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">samples =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>           <span class="at">conf.level =</span> <span class="fl">0.95</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="fu">c</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>             <span class="st">&quot;default&quot;</span>, <span class="st">&quot;strict&quot;</span>, <span class="st">&quot;param&quot;</span>, <span class="st">&quot;impartial&quot;</span>, <span class="st">&quot;hyp&quot;</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>             <span class="st">&quot;arm&quot;</span>, <span class="st">&quot;bram&quot;</span>, <span class="st">&quot;sample&quot;</span>, <span class="st">&quot;factor&quot;</span>, <span class="st">&quot;nonparam&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>           ),</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>           <span class="at">likelihood =</span> <span class="fu">c</span>(</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>             <span class="st">&quot;poisson&quot;</span>, <span class="st">&quot;binomial&quot;</span>, <span class="st">&quot;hypergeometric&quot;</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>             <span class="st">&quot;normal&quot;</span>, <span class="st">&quot;uniform&quot;</span>, <span class="st">&quot;cauchy&quot;</span>, <span class="st">&quot;t&quot;</span>, <span class="st">&quot;chisq&quot;</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>             <span class="st">&quot;exponential&quot;</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>           ),</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>           <span class="at">N.units =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>           <span class="at">alpha =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>           <span class="at">beta =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>           <span class="at">materiality =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>           <span class="at">expected =</span> <span class="dv">0</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>           <span class="at">ir =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>           <span class="at">cr =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>           <span class="at">ub =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>           <span class="at">p.hmin =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>           <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>           <span class="at">n =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>           <span class="at">factor =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>           <span class="at">samples =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a>           <span class="at">conf.level =</span> <span class="fl">0.95</span>)</span></code></pre></div>
 <p><em>Supported options for the <code>method</code> argument:</em></p>
 <ul>
 <li><code>default</code>: Indifferent / noninformative prior
@@ -478,16 +478,16 @@ beta-binomial prior distribution (Dyer &amp; Pierce, 1991).</li>
 <li><code>exponential</code>: Exponential prior distribution.</li>
 </ul>
 <p><em>Example usage:</em></p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Default beta(1, 1) prior distribution</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="st">&quot;default&quot;</span>, <span class="at">likelihood =</span> <span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Custom gamma(1, 10) prior distribution</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="st">&quot;param&quot;</span>, <span class="at">likelihood =</span> <span class="st">&quot;poisson&quot;</span>, <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">beta =</span> <span class="dv">10</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Beta prior distribution incorporating inherent risk (70%) and control risk (50%)</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="st">&quot;arm&quot;</span>, <span class="at">likelihood =</span> <span class="st">&quot;binomial&quot;</span>, <span class="at">materiality =</span> <span class="fl">0.05</span>, <span class="at">ir =</span> <span class="fl">0.7</span>, <span class="at">cr =</span> <span class="fl">0.5</span>)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(x) <span class="co"># Prints information about the prior distribution</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Default beta(1, 1) prior distribution</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="st">&quot;default&quot;</span>, <span class="at">likelihood =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co"># Custom gamma(1, 10) prior distribution</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="st">&quot;param&quot;</span>, <span class="at">likelihood =</span> <span class="st">&quot;poisson&quot;</span>, <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">beta =</span> <span class="dv">10</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co"># Beta prior distribution incorporating inherent risk (70%) and control risk (50%)</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="st">&quot;arm&quot;</span>, <span class="at">likelihood =</span> <span class="st">&quot;binomial&quot;</span>, <span class="at">materiality =</span> <span class="fl">0.05</span>, <span class="at">ir =</span> <span class="fl">0.7</span>, <span class="at">cr =</span> <span class="fl">0.5</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="fu">summary</span>(x) <span class="co"># Prints information about the prior distribution</span></span></code></pre></div>
 <pre><code>## 
 ##  Prior Distribution Summary
 ## 
@@ -505,7 +505,7 @@ beta-binomial prior distribution (Dyer &amp; Pierce, 1991).</li>
 ##   Information entropy (nat):     -2.0921 
 ##   95 percent upper bound:        0.13295 
 ##   Precision:                     0.13295</code></pre>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(x, <span class="at">n =</span> <span class="dv">20</span>, <span class="at">cumulative =</span> <span class="cn">TRUE</span>) <span class="co"># Predictions for a sample of n = 20</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">predict</span>(x, <span class="at">n =</span> <span class="dv">20</span>, <span class="at">cumulative =</span> <span class="cn">TRUE</span>) <span class="co"># Predictions for a sample of n = 20</span></span></code></pre></div>
 <pre><code>##      x&lt;=0      x&lt;=1      x&lt;=2      x&lt;=3      x&lt;=4      x&lt;=5      x&lt;=6      x&lt;=7 
 ## 0.5121951 0.7682927 0.8930582 0.9521576 0.9793114 0.9913797 0.9965519 0.9986816 
 ##      x&lt;=8      x&lt;=9     x&lt;=10     x&lt;=11     x&lt;=12     x&lt;=13     x&lt;=14     x&lt;=15 
@@ -528,15 +528,15 @@ an object of class <code>jfaPrior</code> as returned by the
 <code>jfaPosterior</code> as returned by the <code>evaluation()</code>
 function.</p>
 <p><em>Full function with default arguments:</em></p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">planning</span>(<span class="at">materiality =</span> <span class="cn">NULL</span>,</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">min.precision =</span> <span class="cn">NULL</span>,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">expected =</span> <span class="dv">0</span>,</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">likelihood =</span> <span class="fu">c</span>(<span class="st">&quot;poisson&quot;</span>, <span class="st">&quot;binomial&quot;</span>, <span class="st">&quot;hypergeometric&quot;</span>),</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">N.units =</span> <span class="cn">NULL</span>,</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">by =</span> <span class="dv">1</span>,</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">max =</span> <span class="dv">5000</span>,</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">prior =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">planning</span>(<span class="at">materiality =</span> <span class="cn">NULL</span>,</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>         <span class="at">min.precision =</span> <span class="cn">NULL</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>         <span class="at">expected =</span> <span class="dv">0</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>         <span class="at">likelihood =</span> <span class="fu">c</span>(<span class="st">&quot;poisson&quot;</span>, <span class="st">&quot;binomial&quot;</span>, <span class="st">&quot;hypergeometric&quot;</span>),</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>         <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>         <span class="at">N.units =</span> <span class="cn">NULL</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>         <span class="at">by =</span> <span class="dv">1</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>         <span class="at">max =</span> <span class="dv">5000</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>         <span class="at">prior =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <p><em>Supported options for the <code>likelihood</code>
 argument:</em></p>
 <ul>
@@ -546,19 +546,19 @@ argument:</em></p>
 2012).</li>
 </ul>
 <p><em>Example usage:</em></p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Classical planning using the Poisson likelihood</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">planning</span>(<span class="at">materiality =</span> <span class="fl">0.03</span>, <span class="at">likelihood =</span> <span class="st">&quot;poisson&quot;</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Bayesian planning using a default beta(1, 1) prior and binomial likelihood</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">planning</span>(<span class="at">materiality =</span> <span class="fl">0.03</span>, <span class="at">likelihood =</span> <span class="st">&quot;binomial&quot;</span>, <span class="at">prior =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Bayesian planning using a custom beta(1, 10) prior and binomial likelihood</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">planning</span>(</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">materiality =</span> <span class="fl">0.03</span>,</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior =</span> <span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="st">&quot;param&quot;</span>, <span class="at">likelihood =</span> <span class="st">&quot;binomial&quot;</span>, <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">beta =</span> <span class="dv">10</span>)</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(x) <span class="co"># Prints information about the planning</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Classical planning using the Poisson likelihood</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">planning</span>(<span class="at">materiality =</span> <span class="fl">0.03</span>, <span class="at">likelihood =</span> <span class="st">&quot;poisson&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co"># Bayesian planning using a default beta(1, 1) prior and binomial likelihood</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">planning</span>(<span class="at">materiality =</span> <span class="fl">0.03</span>, <span class="at">likelihood =</span> <span class="st">&quot;binomial&quot;</span>, <span class="at">prior =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># Bayesian planning using a custom beta(1, 10) prior and binomial likelihood</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">planning</span>(</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="at">materiality =</span> <span class="fl">0.03</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>  <span class="at">prior =</span> <span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="st">&quot;param&quot;</span>, <span class="at">likelihood =</span> <span class="st">&quot;binomial&quot;</span>, <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">beta =</span> <span class="dv">10</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>)</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="fu">summary</span>(x) <span class="co"># Prints information about the planning</span></span></code></pre></div>
 <pre><code>## 
 ##  Bayesian Audit Sample Planning Summary
 ## 
@@ -592,16 +592,16 @@ the <code>size</code> argument can be an object of class
 <code>jfaPlanning</code> as returned by the <code>planning()</code>
 function.</p>
 <p><em>Full function with default arguments:</em></p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">selection</span>(data,</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>          size,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">units =</span> <span class="fu">c</span>(<span class="st">&quot;items&quot;</span>, <span class="st">&quot;values&quot;</span>),</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">method =</span> <span class="fu">c</span>(<span class="st">&quot;interval&quot;</span>, <span class="st">&quot;cell&quot;</span>, <span class="st">&quot;random&quot;</span>, <span class="st">&quot;sieve&quot;</span>),</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">values =</span> <span class="cn">NULL</span>,</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">order =</span> <span class="cn">NULL</span>,</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">decreasing =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">randomize =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">replace =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">start =</span> <span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">selection</span>(data,</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>          size,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>          <span class="at">units =</span> <span class="fu">c</span>(<span class="st">&quot;items&quot;</span>, <span class="st">&quot;values&quot;</span>),</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>          <span class="at">method =</span> <span class="fu">c</span>(<span class="st">&quot;interval&quot;</span>, <span class="st">&quot;cell&quot;</span>, <span class="st">&quot;random&quot;</span>, <span class="st">&quot;sieve&quot;</span>),</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>          <span class="at">values =</span> <span class="cn">NULL</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>          <span class="at">order =</span> <span class="cn">NULL</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>          <span class="at">decreasing =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>          <span class="at">randomize =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>          <span class="at">replace =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>          <span class="at">start =</span> <span class="dv">1</span>)</span></code></pre></div>
 <p><em>Supported options for the <code>units</code> argument:</em></p>
 <ul>
 <li><code>items</code>: Sampling units are items (rows) (Leslie,
@@ -618,16 +618,16 @@ Teitlebaum, &amp; Anderson, 1979).</li>
 (Hoogduin, Hall, &amp; Tsay, 2010).</li>
 </ul>
 <p><em>Example usage:</em></p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Selection using random record (attributes) sampling</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&quot;items&quot;</span>, <span class="at">method =</span> <span class="st">&quot;random&quot;</span>)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Selection using fixed interval monetary unit sampling (using column &#39;bookValue&#39; in BuildIt)</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">selection</span>(</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&quot;values&quot;</span>,</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;interval&quot;</span>, <span class="at">values =</span> <span class="st">&quot;bookValue&quot;</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(x) <span class="co"># Prints information about the selection</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Selection using random record (attributes) sampling</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&quot;items&quot;</span>, <span class="at">method =</span> <span class="st">&quot;random&quot;</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co"># Selection using fixed interval monetary unit sampling (using column &#39;bookValue&#39; in BuildIt)</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">selection</span>(</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="at">data =</span> BuildIt, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">units =</span> <span class="st">&quot;values&quot;</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;interval&quot;</span>, <span class="at">values =</span> <span class="st">&quot;bookValue&quot;</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>)</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="fu">summary</span>(x) <span class="co"># Prints information about the selection</span></span></code></pre></div>
 <pre><code>## 
 ##  Audit Sample Selection Summary
 ## 
@@ -662,26 +662,26 @@ be an object of class <code>jfaPrior</code> as returned by the
 <code>jfaPosterior</code> as returned by the <code>evaluation()</code>
 function.</p>
 <p><em>Full function with default arguments:</em></p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">evaluation</span>(<span class="at">materiality =</span> <span class="cn">NULL</span>, </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="fu">c</span>(</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>             <span class="st">&quot;poisson&quot;</span>, <span class="st">&quot;binomial&quot;</span>, <span class="st">&quot;hypergeometric&quot;</span>,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>             <span class="st">&quot;stringer&quot;</span>, <span class="st">&quot;stringer.meikle&quot;</span>, <span class="st">&quot;stringer.lta&quot;</span>, <span class="st">&quot;stringer.pvz&quot;</span>,</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>             <span class="st">&quot;rohrbach&quot;</span>, <span class="st">&quot;moment&quot;</span>, <span class="st">&quot;coxsnell&quot;</span>,</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>             <span class="st">&quot;direct&quot;</span>, <span class="st">&quot;difference&quot;</span>, <span class="st">&quot;quotient&quot;</span>, <span class="st">&quot;regression&quot;</span>, <span class="st">&quot;mpu&quot;</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>           ),</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">&quot;less&quot;</span>, <span class="st">&quot;two.sided&quot;</span>, <span class="st">&quot;greater&quot;</span>),</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">data =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">values =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">values.audit =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>           <span class="at">strata =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>           <span class="at">times =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>           <span class="at">x =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>           <span class="at">n =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>           <span class="at">N.units =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>           <span class="at">N.items =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>           <span class="at">pooling =</span> <span class="fu">c</span>(<span class="st">&quot;none&quot;</span>, <span class="st">&quot;complete&quot;</span>, <span class="st">&quot;partial&quot;</span>), </span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>           <span class="at">prior =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">evaluation</span>(<span class="at">materiality =</span> <span class="cn">NULL</span>, </span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>           <span class="at">method =</span> <span class="fu">c</span>(</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>             <span class="st">&quot;poisson&quot;</span>, <span class="st">&quot;binomial&quot;</span>, <span class="st">&quot;hypergeometric&quot;</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>             <span class="st">&quot;stringer&quot;</span>, <span class="st">&quot;stringer.meikle&quot;</span>, <span class="st">&quot;stringer.lta&quot;</span>, <span class="st">&quot;stringer.pvz&quot;</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>             <span class="st">&quot;rohrbach&quot;</span>, <span class="st">&quot;moment&quot;</span>, <span class="st">&quot;coxsnell&quot;</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>             <span class="st">&quot;direct&quot;</span>, <span class="st">&quot;difference&quot;</span>, <span class="st">&quot;quotient&quot;</span>, <span class="st">&quot;regression&quot;</span>, <span class="st">&quot;mpu&quot;</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>           ),</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">&quot;less&quot;</span>, <span class="st">&quot;two.sided&quot;</span>, <span class="st">&quot;greater&quot;</span>),</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>           <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>           <span class="at">data =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>           <span class="at">values =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>           <span class="at">values.audit =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>           <span class="at">strata =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>           <span class="at">times =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>           <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>           <span class="at">n =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a>           <span class="at">N.units =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a>           <span class="at">N.items =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a>           <span class="at">pooling =</span> <span class="fu">c</span>(<span class="st">&quot;none&quot;</span>, <span class="st">&quot;complete&quot;</span>, <span class="st">&quot;partial&quot;</span>), </span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a>           <span class="at">prior =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <p><em>Supported options for the <code>method</code> argument:</em></p>
 <ul>
 <li><code>poisson</code>: Poisson likelihood (Stewart, 2012).</li>
@@ -713,19 +713,19 @@ Hoogduin, 2011).</li>
 2011).</li>
 </ul>
 <p><em>Example usage:</em></p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Classical evaluation using the Poisson likelihood (and summary statistics)</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">evaluation</span>(<span class="at">materiality =</span> <span class="fl">0.03</span>, <span class="at">x =</span> <span class="dv">1</span>, <span class="at">n =</span> <span class="dv">100</span>, <span class="at">method =</span> <span class="st">&quot;poisson&quot;</span>)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Bayesian evaluation using a default minimal information prior (and summary statistics)</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">evaluation</span>(<span class="at">materiality =</span> <span class="fl">0.03</span>, <span class="at">x =</span> <span class="dv">1</span>, <span class="at">n =</span> <span class="dv">100</span>, <span class="at">method =</span> <span class="st">&quot;poisson&quot;</span>, <span class="at">prior =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Bayesian evaluation using a custom beta(1, 10) prior (and summary statistics)</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">evaluation</span>(</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">materiality =</span> <span class="fl">0.03</span>, <span class="at">x =</span> <span class="dv">1</span>, <span class="at">n =</span> <span class="dv">100</span>,</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior =</span> <span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="st">&quot;param&quot;</span>, <span class="at">likelihood =</span> <span class="st">&quot;binomial&quot;</span>, <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">beta =</span> <span class="dv">10</span>)</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(x) <span class="co"># Prints information about the evaluation</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Classical evaluation using the Poisson likelihood (and summary statistics)</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">evaluation</span>(<span class="at">materiality =</span> <span class="fl">0.03</span>, <span class="at">x =</span> <span class="dv">1</span>, <span class="at">n =</span> <span class="dv">100</span>, <span class="at">method =</span> <span class="st">&quot;poisson&quot;</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co"># Bayesian evaluation using a default minimal information prior (and summary statistics)</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">evaluation</span>(<span class="at">materiality =</span> <span class="fl">0.03</span>, <span class="at">x =</span> <span class="dv">1</span>, <span class="at">n =</span> <span class="dv">100</span>, <span class="at">method =</span> <span class="st">&quot;poisson&quot;</span>, <span class="at">prior =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co"># Bayesian evaluation using a custom beta(1, 10) prior (and summary statistics)</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">evaluation</span>(</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  <span class="at">materiality =</span> <span class="fl">0.03</span>, <span class="at">x =</span> <span class="dv">1</span>, <span class="at">n =</span> <span class="dv">100</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>  <span class="at">prior =</span> <span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="st">&quot;param&quot;</span>, <span class="at">likelihood =</span> <span class="st">&quot;binomial&quot;</span>, <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">beta =</span> <span class="dv">10</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>)</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="fu">summary</span>(x) <span class="co"># Prints information about the evaluation</span></span></code></pre></div>
 <pre><code>## 
 ##  Bayesian Audit Sample Evaluation Summary
 ## 
@@ -757,12 +757,12 @@ function and automatically creates a <code>html</code> or
 <code>pdf</code> report containing the analysis results and their
 interpretation.</p>
 <p><em>Full function with default arguments:</em></p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">report</span>(object,</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">file =</span> <span class="st">&quot;report.html&quot;</span>,</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">format =</span> <span class="fu">c</span>(<span class="st">&quot;html_document&quot;</span>, <span class="st">&quot;pdf_document&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">report</span>(object,</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>       <span class="at">file =</span> <span class="st">&quot;report.html&quot;</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>       <span class="at">format =</span> <span class="fu">c</span>(<span class="st">&quot;html_document&quot;</span>, <span class="st">&quot;pdf_document&quot;</span>))</span></code></pre></div>
 <p><em>Example usage:</em></p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate an automatic report</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">report</span>(<span class="at">object =</span> x, <span class="at">file =</span> <span class="st">&#39;myReport.html&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Generate an automatic report</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">report</span>(<span class="at">object =</span> x, <span class="at">file =</span> <span class="st">&#39;myReport.html&#39;</span>)</span></code></pre></div>
 <p>For an example report, see the following <a href="https://github.com/koenderks/jfa/raw/development/man/figures/readme/report/report.pdf">link</a>.</p>
 </div>
 </div>

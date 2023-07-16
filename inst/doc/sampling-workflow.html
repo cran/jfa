@@ -12,7 +12,7 @@
 
 <meta name="author" content="Koen Derks" />
 
-<meta name="date" content="2023-04-07" />
+<meta name="date" content="2023-07-16" />
 
 <title>Walkthrough of the classical audit sampling workflow</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">Walkthrough of the classical audit sampling
 workflow</h1>
 <h4 class="author">Koen Derks</h4>
-<h4 class="date">2023-04-07</h4>
+<h4 class="date">2023-07-16</h4>
 
 
 <div id="TOC">
@@ -382,8 +382,8 @@ statements are based. For this example, the performance materiality is
 set at 5% of the total value of the population.</p>
 <p>In this example, we focus on the <code>BuildIt</code> data set that
 comes with the <strong>jfa</strong> package.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;BuildIt&quot;</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(BuildIt)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;BuildIt&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">head</span>(BuildIt)</span></code></pre></div>
 <pre><code>##      ID bookValue auditValue
 ## 1 82884    242.61     242.61
 ## 2 25064    642.99     642.99
@@ -421,10 +421,10 @@ that, when 2.5% errors are found in the sample, they can conclude with
 performance materiality of 5%.</p>
 <p>Below, the auditor defines the performance materiality, confidence
 level, and expected misstatements in the sample.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify the confidence, materiality, and expected errors.</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>confidence <span class="ot">&lt;-</span> <span class="fl">0.95</span> <span class="co"># 95%</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>materiality <span class="ot">&lt;-</span> <span class="fl">0.05</span> <span class="co"># 5%</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>expected <span class="ot">&lt;-</span> <span class="fl">0.025</span> <span class="co"># 2.5%</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Specify the confidence, materiality, and expected errors.</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>confidence <span class="ot">&lt;-</span> <span class="fl">0.95</span> <span class="co"># 95%</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>materiality <span class="ot">&lt;-</span> <span class="fl">0.05</span> <span class="co"># 5%</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>expected <span class="ot">&lt;-</span> <span class="fl">0.025</span> <span class="co"># 2.5%</span></span></code></pre></div>
 <p>Many audits are performed according to the <em>audit risk model
 (ARM)</em>, which determines that the uncertainty about the auditor’s
 statement as a whole (1 - the confidence) is a factor of three terms:
@@ -451,9 +451,9 @@ auditor’s firm defines the probabilities of low, medium, and high
 respectively as 50%, 60%, and 100%. Because the auditor assessed
 BuildIt’s internal control systems, they assess the control risk as
 medium (60%).</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify the inherent risk (ir) and control risk (cr).</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ir <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># 100%</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>cr <span class="ot">&lt;-</span> <span class="fl">0.6</span> <span class="co"># 60%</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Specify the inherent risk (ir) and control risk (cr).</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>ir <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># 100%</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>cr <span class="ot">&lt;-</span> <span class="fl">0.6</span> <span class="co"># 60%</span></span></code></pre></div>
 </div>
 <div id="stage-1-planning-an-audit-sample" class="section level2">
 <h2>Stage 1: Planning an audit sample</h2>
@@ -469,17 +469,17 @@ analysis can easily be done through the following functions by setting
 <code>prior = FALSE</code>. In a frequentist analysis, the auditor
 immediately uses the adjusted confidence to calculate the sample size
 via the <code>planning()</code> function.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Adjust the required confidence for a frequentist analysis.</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>c.adj <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> ((<span class="dv">1</span> <span class="sc">-</span> confidence) <span class="sc">/</span> (ir <span class="sc">*</span> cr))</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Calculate the required sample size.</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>stage1 <span class="ot">&lt;-</span> <span class="fu">planning</span>(<span class="at">materiality =</span> materiality, <span class="at">expected =</span> expected, <span class="at">conf.level =</span> c.adj)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Adjust the required confidence for a frequentist analysis.</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>c.adj <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> ((<span class="dv">1</span> <span class="sc">-</span> confidence) <span class="sc">/</span> (ir <span class="sc">*</span> cr))</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co"># Step 1: Calculate the required sample size.</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>stage1 <span class="ot">&lt;-</span> <span class="fu">planning</span>(<span class="at">materiality =</span> materiality, <span class="at">expected =</span> expected, <span class="at">conf.level =</span> c.adj)</span></code></pre></div>
 <p>The auditor can then inspect the result from the planning procedure
 by using the <code>summary()</code> function. The result shows that the
 auditor needs to select a sample of 178 items so that, when at most 4.45
 misstatements are found, they can conclude with 91.66% confidence that
 the misstatement in BuildIt’s population is lower than the performance
 materiality of 5%.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(stage1)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">summary</span>(stage1)</span></code></pre></div>
 <pre><code>## 
 ##  Classical Audit Sample Planning Summary
 ## 
@@ -522,12 +522,12 @@ function enables them to select the sample from the population. She uses
 the <code>stage1</code> object as an input for the
 <code>selection()</code> function, since this passes the calculated
 sample size to the function.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Draw a sample from the financial statements.</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>stage2 <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> stage1, <span class="at">units =</span> <span class="st">&quot;values&quot;</span>, <span class="at">values =</span> <span class="st">&quot;bookValue&quot;</span>, <span class="at">method =</span> <span class="st">&quot;interval&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Step 2: Draw a sample from the financial statements.</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>stage2 <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> BuildIt, <span class="at">size =</span> stage1, <span class="at">units =</span> <span class="st">&quot;values&quot;</span>, <span class="at">values =</span> <span class="st">&quot;bookValue&quot;</span>, <span class="at">method =</span> <span class="st">&quot;interval&quot;</span>)</span></code></pre></div>
 <p>Like before, the auditor can inspect the outcomes of their sampling
 procedure<br />
 by using the <code>summary()</code> function.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(stage2)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">summary</span>(stage2)</span></code></pre></div>
 <pre><code>## 
 ##  Audit Sample Selection Summary
 ## 
@@ -552,8 +552,8 @@ by using the <code>summary()</code> function.</p>
 <h2>Stage 3: Executing the audit</h2>
 <p>The selected sample can be isolated by indexing the
 <code>sample</code> object from the sampling result.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Isolate the sample for execution of the audit.</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> stage2<span class="sc">$</span>sample</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Step 3: Isolate the sample for execution of the audit.</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>sample <span class="ot">&lt;-</span> stage2<span class="sc">$</span>sample</span></code></pre></div>
 <p>Next, the auditor can execute the audit by annotating the items in
 the sample with their audit values (for exampling by writing the sample
 to a <em>.csv</em> file using <code>write.csv()</code>. They can then
@@ -561,11 +561,11 @@ load the annotated sample back into the R session for further
 evaluation. For this example, the audit values of the sample items are
 already included in the <code>auditValue</code> column of the data
 set.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># To write the sample to a .csv file:</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="at">x =</span> sample, <span class="at">file =</span> <span class="st">&quot;auditSample.csv&quot;</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># To load annotated sample back into R:</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="at">file =</span> <span class="st">&quot;auditSample.csv&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># To write the sample to a .csv file:</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="at">x =</span> sample, <span class="at">file =</span> <span class="st">&quot;auditSample.csv&quot;</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co"># To load annotated sample back into R:</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="at">file =</span> <span class="st">&quot;auditSample.csv&quot;</span>)</span></code></pre></div>
 </div>
 <div id="stage-4-evaluating-the-sample" class="section level2">
 <h2>Stage 4: Evaluating the sample</h2>
@@ -575,15 +575,15 @@ set.</p>
 <p>Using the annotated sample, the auditor can perform inference about
 the misstatement in the population via the <code>evaluation()</code>
 function.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 4: Evaluate the sample</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>stage4 <span class="ot">&lt;-</span> <span class="fu">evaluation</span>(</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">materiality =</span> materiality, <span class="at">conf.level =</span> c.adj, <span class="at">data =</span> sample,</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">values =</span> <span class="st">&quot;bookValue&quot;</span>, <span class="at">values.audit =</span> <span class="st">&quot;auditValue&quot;</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Step 4: Evaluate the sample</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>stage4 <span class="ot">&lt;-</span> <span class="fu">evaluation</span>(</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="at">materiality =</span> materiality, <span class="at">conf.level =</span> c.adj, <span class="at">data =</span> sample,</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="at">values =</span> <span class="st">&quot;bookValue&quot;</span>, <span class="at">values.audit =</span> <span class="st">&quot;auditValue&quot;</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>)</span></code></pre></div>
 <p>The auditor can inspect the outcomes of her inference by using the
 <code>summary()</code> function. The resulting 91.66% upper bound is
 1.396%, which is lower than the performance materiality of 5%.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(stage4)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">summary</span>(stage4)</span></code></pre></div>
 <pre><code>## 
 ##  Classical Audit Sample Evaluation Summary
 ## 
@@ -612,7 +612,7 @@ obtained sufficient evidence to conclude that the population does not
 contain material misstatements. The auditor can create a
 <code>html</code> or <code>pdf</code> report of the statistical results
 using the <code>report()</code> function, as shown below.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">report</span>(stage4, <span class="at">file =</span> <span class="st">&quot;report.html&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">report</span>(stage4, <span class="at">file =</span> <span class="st">&quot;report.html&quot;</span>)</span></code></pre></div>
 </div>
 
 

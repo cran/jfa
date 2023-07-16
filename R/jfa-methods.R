@@ -798,12 +798,15 @@ plot.jfaEvaluation <- function(x, type = c("posterior", "estimates"), ...) {
 #' @export
 print.jfaDistr <- function(x, digits = getOption("digits"), ...) {
   cat("\n")
-  cat(strwrap("Digit distribution test", prefix = "\t"), sep = "\n")
+  cat(strwrap("Digit Distribution Test", prefix = "\t"), sep = "\n")
   cat("\n")
   cat("data:  ", x$data.name, "\n", sep = "")
   out <- character()
   if (!is.null(x$n)) {
     out <- c(out, paste(names(x$n), "=", format(x$n, digits = max(1L, digits - 2L))))
+  }
+  if (!is.null(x$mad)) {
+    out <- c(out, paste(names(x$mad), "=", format(x$mad, digits = max(1L, digits - 2L))))
   }
   if (!is.null(x$statistic)) {
     out <- c(out, paste(names(x$statistic), "=", format(x$statistic, digits = max(1L, digits - 2L))))
@@ -831,16 +834,81 @@ print.jfaDistr <- function(x, digits = getOption("digits"), ...) {
 }
 
 #' @rdname jfa-methods
+#' @method print summary.jfaDistr
+#' @export
+print.summary.jfaDistr <- function(x, digits = getOption("digits"), ...) {
+  cat("\n")
+  cat(strwrap("Digit Distribution Test Summary", prefix = "\t"), sep = "\n")
+  cat("\nOptions:\n")
+  cat(paste("  Confidence level:              ", format(x[["conf.level"]], digits = max(1L, digits - 2L))), "\n")
+  cat(paste("  Digits:                        ", switch(x[["check"]],
+    "first" = "Leading",
+    "firsttwo" = "First and second",
+    "last" = "Last"
+  )), "\n")
+  cat(paste("  Reference:                     ", if (x[["reference"]] == "benford") {
+    "Benford's law"
+  } else if (x[["reference"]] == "uniform") {
+    "Uniform distribution"
+  } else {
+    "Custom distribution"
+  }), "\n")
+  if (x[["type"]] == "Bayesian") {
+    cat(paste("  Prior distribution:            ", "Dirichlet(1, ..., 1)"), "\n")
+  }
+  cat("\nData:\n")
+  cat(paste("  Sample size:                   ", format(x[["n"]], digits = max(1L, digits - 2L))), "\n")
+  cat("\nResults:\n")
+  if (x[["type"]] == "Bayesian") {
+    cat(paste("  BF\u2081\u2080:\t                         ", format(x[["bf"]], digits = max(1L, digits - 2L))), "\n")
+  } else {
+    cat(paste("  X-squared:\t                 ", format(x[["statistic"]], digits = max(1L, digits - 2L))), "\n")
+    cat(paste("  Degrees of freedom:\t         ", format(x[["parameter"]], digits = max(1L, digits - 2L))), "\n")
+    cat(paste("  p-value:                       ", format.pval(x[["p.value"]], digits = max(1L, digits - 2L))), "\n")
+  }
+  cat(paste("  Mean absolute difference (MAD):", format(x[["mad"]], digits = max(1L, digits - 2L))), "\n")
+  cat(paste0("\nDigits (", length(x[["digits"]]), "):\n"))
+  print(round(x[["estimates"]], digits = max(1L, digits - 2L)), quote = FALSE)
+}
+
+#' @rdname jfa-methods
+#' @method summary jfaDistr
+#' @export
+summary.jfaDistr <- function(object, digits = getOption("digits"), ...) {
+  out <- list(
+    "conf.level" = round(object[["conf.level"]], digits),
+    "n" = object[["n"]],
+    "check" = object[["check"]],
+    "digits" = object[["digits"]],
+    "reference" = object[["reference"]],
+    "mad" = object[["mad"]],
+    stringsAsFactors = FALSE
+  )
+  if (!is.null(object[["p.value"]])) {
+    out[["statistic"]] <- object[["statistic"]]
+    out[["parameter"]] <- object[["parameter"]]
+    out[["p.value"]] <- object[["p.value"]]
+    out[["type"]] <- "Classical"
+  } else if (!is.null(object[["bf"]])) {
+    out[["bf"]] <- object[["bf"]]
+    out[["type"]] <- "Bayesian"
+  }
+  out[["estimates"]] <- object[["estimates"]]
+  class(out) <- c("summary.jfaDistr", "list")
+  return(out)
+}
+
+#' @rdname jfa-methods
 #' @method plot jfaDistr
 #' @export
 plot.jfaDistr <- function(x, ...) {
-  y <- type <- NULL
+  y <- type <- d <- lb <- ub <- NULL
   df <- data.frame(
     x = c(x[["digits"]], x[["digits"]]),
     y = c(x$observed / x$n, x$expected / x$n),
     type = c(rep("Observed", length(x[["digits"]])), rep("Expected", length(x[["digits"]])))
   )
-  yBreaks <- pretty(c(0, df$y), min.n = 4)
+  yBreaks <- pretty(c(0, df$y, x[["estimates"]]$ub), min.n = 4)
   if (x[["check"]] == "first" || x[["check"]] == "last") {
     xBreaks <- x[["digits"]]
     xLabels <- x[["digits"]]
@@ -868,10 +936,27 @@ plot.jfaDistr <- function(x, ...) {
     "firsttwo" = "Leading digits",
     "last" = "Last digit"
   )
-  p <- ggplot2::ggplot(data = data.frame(x = c(xBreaks[1], xBreaks[1]), y = c(yBreaks[1], yBreaks[1]), type = c("Observed", "Expected")), mapping = ggplot2::aes(x = x, y = y, fill = type)) +
+  xs <- rep(xBreaks[1], 2)
+  ys <- rep(yBreaks[1], 2)
+  types <- c("Observed", "Expected")
+  sizes <- c(7, 10)
+  shapes <- c(21, 22)
+  fills <- c("dodgerblue", "darkgray")
+  if (any(x[["deviation"]])) {
+    xs <- c(xs, xBreaks[1])
+    ys <- c(ys, yBreaks[1])
+    types <- c(types, "Deviation")
+    sizes <- c(sizes, 10)
+    shapes <- c(shapes, 22)
+    fills <- c(fills, "firebrick")
+  }
+  plotData <- data.frame(x = xs, y = ys, type = types)
+  plotData[["type"]] <- factor(plotData[["type"]], levels = types)
+  p <- ggplot2::ggplot(data = plotData, mapping = ggplot2::aes(x = x, y = y, fill = type)) +
     ggplot2::geom_point(alpha = 0) +
-    ggplot2::geom_bar(data = subset(df, type == "Expected"), mapping = ggplot2::aes(x = x, y = y), fill = "darkgray", stat = "identity", color = "black") +
+    ggplot2::geom_bar(data = subset(df, type == "Expected"), mapping = ggplot2::aes(x = x, y = y), fill = ifelse(x[["deviation"]], "firebrick", "darkgray"), stat = "identity", color = "black") +
     ggplot2::geom_line(data = subset(df, type == "Observed"), mapping = ggplot2::aes(x = x, y = y), color = "dodgerblue", linewidth = lineSize) +
+    ggplot2::geom_errorbar(data = x[["estimates"]], mapping = ggplot2::aes(x = d, ymin = lb, ymax = ub), width = 0.5) +
     ggplot2::geom_point(data = subset(df, type == "Observed"), mapping = ggplot2::aes(x = x, y = y), fill = "dodgerblue", size = pointSize, shape = 21) +
     ggplot2::scale_x_continuous(name = axisName, breaks = xBreaks, labels = xLabels, limits = c(min(x[["digits"]]) - 0.5, max(x[["digits"]]) + 0.5), ) +
     ggplot2::scale_y_continuous(name = "Relative frequency", breaks = yBreaks, limits = c(0, max(yBreaks))) +
@@ -879,9 +964,8 @@ plot.jfaDistr <- function(x, ...) {
     ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = -Inf, yend = -Inf) +
     ggplot2::labs(fill = "") +
     ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = -5, r = 50))) +
-    ggplot2::guides(fill = ggplot2::guide_legend(reverse = TRUE, override.aes = list(
-      size = c(7, 10), shape = c(21, 22),
-      fill = c("dodgerblue", "darkgray"), color = "black", alpha = 1
+    ggplot2::guides(fill = ggplot2::guide_legend(override.aes = list(
+      size = sizes, shape = shapes, fill = fills, color = "black", alpha = 1
     )))
   p <- .theme_jfa(p, legend.position = "top")
   return(p)
@@ -894,7 +978,7 @@ plot.jfaDistr <- function(x, ...) {
 #' @export
 print.jfaRv <- function(x, digits = getOption("digits"), ...) {
   cat("\n")
-  cat(strwrap("Repeated values test", prefix = "\t"), sep = "\n")
+  cat(strwrap("Repeated Values Test", prefix = "\t"), sep = "\n")
   cat("\n")
   cat("data:  ", x$data.name, "\n", sep = "")
   out <- character()

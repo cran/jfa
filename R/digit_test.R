@@ -19,20 +19,25 @@
 #' of (leading) digits in a vector against a reference distribution. By default,
 #' the distribution of leading digits is checked against Benford's law.
 #'
-#' @usage digit_test(x,
-#'            check = c("first", "last", "firsttwo"),
-#'            reference = "benford",
-#'            prior = FALSE)
+#' @usage digit_test(
+#'   x,
+#'   check = c("first", "last", "firsttwo"),
+#'   reference = "benford",
+#'   conf.level = 0.95,
+#'   prior = FALSE
+#' )
 #'
-#' @param x         a numeric vector.
-#' @param check     location of the digits to analyze. Can be \code{first},
+#' @param x          a numeric vector.
+#' @param check      location of the digits to analyze. Can be \code{first},
 #'   \code{firsttwo}, or \code{last}.
-#' @param reference which character string given the reference distribution for
+#' @param reference  which character string given the reference distribution for
 #'   the digits, or a vector of probabilities for each digit. Can be
 #'   \code{benford} for Benford's law, \code{uniform} for the uniform
 #'   distribution. An error is given if any entry of \code{reference} is
 #'   negative. Probabilities that do not sum to one are normalized.
-#' @param prior     a logical specifying whether to use a prior distribution,
+#' @param conf.level a numeric value between 0 and 1 specifying the
+#'   confidence level (i.e., 1 - audit risk / detection risk).
+#' @param prior      a logical specifying whether to use a prior distribution,
 #'   or a numeric vector containing the prior parameters for the Dirichlet
 #'   distribution on the digit categories.
 #'
@@ -90,6 +95,7 @@
 digit_test <- function(x,
                        check = c("first", "last", "firsttwo"),
                        reference = "benford",
+                       conf.level = 0.95,
                        prior = FALSE) {
   stopifnot("'x' must be a vector" = (NCOL(x) == 1) && !is.data.frame(x))
   check <- match.arg(check)
@@ -145,10 +151,13 @@ digit_test <- function(x,
     bf <- exp(log_bf10)
     names(bf) <- "BF10"
   }
+  mad <- mean(abs((obs / n) - (exp / n)))
+  names(mad) <- "MAD"
   names(n) <- "n"
   names(obs) <- dig
   names(exp) <- dig
   result <- list()
+  result[["conf.level"]] <- conf.level
   result[["observed"]] <- obs
   result[["expected"]] <- exp
   result[["n"]] <- n
@@ -159,10 +168,24 @@ digit_test <- function(x,
   } else {
     result[["bf"]] <- bf
   }
+  result[["mad"]] <- mad
   result[["check"]] <- check
   result[["digits"]] <- dig
   result[["reference"]] <- reference
   result[["match"]] <- split(x = data.frame(row = seq_along(d), value = x), f = d)
+  result[["estimates"]] <- data.frame(d = dig, n = obs, p.exp = p_exp, p.obs = obs / n)
+  if (!prior) {
+    result[["estimates"]]$lb <- stats::qbeta((1 - conf.level) / 2, obs, 1 + n - obs)
+    result[["estimates"]]$ub <- stats::qbeta(conf.level + (1 - conf.level) / 2, 1 + obs, n - obs)
+    result[["estimates"]]$p.value <- apply(result[["estimates"]], 1, function(x, n) stats::binom.test(x[2], n, x[3], alternative = "two.sided")$p.value, n = n)
+  } else {
+    result[["estimates"]]$lb <- stats::qbeta((1 - conf.level) / 2, 1 + obs, 1 + n - obs)
+    result[["estimates"]]$ub <- stats::qbeta(conf.level + (1 - conf.level) / 2, 1 + obs, 1 + n - obs)
+    result[["estimates"]]$bf10 <- 1 / (stats::dbeta(p_exp, 1 + obs, 1 + n - obs) / stats::dbeta(p_exp, 1, 1))
+  }
+  deviation <- result[["estimates"]]$p.exp <= result[["estimates"]]$lb | result[["estimates"]]$p.exp >= result[["estimates"]]$ub
+  names(deviation) <- dig
+  result[["deviation"]] <- deviation
   result[["data.name"]] <- dname
   class(result) <- c("jfaDistr", "list")
   return(result)

@@ -4,10 +4,13 @@
 \alias{digit_test}
 \title{Data Auditing: Digit Distribution Test}
 \usage{
-digit_test(x,
-           check = c("first", "last", "firsttwo"),
-           reference = "benford",
-           prior = FALSE)
+digit_test(
+  x,
+  check = c("first", "last", "firsttwo"),
+  reference = "benford",
+  conf.level = 0.95,
+  prior = FALSE
+)
 }
 \arguments{
 \item{x}{a numeric vector.}
@@ -20,6 +23,9 @@ the digits, or a vector of probabilities for each digit. Can be
 \code{benford} for Benford's law, \code{uniform} for the uniform
 distribution. An error is given if any entry of \code{reference} is
 negative. Probabilities that do not sum to one are normalized.}
+
+\item{conf.level}{a numeric value between 0 and 1 specifying the
+confidence level (i.e., 1 - audit risk / detection risk).}
 
 \item{prior}{a logical specifying whether to use a prior distribution,
 or a numeric vector containing the prior parameters for the Dirichlet

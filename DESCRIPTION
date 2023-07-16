@@ -1,7 +1,7 @@
 Package: jfa
 Title: Statistical Methods for Auditing
-Version: 0.6.6
-Date: 2023-04-07
+Version: 0.6.7
+Date: 2023-07-14
 Authors@R: 
     person(given = "Koen",
            family = "Derks",
@@ -20,12 +20,12 @@ Description: Provides statistical methods for auditing as implemented in JASP
     provides statistical methods for auditing data, including (Bayesian) tests
     of digit distributions and tests for repeated values.
 Depends: R (>= 3.5.0)
-Imports: bde, extraDistr, ggplot2, methods, Rcpp (>= 0.12.0),
-        RcppParallel (>= 5.0.1), rstan (>= 2.18.1), rstantools (>=
-        2.2.0), stats, truncdist
+Imports: bde (>= 1.0.1.1), extraDistr (>= 1.9.1), ggplot2 (>= 3.4.2),
+        methods, Rcpp (>= 0.12.0), RcppParallel (>= 5.0.1), rstan (>=
+        2.18.1), rstantools (>= 2.2.0), stats, truncdist (>= 1.0-2)
 Suggests: benford.analysis (>= 0.1.5), BenfordTests (>= 1.2.0),
-        BeyondBenford (>= 1.4), kableExtra, knitr, MUS (>= 0.1.6),
-        rmarkdown, samplingbook (>= 1.2.4), testthat
+        BeyondBenford (>= 1.4), kableExtra (>= 1.3.4), knitr, MUS (>=
+        0.1.6), rmarkdown, samplingbook (>= 1.2.4), testthat
 LinkingTo: BH (>= 1.66.0), Rcpp (>= 0.12.0), RcppEigen (>= 0.3.3.3.0),
         RcppParallel (>= 5.0.1), rstan (>= 2.18.1), StanHeaders (>=
         2.18.0)
@@ -40,8 +40,8 @@ SystemRequirements: C++17, GNU make
 Language: en-US
 RoxygenNote: 7.2.3
 Biarch: true
-Packaged: 2023-04-07 14:26:43 UTC; koenderks
+Packaged: 2023-07-16 13:52:06 UTC; koenderks
 Author: Koen Derks [aut, cre] (<https://orcid.org/0000-0002-5533-9349>)
 Maintainer: Koen Derks <k.derks@nyenrode.nl>
 Repository: CRAN
-Date/Publication: 2023-04-08 13:50:02 UTC
+Date/Publication: 2023-07-16 14:40:07 UTC
