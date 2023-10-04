@@ -12,7 +12,7 @@
 
 <meta name="author" content="Koen Derks" />
 
-<meta name="date" content="2023-07-16" />
+<meta name="date" content="2023-10-04" />
 
 <title>Data auditing: Get started</title>
 
@@ -340,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Data auditing: Get started</h1>
 <h4 class="author">Koen Derks</h4>
-<h4 class="date">2023-07-16</h4>
+<h4 class="date">2023-10-04</h4>
 
 
 <div id="TOC">
@@ -388,10 +388,12 @@ the alternative hypothesis that the digits are not distributed according
 to the reference distribution and produces a Bayes factor (Kass &amp;
 Raftery, 1995).</p>
 <p><em>Full function with default arguments:</em></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">digit_test</span>(x,</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>           <span class="at">check =</span> <span class="fu">c</span>(<span class="st">&quot;first&quot;</span>, <span class="st">&quot;last&quot;</span>, <span class="st">&quot;firsttwo&quot;</span>),</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>           <span class="at">reference =</span> <span class="st">&quot;benford&quot;</span>,</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>           <span class="at">prior =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">digit_test</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  x,</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="at">check =</span> <span class="fu">c</span>(<span class="st">&quot;first&quot;</span>, <span class="st">&quot;last&quot;</span>, <span class="st">&quot;firsttwo&quot;</span>),</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="at">reference =</span> <span class="st">&quot;benford&quot;</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="at">prior =</span> <span class="cn">FALSE</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>)</span></code></pre></div>
 <p><em>Supported options for the <code>check</code> argument:</em></p>
 <table>
 <thead>
@@ -452,7 +454,7 @@ law using the code below.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Frequentist hypothesis test</span></span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">digit_test</span>(sinoForest<span class="sc">$</span>value, <span class="at">check =</span> <span class="st">&quot;first&quot;</span>, <span class="at">reference =</span> <span class="st">&quot;benford&quot;</span>)</span></code></pre></div>
 <pre><code>## 
-##  Digit Distribution Test
+##  Classical Digit Distribution Test
 ## 
 ## data:  sinoForest$value
 ## n = 772, MAD = 0.0065981, X-squared = 7.6517, df = 8, p-value = 0.4682
@@ -460,10 +462,10 @@ law using the code below.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Bayesian hypothesis test using default prior</span></span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">digit_test</span>(sinoForest<span class="sc">$</span>value, <span class="at">check =</span> <span class="st">&quot;first&quot;</span>, <span class="at">reference =</span> <span class="st">&quot;benford&quot;</span>, <span class="at">prior =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## 
-##  Digit Distribution Test
+##  Bayesian Digit Distribution Test
 ## 
 ## data:  sinoForest$value
-## n = 772, MAD = 0.0065981, BF10 = 1.4493e-07
+## n = 772, MAD = 0.0065981, BF₁₀ = 1.4493e-07
 ## alternative hypothesis: leading digit(s) are not distributed according to the benford distribution.</code></pre>
 </div>
 <div id="test-for-repeated-values-with-repeated_test" class="section level3">
@@ -475,10 +477,12 @@ and its generalizations, this approach examines the entire number at
 once, not only the first or last digit. For the technical details of
 this procedure, see Simohnsohn (2019).</p>
 <p><em>Full function with default arguments:</em></p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">repeated_test</span>(x,</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>              <span class="at">check =</span> <span class="st">&quot;last&quot;</span>,</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>              <span class="at">method =</span> <span class="st">&quot;af&quot;</span>,</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>              <span class="at">samples =</span> <span class="dv">2000</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">repeated_test</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  x,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="at">check =</span> <span class="st">&quot;last&quot;</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;af&quot;</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">samples =</span> <span class="dv">2000</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>)</span></code></pre></div>
 <p><em>Supported options for the <code>check</code> argument:</em></p>
 <table>
 <thead>
@@ -532,10 +536,10 @@ also contain a greater amount of repeated values than expected if the
 data were not tampered with.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">repeated_test</span>(sanitizer<span class="sc">$</span>value, <span class="at">check =</span> <span class="st">&quot;lasttwo&quot;</span>, <span class="at">samples =</span> <span class="dv">5000</span>)</span></code></pre></div>
 <pre><code>## 
-##  Repeated Values Test
+##  Classical Repeated Values Test
 ## 
 ## data:  sanitizer$value
-## n = 1600, AF = 1.5225, p-value = 0.0028
+## n = 1600, AF = 1.5225, p-value = 0.003
 ## alternative hypothesis: average frequency in data is greater than for random data.</code></pre>
 </div>
 </div>

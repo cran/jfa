@@ -7,10 +7,11 @@
 
 # jfa: Statistical Methods for Auditing <img src='https://github.com/koenderks/jfa/raw/development/man/figures/logo.png' width='149' height='173' align='right'/>
 
-**jfa** is an R package that provides statistical methods for auditing. The package includes functions for planning, performing, evaluating, and reporting audit samples compliant with international auditing standards, as well as functions for auditing data, such as testing the distribution of leading digits against Benford's law. In addition to offering classical frequentist methods, **jfa** also provides a straightforward implementation of their Bayesian counterparts.
+**jfa** is an R package that provides statistical methods for auditing. The package includes functions for planning, performing, evaluating, and reporting audit samples compliant with international auditing standards, as well as functions for auditing data, such as testing the distribution of leading digits against Benford's law, and functions for auditing algorithms with respect to fairness. In addition to offering classical (frequentist) methods, **jfa** also provides a straightforward implementation of their Bayesian counterparts.
 
 - [Audit sampling: Get started](https://koenderks.github.io/jfa/articles/audit-sampling.html)
 - [Data auditing: Get started](https://koenderks.github.io/jfa/articles/data-auditing.html)
+- [Algorithm auditing: Get started](https://koenderks.github.io/jfa/articles/algorithm-auditing.html)
 
 The functionality of the **jfa** package and its intended workflow are implemented with a graphical user interface in the [Audit](https://github.com/jasp-stats/jaspAudit) module of [JASP](https://jasp-stats.org), a free and open-source software program for statistical analyses.
 
@@ -57,7 +58,7 @@ citation("jfa")
 
 #>  To cite jfa in publications, please use:
 #>
-#>    Derks, K. (2023). jfa: Statistical methods for auditing. R package version 0.6.7.
+#>    Derks, K. (2023). jfa: Statistical methods for auditing. R package version 0.7.0.
 #>
 #>  A BibTeX entry for LaTeX users is
 #>
@@ -65,7 +66,7 @@ citation("jfa")
 #>      title = {jfa: Statistical methods for auditing},
 #>      author = {Koen Derks},
 #>      year = {2023},
-#>      note = {R package version 0.6.7},
+#>      note = {R package version 0.7.0},
 #>      url = {https://CRAN.R-project.org/package=jfa},
 #>    }
 ```

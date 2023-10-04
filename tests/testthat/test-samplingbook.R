@@ -18,6 +18,7 @@ context("Benchmark against R package samplingbook")
 # samplingbook R package (version 1.2.4)
 
 test_that(desc = "(id: f15-v0.6.3-t1) Validate hypergeometric 99% upper bounds", {
+  testthat::skip_on_cran()
   ub_level <- 0.99
   interval_level <- ub_level - (1 - ub_level)
   index <- 1
@@ -26,7 +27,7 @@ test_that(desc = "(id: f15-v0.6.3-t1) Validate hypergeometric 99% upper bounds",
   for (N in seq(400, 1000, 50)) {
     for (n in seq(20, 300, 10)) {
       for (k in 0:10) {
-        ub_jfa[index] <- jfa::evaluation(materiality = 0.99, n = n, x = k, method = "hypergeometric", N.units = N, conf.level = ub_level, alternative = "less")$ub
+        ub_jfa[index] <- evaluation(materiality = 0.99, n = n, x = k, method = "hypergeometric", N.units = N, conf.level = ub_level, alternative = "less")$ub
         ub_sb[index] <- suppressWarnings(expr = {
           samplingbook::Sprop(m = k, n = n, N = N, level = interval_level)$ci$exact[2]
         })
@@ -38,6 +39,7 @@ test_that(desc = "(id: f15-v0.6.3-t1) Validate hypergeometric 99% upper bounds",
 })
 
 test_that(desc = "(id: f15-v0.6.3-t2) Validate hypergeometric 95% upper bounds", {
+  testthat::skip_on_cran()
   ub_level <- 0.95
   interval_level <- ub_level - (1 - ub_level)
   index <- 1
@@ -46,7 +48,7 @@ test_that(desc = "(id: f15-v0.6.3-t2) Validate hypergeometric 95% upper bounds",
   for (N in seq(400, 1000, 50)) {
     for (n in seq(20, 300, 10)) {
       for (k in 0:10) {
-        ub_jfa[index] <- jfa::evaluation(materiality = 0.99, n = n, x = k, method = "hypergeometric", N.units = N, conf.level = ub_level, alternative = "less")$ub
+        ub_jfa[index] <- evaluation(materiality = 0.99, n = n, x = k, method = "hypergeometric", N.units = N, conf.level = ub_level, alternative = "less")$ub
         ub_sb[index] <- suppressWarnings(expr = {
           samplingbook::Sprop(m = k, n = n, N = N, level = interval_level)$ci$exact[2]
         })
@@ -58,6 +60,7 @@ test_that(desc = "(id: f15-v0.6.3-t2) Validate hypergeometric 95% upper bounds",
 })
 
 test_that(desc = "(id: f15-v0.6.3-t3) Validate hypergeometric 90% upper bounds", {
+  testthat::skip_on_cran()
   ub_level <- 0.90
   interval_level <- ub_level - (1 - ub_level)
   index <- 1
@@ -66,7 +69,7 @@ test_that(desc = "(id: f15-v0.6.3-t3) Validate hypergeometric 90% upper bounds",
   for (N in seq(400, 1000, 50)) {
     for (n in seq(20, 300, 10)) {
       for (k in 0:10) {
-        ub_jfa[index] <- jfa::evaluation(materiality = 0.99, n = n, x = k, method = "hypergeometric", N.units = N, conf.level = ub_level, alternative = "less")$ub
+        ub_jfa[index] <- evaluation(materiality = 0.99, n = n, x = k, method = "hypergeometric", N.units = N, conf.level = ub_level, alternative = "less")$ub
         ub_sb[index] <- suppressWarnings(expr = {
           samplingbook::Sprop(m = k, n = n, N = N, level = interval_level)$ci$exact[2]
         })

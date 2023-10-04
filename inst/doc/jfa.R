@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 library(jfa)
 
 ## -----------------------------------------------------------------------------
@@ -28,7 +28,7 @@ sample <- stage2[["sample"]]
 ## -----------------------------------------------------------------------------
 # Stage 4: Evaluation
 stage4 <- evaluation(
-  materiality = 0.03, method = "stringer",
+  materiality = 0.03, method = "stringer.poisson",
   conf.level = 0.95, data = sample,
   values = "bookValue", values.audit = "auditValue"
 )
@@ -43,6 +43,14 @@ plot(x)
 ## ----fig.align="center", fig.height=4, fig.width=6----------------------------
 # Repeated values test
 x <- repeated_test(sanitizer$value, check = "lasttwo", samples = 5000)
+print(x)
+plot(x)
+
+## ----fig.align="center", fig.height=4, fig.width=6----------------------------
+# Model Fairness
+x <- model_fairness(compas, "Ethnicity", "TwoYrRecidivism", "Predicted",
+  privileged = "Caucasian", positive = "yes"
+)
 print(x)
 plot(x)
 

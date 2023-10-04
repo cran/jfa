@@ -1,3 +1,14 @@
+# jfa 0.7.0
+
+**New features**
+
+- Added a new function `model_fairness()` to compute fairness metrics for algorithm auditing on the basis of predictions of an algorithm.
+
+**Minor changes**
+
+- In the `evaluation()` function, the typical stringer bound has been changed from `method = "stringer"` to `method = "stringer.binomial"`. Furthermore, additional methods `stringer.poisson` and `stringer.hypergeometric` are added that apply the stringer bound using the Poisson and hypergeometric distributions, respectively. The `stringer` method will remain for now but redirect to `stringer.binomial`.
+- Compatibility with `rstantools 2.3.1`.
+
 # jfa 0.6.7
 
 **New features**

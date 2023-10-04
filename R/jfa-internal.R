@@ -592,7 +592,7 @@
       cores = getOption("mc.cores", 1),
       seed = sample.int(.Machine$integer.max, 1),
       control = list(adapt_delta = 0.95),
-      refresh = 0
+      refresh = getOption("mc.refresh", 0)
     )
     raw_posterior <- rstan::sampling(
       object = model,
@@ -604,7 +604,7 @@
       cores = getOption("mc.cores", 1),
       seed = sample.int(.Machine$integer.max, 1),
       control = list(adapt_delta = 0.95),
-      refresh = 0
+      refresh = getOption("mc.refresh", 0)
     )
   })
   samples <- cbind(rstan::extract(raw_posterior)$theta_s, rstan::extract(raw_prior)$theta_s)
@@ -752,4 +752,291 @@
     stop("specify a valid input for the 'check' argument")
   }
   return(digits)
+}
+
+.multinomialBf <- function(y, p, prior_a_vec) {
+  # For more specific calculations, see Sarafoglou, A., Haaf, J. M., Ly, A., Gronau, Q. F., Wagenmakers, E. J., & Marsman, M. (2023). Evaluating multinomial order restrictions with bridge sampling. Psychological Methods, 28(2), 322.
+  lbeta_xa <- sum(lgamma(prior_a_vec + y)) - lgamma(sum(prior_a_vec + y))
+  lbeta_a <- sum(lgamma(prior_a_vec)) - lgamma(sum(prior_a_vec))
+  if (any(rowSums(cbind(p, y)) == 0)) {
+    log_bf10 <- (lbeta_xa - lbeta_a)
+  } else {
+    log_bf10 <- (lbeta_xa - lbeta_a) + (0 - sum(y * log(p)))
+  }
+  bf10 <- exp(log_bf10)
+  return(bf10)
+}
+
+.contingencyTableBf <- function(y, prior_a, fixed = c("none", "rows", "columns")) {
+  # For more specific calculations, see Jamil, T., Ly, A., Morey, R. D., Love, J., Marsman, M., & Wagenmakers, E. J. (2017). Default “Gunel and Dickey” Bayes factors for contingency tables. Behavior Research Methods, 49, 638-652.
+  C <- ncol(y)
+  R <- nrow(y)
+  ystardot <- rowSums(y)
+  ydotstar <- colSums(y)
+  alphastarstar <- matrix(prior_a, nrow = R, ncol = C)
+  alphastardot <- rowSums(alphastarstar)
+  alphadotstar <- colSums(alphastarstar)
+  xistardot <- alphastardot - (C - 1)
+  xidotstar <- alphadotstar - (R - 1)
+  ldirichlet <- function(a) {
+    sum(lgamma(a)) - lgamma(sum(a))
+  }
+  part1 <- switch(fixed,
+    "none" = ldirichlet(ystardot + xistardot) - ldirichlet(xistardot),
+    "rows" = ldirichlet(ydotstar + xidotstar) - ldirichlet(xidotstar),
+    "columns" = ldirichlet(ystardot + xistardot) - ldirichlet(xistardot)
+  )
+  part2 <- switch(fixed,
+    "none" = ldirichlet(ydotstar + xidotstar) - ldirichlet(xidotstar),
+    "rows" = ldirichlet(ystardot + alphastardot) - ldirichlet(alphastardot),
+    "columns" = ldirichlet(ydotstar + alphadotstar) - ldirichlet(alphadotstar)
+  )
+  part3 <- ldirichlet(alphastarstar) - ldirichlet(y + alphastarstar)
+  logBF01 <- part1 + part2 + part3
+  BF01 <- exp(logBF01)
+  BF10 <- 1 / BF01
+  return(BF10)
+}
+
+.mcmc_or <- function(counts, prior_a) {
+  suppressWarnings({
+    raw_prior <- rstan::sampling(
+      object = stanmodels[["or_fairness"]],
+      data = list(y = counts, prior_a = prior_a, use_likelihood = 0),
+      pars = "OR",
+      iter = getOption("mc.iterations", 2000),
+      warmup = getOption("mc.warmup", 1000),
+      chains = getOption("mc.chains", 4),
+      cores = getOption("mc.cores", 1),
+      seed = sample.int(.Machine$integer.max, 1),
+      control = list(adapt_delta = 0.95),
+      refresh = getOption("mc.refresh", 0)
+    )
+    raw_posterior <- rstan::sampling(
+      object = stanmodels[["or_fairness"]],
+      data = list(y = counts, prior_a = prior_a, use_likelihood = 1),
+      pars = c("OR", "prob"),
+      iter = getOption("mc.iterations", 2000),
+      warmup = getOption("mc.warmup", 1000),
+      chains = getOption("mc.chains", 4),
+      cores = getOption("mc.cores", 1),
+      seed = sample.int(.Machine$integer.max, 1),
+      control = list(adapt_delta = 0.95),
+      refresh = getOption("mc.refresh", 0)
+    )
+  })
+  samples <- data.frame(
+    prior = rstan::extract(raw_prior)$OR,
+    OR = rstan::extract(raw_posterior)$OR,
+    prob = rstan::extract(raw_posterior)$prob
+  )
+  stopifnot("Stan model could not be fitted...check your priors" = !is.null(samples))
+  return(samples)
+}
+
+.plotBfRobustness <- function(x, plotdata) {
+  y <- xend <- yend <- label <- type <- NULL
+  maxPrior <- paste0("max.~BF[10]:~~~~~~~~~~~~~~~~~~~~~~~'", format(plotdata$y[which.max(plotdata$y)], digits = 3), "'~at~\u03B1~`=`~", plotdata$x[which.max(plotdata$y)])
+  userPrior <- paste0("user~prior:~~~~~~~~~~~~~~~~~~~~~~~~BF[10]:~'", format(x[["bf"]], digits = 3), "'")
+  uniPrior <- paste0("uniform~prior:~~~~~~~~~~~~~~~~~~~BF[10]:~'", format(plotdata$y[1], digits = 3), "'")
+  concPrior <- paste0("concentrated~prior:~~~~~~~~~BF[10]:~'", format(plotdata$y[which(plotdata$x == 10)], digits = 3), "'")
+  uconcPrior <- paste0("ultraconcentrated~prior:~BF[10]:~'", format(plotdata$y[which(plotdata$x == 50)], digits = 3), "'")
+  pointdata <- data.frame(
+    x = c(plotdata$x[which.max(plotdata$y)], as.numeric(x[["prior"]]), 1, 10, 50),
+    y = c(plotdata$y[which.max(plotdata$y)], x[["bf"]], plotdata$y[1], plotdata$y[which(plotdata$x == 10)], plotdata$y[which(plotdata$x == 50)]),
+    type = factor(c(maxPrior, userPrior, uniPrior, concPrior, uconcPrior), levels = c(maxPrior, userPrior, uniPrior, concPrior, uconcPrior))
+  )
+  plotdata$y <- log(plotdata$y)
+  pointdata$y <- log(pointdata$y)
+  yRange <- range(plotdata$y)
+  xBreaks <- pretty(plotdata$x, min.n = 4)
+  if (all(abs(yRange) <= log(100))) {
+    yBreaks <- log(c(1 / 100, 1 / 30, 1 / 10, 1 / 3, 1, 3, 10, 30, 100))
+    yLabels <- c("1 / 100", "1 / 30", "1 / 10", "1 / 3", "1", "3", "10", "30", "100")
+    idx <- findInterval(yRange, 1.05 * yBreaks, all.inside = TRUE)
+    if (idx[2L] == 5L && abs(yRange[2L]) <= 0.05493061) {
+      idx[2L] <- 4L
+    }
+    idx <- max(1L, idx[1L] - 1L):min(length(yBreaks), idx[2L] + 2L)
+    yBreaks <- yBreaks[idx]
+    yLabels <- yLabels[idx]
+    hasRightAxis <- TRUE
+  } else {
+    hasRightAxis <- FALSE
+    yRange <- yRange * log10(exp(1))
+    plotdata$y <- plotdata$y * log10(exp(1))
+    pointdata$y <- pointdata$y * log10(exp(1))
+    from <- floor(yRange[1L])
+    to <- ceiling(yRange[2L])
+    yBreaks <- unique(as.integer(pretty(x = c(from, to))))
+    step <- yBreaks[2L] - yBreaks[1L]
+    yBreaks <- c(yBreaks[1L] - step, yBreaks, yBreaks[length(yBreaks)] + step)
+    if (yBreaks[1L] == 0) {
+      yBreaks <- c(-step, yBreaks)
+    }
+    if (yBreaks[length(yBreaks)] == 0) {
+      yBreaks <- c(yBreaks, step)
+    }
+    if (max(abs(yBreaks)) < 6L) {
+      idx <- yBreaks < 0
+      yLabels <- c(paste("1 /", formatC(10^abs(yBreaks[idx]), format = "fg")), formatC(10^yBreaks[!idx], format = "fg"))
+    } else {
+      yLabels <- parse(text = paste0("10^", yBreaks))
+    }
+  }
+  if (hasRightAxis) {
+    allEvidenceLabels <- c("Anecdotal", "Moderate", "Strong", "Very strong", "Extreme")
+    allYlabelR <- allEvidenceLabels
+    allYlabelR <- c(rev(allYlabelR), allYlabelR)
+    nr <- 2 * length(yBreaks) - 1
+    yBreaksR <- numeric(nr)
+    yLabelsR <- character(nr)
+    colsRight <- character(nr)
+    idxOdd <- seq(1, nr, 2)
+    idxEven <- seq(2, nr, 2)
+    yBreaksR[idxOdd] <- yBreaks
+    yBreaksR[idxEven] <- (yBreaks[-1] + yBreaks[-length(yBreaks)]) / 2
+    yLabelsR[idxEven] <- allYlabelR[idx][-1L]
+    colsRight[idxOdd] <- "black"
+    colsRight[idxEven] <- NA_character_
+    dfRightAxisLines <- data.frame(x = Inf, xend = Inf, y = yBreaksR[1L], yend = yBreaksR[length(yBreaksR)])
+    rightAxisLine <- ggplot2::geom_segment(data = dfRightAxisLines, mapping = ggplot2::aes(x = x, y = y, xend = xend, yend = yend), inherit.aes = FALSE)
+    secAxis <- ggplot2::sec_axis(trans = ~., name = "Evidence", breaks = yBreaksR, labels = yLabelsR)
+  } else {
+    secAxis <- ggplot2::waiver()
+  }
+  n <- length(yBreaks) - 1L
+  d1 <- yBreaks[1L] - yBreaks[2L]
+  d2 <- yBreaks[n + 1L] - yBreaks[n]
+  xlocation <- (xBreaks[length(xBreaks)] - xBreaks[1L]) * 0.1
+  dfArrow <- data.frame(x = xlocation, xend = xlocation, y = c(yBreaks[2L] + 0.25 * d1, yBreaks[n] + 0.25 * d2), yend = c(yBreaks[2L] + 0.75 * d1, yBreaks[n] + 0.75 * d2))
+  evidenceBase <- gettext("Evidence~'for'~H%s")
+  arrowLabel <- c(sprintf(evidenceBase, "[0]"), sprintf(evidenceBase, "[1]"))
+  dfArrowTxt <- data.frame(y = (dfArrow$y + dfArrow$yend) / 2, x = 1.5 * xlocation, label = arrowLabel, stringsAsFactors = FALSE)
+  if (0 < min(yBreaks)) {
+    dfArrow <- dfArrow[-1L, ]
+    dfArrowTxt <- dfArrowTxt[-1L, ]
+  } else if (0 > max(yBreaks)) {
+    dfArrow <- dfArrow[-2L, ]
+    dfArrowTxt <- dfArrowTxt[-2L, ]
+  }
+  p <- ggplot2::ggplot(data = pointdata, mapping = ggplot2::aes(x = x, y = y, fill = type)) +
+    ggplot2::geom_segment(data = data.frame(x = 1, xend = 101, y = yBreaks, yend = yBreaks), mapping = ggplot2::aes(x = x, y = y, xend = xend, yend = yend), inherit.aes = FALSE, linetype = "dashed", colour = "lightgray") +
+    ggplot2::geom_segment(x = 1, xend = 101, y = 0, yend = 0, linewidth = 0.25, inherit.aes = FALSE) +
+    ggplot2::geom_path(data = plotdata, mapping = ggplot2::aes(x = x, y = y), inherit.aes = FALSE) +
+    ggplot2::geom_point(shape = 21, size = 2.5) +
+    ggplot2::scale_x_continuous(name = "Dirichlet prior concentration", breaks = seq(1, 101, 20), limits = c(1, 101)) +
+    ggplot2::scale_y_continuous(name = expression(BF[10]), breaks = yBreaks, limits = range(yBreaks), labels = yLabels, sec.axis = secAxis) +
+    ggplot2::scale_fill_manual(name = NULL, values = c("red", "lightgray", "black", "white", "cornsilk2"), labels = function(x) parse(text = x)) +
+    ggplot2::geom_segment(x = -Inf, xend = -Inf, y = min(yBreaks), yend = max(yBreaks), inherit.aes = FALSE) +
+    ggplot2::geom_segment(x = 1, xend = 101, y = -Inf, yend = -Inf, inherit.aes = FALSE) +
+    ggplot2::geom_segment(data = dfArrow, ggplot2::aes(x = x, y = y, xend = xend, yend = yend), lineend = "round", linejoin = "bevel", arrow = ggplot2::arrow(length = ggplot2::unit(0.4, "cm")), size = 1, inherit.aes = FALSE) +
+    ggplot2::geom_text(data = dfArrowTxt, mapping = ggplot2::aes(x = x, y = y, label = label), parse = TRUE, size = 0.4 * 12, inherit.aes = FALSE, hjust = 0) +
+    ggplot2::guides(fill = ggplot2::guide_legend(nrow = 5, byrow = TRUE)) +
+    ggplot2::theme(
+      legend.spacing.y = ggplot2::unit(0, "cm"),
+      legend.margin = ggplot2::margin(0, 0, -0.5, 0, "cm"),
+      legend.text.align = 0
+    )
+  if (hasRightAxis) {
+    p <- p + rightAxisLine + ggplot2::theme(axis.ticks.y.right = ggplot2::element_line(colour = rep(c("black", NA), length = length(yBreaksR))))
+  }
+  return(p)
+}
+
+.plotBfSequential <- function(x, plotdata) {
+  y <- xend <- yend <- label <- type <- NULL
+  plotdata$y <- log(plotdata$y)
+  yRange <- range(plotdata$y)
+  xBreaks <- pretty(plotdata$x, min.n = 4)
+  if (all(abs(yRange) <= log(100))) {
+    yBreaks <- log(c(1 / 100, 1 / 30, 1 / 10, 1 / 3, 1, 3, 10, 30, 100))
+    yLabels <- c("1 / 100", "1 / 30", "1 / 10", "1 / 3", "1", "3", "10", "30", "100")
+    idx <- findInterval(yRange, 1.05 * yBreaks, all.inside = TRUE)
+    if (idx[2L] == 5L && abs(yRange[2L]) <= 0.05493061) {
+      idx[2L] <- 4L
+    }
+    idx <- max(1L, idx[1L] - 1L):min(length(yBreaks), idx[2L] + 2L)
+    yBreaks <- yBreaks[idx]
+    yLabels <- yLabels[idx]
+    hasRightAxis <- TRUE
+  } else {
+    hasRightAxis <- FALSE
+    yRange <- yRange * log10(exp(1))
+    plotdata$y <- plotdata$y * log10(exp(1))
+    from <- floor(yRange[1L])
+    to <- ceiling(yRange[2L])
+    yBreaks <- unique(as.integer(pretty(x = c(from, to))))
+    step <- yBreaks[2L] - yBreaks[1L]
+    yBreaks <- c(yBreaks[1L] - step, yBreaks, yBreaks[length(yBreaks)] + step)
+    if (yBreaks[1L] == 0) {
+      yBreaks <- c(-step, yBreaks)
+    }
+    if (yBreaks[length(yBreaks)] == 0) {
+      yBreaks <- c(yBreaks, step)
+    }
+    if (max(abs(yBreaks)) < 6L) {
+      idx <- yBreaks < 0
+      yLabels <- c(paste("1 /", formatC(10^abs(yBreaks[idx]), format = "fg")), formatC(10^yBreaks[!idx], format = "fg"))
+    } else {
+      yLabels <- parse(text = paste0("10^", yBreaks))
+    }
+  }
+  if (hasRightAxis) {
+    allEvidenceLabels <- c("Anecdotal", "Moderate", "Strong", "Very strong", "Extreme")
+    allYlabelR <- allEvidenceLabels
+    allYlabelR <- c(rev(allYlabelR), allYlabelR)
+    nr <- 2 * length(yBreaks) - 1
+    yBreaksR <- numeric(nr)
+    yLabelsR <- character(nr)
+    colsRight <- character(nr)
+    idxOdd <- seq(1, nr, 2)
+    idxEven <- seq(2, nr, 2)
+    yBreaksR[idxOdd] <- yBreaks
+    yBreaksR[idxEven] <- (yBreaks[-1] + yBreaks[-length(yBreaks)]) / 2
+    yLabelsR[idxEven] <- allYlabelR[idx][-1L]
+    colsRight[idxOdd] <- "black"
+    colsRight[idxEven] <- NA_character_
+    dfRightAxisLines <- data.frame(x = Inf, xend = Inf, y = yBreaksR[1L], yend = yBreaksR[length(yBreaksR)])
+    rightAxisLine <- ggplot2::geom_segment(data = dfRightAxisLines, mapping = ggplot2::aes(x = x, y = y, xend = xend, yend = yend), inherit.aes = FALSE)
+    secAxis <- ggplot2::sec_axis(trans = ~., name = "Evidence", breaks = yBreaksR, labels = yLabelsR)
+  } else {
+    secAxis <- ggplot2::waiver()
+  }
+  n <- length(yBreaks) - 1L
+  d1 <- yBreaks[1L] - yBreaks[2L]
+  d2 <- yBreaks[n + 1L] - yBreaks[n]
+  xlocation <- (xBreaks[length(xBreaks)] - xBreaks[1L]) * 0.1
+  dfArrow <- data.frame(x = xlocation, xend = xlocation, y = c(yBreaks[2L] + 0.25 * d1, yBreaks[n] + 0.25 * d2), yend = c(yBreaks[2L] + 0.75 * d1, yBreaks[n] + 0.75 * d2))
+  evidenceBase <- gettext("Evidence~'for'~H%s")
+  arrowLabel <- c(sprintf(evidenceBase, "[0]"), sprintf(evidenceBase, "[1]"))
+  dfArrowTxt <- data.frame(y = (dfArrow$y + dfArrow$yend) / 2, x = 1.5 * xlocation, label = arrowLabel, stringsAsFactors = FALSE)
+  if (0 < min(yBreaks)) {
+    dfArrow <- dfArrow[-1L, ]
+    dfArrowTxt <- dfArrowTxt[-1L, ]
+  } else if (0 > max(yBreaks)) {
+    dfArrow <- dfArrow[-2L, ]
+    dfArrowTxt <- dfArrowTxt[-2L, ]
+  }
+  p <- ggplot2::ggplot(data = plotdata, mapping = ggplot2::aes(x = x, y = y, linetype = type, color = type)) +
+    ggplot2::geom_segment(data = data.frame(x = min(xBreaks), xend = max(xBreaks), y = yBreaks, yend = yBreaks), mapping = ggplot2::aes(x = x, y = y, xend = xend, yend = yend), inherit.aes = FALSE, linetype = "dashed", colour = "lightgray") +
+    ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = 0, yend = 0, linewidth = 0.25, inherit.aes = FALSE) +
+    ggplot2::geom_path() +
+    ggplot2::scale_x_continuous(name = "n", breaks = xBreaks, limits = range(xBreaks)) +
+    ggplot2::scale_y_continuous(name = expression(BF[10]), breaks = yBreaks, limits = range(yBreaks), labels = yLabels, sec.axis = secAxis) +
+    ggplot2::scale_linetype_manual(name = NULL, values = c("solid", "solid", "dashed", "dotted")) +
+    ggplot2::scale_colour_manual(name = NULL, values = c("black", "darkgray", "black", "black")) +
+    ggplot2::geom_segment(x = -Inf, xend = -Inf, y = min(yBreaks), yend = max(yBreaks), inherit.aes = FALSE) +
+    ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = -Inf, yend = -Inf, inherit.aes = FALSE) +
+    ggplot2::geom_segment(data = dfArrow, ggplot2::aes(x = x, y = y, xend = xend, yend = yend), lineend = "round", linejoin = "bevel", arrow = ggplot2::arrow(length = ggplot2::unit(0.4, "cm")), size = 1, inherit.aes = FALSE) +
+    ggplot2::geom_text(data = dfArrowTxt, mapping = ggplot2::aes(x = x, y = y, label = label), parse = TRUE, size = 0.4 * 12, inherit.aes = FALSE, hjust = 0) +
+    ggplot2::guides(linetype = ggplot2::guide_legend(nrow = 2, ncol = 2, byrow = FALSE), colour = ggplot2::guide_legend(nrow = 2, ncol = 2, byrow = TRUE)) +
+    ggplot2::theme(
+      legend.spacing.y = ggplot2::unit(0, "cm"),
+      legend.margin = ggplot2::margin(0, 0, -0.5, 0, "cm")
+    )
+  if (hasRightAxis) {
+    p <- p + rightAxisLine + ggplot2::theme(axis.ticks.y.right = ggplot2::element_line(colour = rep(c("black", NA), length = length(yBreaksR))))
+  }
+  return(p)
 }

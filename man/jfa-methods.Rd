@@ -31,6 +31,10 @@
 \alias{plot.jfaDistr}
 \alias{print.jfaRv}
 \alias{plot.jfaRv}
+\alias{print.jfaFairness}
+\alias{print.summary.jfaFairness}
+\alias{summary.jfaFairness}
+\alias{plot.jfaFairness}
 \title{Methods for jfa objects}
 \usage{
 \method{print}{jfaPrior}(x, ...)
@@ -85,18 +89,26 @@
 
 \method{summary}{jfaDistr}(object, digits = getOption("digits"), ...)
 
-\method{plot}{jfaDistr}(x, ...)
+\method{plot}{jfaDistr}(x, type = c("estimates", "robustness", "sequential"), ...)
 
 \method{print}{jfaRv}(x, digits = getOption("digits"), ...)
 
 \method{plot}{jfaRv}(x, ...)
+
+\method{print}{jfaFairness}(x, digits = getOption("digits"), ...)
+
+\method{print}{summary.jfaFairness}(x, digits = getOption("digits"), ...)
+
+\method{summary}{jfaFairness}(object, digits = getOption("digits"), ...)
+
+\method{plot}{jfaFairness}(x, type = c("estimates", "posterior", "robustness", "sequential"), ...)
 }
 \arguments{
 \item{...}{further arguments, currently ignored.}
 
 \item{digits}{an integer specifying the number of digits to which output should be rounded. Used in \code{summary}.}
 
-\item{object, x}{an object of class \code{jfaPrior}, \code{jfaPosterior}, \code{jfaPlanning}, \code{jfaSelection}, \code{jfaEvaluation}, \code{jfaDistr}, or \code{jfaRv}.}
+\item{object, x}{an object of class \code{jfaPrior}, \code{jfaPosterior}, \code{jfaPlanning}, \code{jfaSelection}, \code{jfaEvaluation}, \code{jfaDistr}, \code{jfaRv}, or \code{jfaFairness}.}
 
 \item{n}{used in \code{predict}. Specifies the sample size for which predictions should be made.}
 

@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 library(jfa)
 
 ## -----------------------------------------------------------------------------
@@ -51,7 +51,7 @@ summary(stage2)
 # Step 3: Isolate the sample for execution of the audit.
 sample <- stage2$sample
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  # To write the sample to a .csv file:
 #  write.csv(x = sample, file = "auditSample.csv", row.names = FALSE)
 #  
@@ -71,6 +71,6 @@ summary(stage4)
 ## ----fig.align="center", fig.height=4, fig.width=6----------------------------
 plot(stage4)
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  report(stage4, file = "report.html")
 

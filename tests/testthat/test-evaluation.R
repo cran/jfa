@@ -84,11 +84,12 @@ test_that(desc = "(id: f3-v0.1.0-t7) Evaluation with stringer method", {
   jfaRes <- planning(conf.level = 0.95, materiality = 0.05, likelihood = "poisson")
   samp <- selection(population, size = jfaRes, units = "items", method = "random")$sample
   samp$auditValue <- samp[["bookValue"]]
-  jfaEval <- evaluation(conf.level = 0.95, materiality = 0.05, data = samp, values = "bookValue", values.audit = "auditValue", method = "stringer")
+  jfaEval <- evaluation(conf.level = 0.95, materiality = 0.05, data = samp, values = "bookValue", values.audit = "auditValue", method = "stringer.binomial")
   expect_equal(jfaEval[["ub"]], 0.04870291, tolerance = 0.001)
 })
 
 test_that(desc = "(id: f3-v0.1.0-t8) Evaluation with stringer.meikle method", {
+  testthat::skip_on_cran()
   set.seed(1)
   population <- data.frame(ID = sample(1000:100000, size = 1000, replace = FALSE), bookValue = runif(n = 1000, min = 100, max = 500))
   jfaRes <- planning(conf.level = 0.95, materiality = 0.05, likelihood = "poisson")
@@ -105,6 +106,7 @@ test_that(desc = "(id: f3-v0.1.0-t8) Evaluation with stringer.meikle method", {
 })
 
 test_that(desc = "(id: f3-v0.1.0-t9) Evaluation with stringer.lta method", {
+  testthat::skip_on_cran()
   set.seed(1)
   population <- data.frame(ID = sample(1000:100000, size = 1000, replace = FALSE), bookValue = runif(n = 1000, min = 100, max = 500))
   jfaRes <- planning(conf.level = 0.95, materiality = 0.05, likelihood = "poisson")
@@ -121,6 +123,7 @@ test_that(desc = "(id: f3-v0.1.0-t9) Evaluation with stringer.lta method", {
 })
 
 test_that(desc = "(id: f3-v0.1.0-t10) Evaluation with stringer.pvz method", {
+  testthat::skip_on_cran()
   set.seed(1)
   population <- data.frame(ID = sample(1000:100000, size = 1000, replace = FALSE), bookValue = runif(n = 1000, min = 100, max = 500))
   jfaRes <- planning(conf.level = 0.95, materiality = 0.05, likelihood = "poisson")
@@ -137,6 +140,7 @@ test_that(desc = "(id: f3-v0.1.0-t10) Evaluation with stringer.pvz method", {
 })
 
 test_that(desc = "(id: f3-v0.1.0-t11) Evaluation with rohrbach method", {
+  testthat::skip_on_cran()
   set.seed(1)
   population <- data.frame(ID = sample(1000:100000, size = 1000, replace = FALSE), bookValue = runif(n = 1000, min = 100, max = 500))
   jfaRes <- planning(conf.level = 0.95, materiality = 0.05, likelihood = "poisson")
@@ -147,6 +151,7 @@ test_that(desc = "(id: f3-v0.1.0-t11) Evaluation with rohrbach method", {
 })
 
 test_that(desc = "(id: f3-v0.1.0-t12) Evaluation with moment method", {
+  testthat::skip_on_cran()
   set.seed(1)
   population <- data.frame(ID = sample(1000:100000, size = 1000, replace = FALSE), bookValue = runif(n = 1000, min = 100, max = 500))
   jfaRes <- planning(conf.level = 0.95, materiality = 0.05, likelihood = "poisson")
@@ -160,6 +165,7 @@ test_that(desc = "(id: f3-v0.1.0-t12) Evaluation with moment method", {
 })
 
 test_that(desc = "(id: f3-v0.1.0-t13) Evaluation with direct method", {
+  testthat::skip_on_cran()
   data("BuildIt")
   BuildIt$inSample <- c(rep(1, 100), rep(0, 3400))
   BuildIt_sample <- subset(BuildIt, BuildIt$inSample == 1)
@@ -170,6 +176,7 @@ test_that(desc = "(id: f3-v0.1.0-t13) Evaluation with direct method", {
 })
 
 test_that(desc = "(id: f3-v0.1.0-t14) Evaluation with difference method", {
+  testthat::skip_on_cran()
   data("BuildIt")
   BuildIt$inSample <- c(rep(1, 100), rep(0, 3400))
   BuildIt_sample <- subset(BuildIt, BuildIt$inSample == 1)
@@ -180,6 +187,7 @@ test_that(desc = "(id: f3-v0.1.0-t14) Evaluation with difference method", {
 })
 
 test_that(desc = "(id: f3-v0.1.0-t15) Evaluation with quotient method", {
+  testthat::skip_on_cran()
   data("BuildIt")
   BuildIt$inSample <- c(rep(1, 100), rep(0, 3400))
   BuildIt_sample <- subset(BuildIt, BuildIt$inSample == 1)
@@ -200,6 +208,7 @@ test_that(desc = "(id: f3-v0.1.0-t16) Evaluation with regression method", {
 })
 
 test_that(desc = "(id: f3-v0.1.0-t17) Evaluation with Cox and Snell method", {
+  testthat::skip_on_cran()
   set.seed(1)
   population <- data.frame(ID = sample(1000:100000, size = 1000, replace = FALSE), bookValue = runif(n = 1000, min = 100, max = 500))
   jfaRes <- planning(conf.level = 0.95, materiality = 0.05, expected = 0.025)
@@ -216,6 +225,7 @@ test_that(desc = "(id: f3-v0.1.0-t17) Evaluation with Cox and Snell method", {
 # jfa version 0.3.0
 
 test_that(desc = "(id: f3-v0.3.0-t1) Evaluation with counts and stringer method", {
+  testthat::skip_on_cran()
   set.seed(1)
   population <- data.frame(ID = sample(1000:100000, size = 1000, replace = FALSE), bookValue = runif(n = 1000, min = 100, max = 500))
   jfaRes <- planning(conf.level = 0.95, materiality = 0.05, expected = 0.025)
@@ -224,7 +234,7 @@ test_that(desc = "(id: f3-v0.3.0-t1) Evaluation with counts and stringer method"
   samp$auditValue[1:3] <- samp$bookValue[1:3] * 0.4
   counts <- c(2, 2, 3, rep(1, nrow(samp) - 3))
   samp <- cbind(samp, counts)
-  jfaEval <- evaluation(conf.level = 0.95, materiality = 0.05, data = samp, values = "bookValue", values.audit = "auditValue", method = "stringer", times = "counts")
+  jfaEval <- evaluation(conf.level = 0.95, materiality = 0.05, data = samp, values = "bookValue", values.audit = "auditValue", method = "stringer.binomial", times = "counts")
   expect_equal(jfaEval[["ub"]], 0.0326619, tolerance = 0.001)
 })
 
@@ -250,17 +260,19 @@ test_that(desc = "(id: f3-v0.4.0-t1) Bayes factors", {
 # jfa version 0.5.0
 
 test_that(desc = "(id: f3-v0.5.0-t1) Test for mpu estimator", {
+  testthat::skip_on_cran()
   sample <- data.frame(ID = 1:100, ist = rnorm(mean = 1000, n = 100))
   sample$soll <- sample$ist
   sample$ist[1] <- 120
   sample$soll[1] <- 100
   sample$ist[2] <- 100
   sample$soll[2] <- 120
-  jfaEval <- jfa::evaluation(conf.level = 0.95, method = "mpu", data = sample, materiality = 0.1, values = "ist", values.audit = "soll")
+  jfaEval <- evaluation(conf.level = 0.95, method = "mpu", data = sample, materiality = 0.1, values = "ist", values.audit = "soll")
   expect_equal(jfaEval[["ub"]], 0.003970126, tolerance = 0.001)
 })
 
 test_that(desc = "(id: f3-v0.5.0-t1) Test for frequentist summary and print function", {
+  testthat::skip_on_cran()
   set.seed(1)
   population <- data.frame(ID = sample(1000:100000, size = 1000, replace = FALSE), bookValue = runif(n = 1000, min = 100, max = 500))
   jfaRes <- planning(conf.level = 0.95, materiality = 0.05, likelihood = "poisson")
@@ -280,6 +292,7 @@ test_that(desc = "(id: f3-v0.5.0-t1) Test for frequentist summary and print func
 })
 
 test_that(desc = "(id: f3-v0.2.0-t2) Test for Bayesian summary function", {
+  testthat::skip_on_cran()
   set.seed(1)
   population <- data.frame(ID = sample(1000:100000, size = 1000, replace = FALSE), bookValue = runif(n = 1000, min = 100, max = 500))
   jfaRes <- planning(conf.level = 0.95, materiality = 0.05, likelihood = "poisson")
@@ -294,6 +307,7 @@ test_that(desc = "(id: f3-v0.2.0-t2) Test for Bayesian summary function", {
 })
 
 test_that(desc = "(id: f3-v0.2.0-t4) Test for Bayesian plot function", {
+  testthat::skip_on_cran()
   set.seed(1)
   population <- data.frame(ID = sample(1000:100000, size = 1000, replace = FALSE), bookValue = runif(n = 1000, min = 100, max = 500))
   samp <- selection(population, size = 100, units = "items", method = "random")$sample
@@ -367,6 +381,7 @@ test_that(desc = "(id: f3-v0.6.0-t2) Test Bayes factors for gamma prior", {
 })
 
 test_that(desc = "(id: f3-v0.6.0-t3) Test Bayes factors for beta-binomial prior", {
+  testthat::skip_on_cran()
   # Compute a Bayes factor from a noninformative beta-binomial prior
   BF <- evaluation(materiality = 0.03, n = 160, x = 1, prior = auditPrior(method = "default", likelihood = "hypergeometric", N.units = 1000))$posterior$hypotheses$bf.h1
   expect_equal(BF, 943.4715321)
@@ -389,6 +404,7 @@ test_that(desc = "(id: f3-v0.6.0-t3) Test Bayes factors for beta-binomial prior"
 # jfa 0.6.5
 
 test_that(desc = "(id: f3-v0.6.5-t1) Test frequentist poisson stratification with summary statistics (Derks et al., 2022, Table 1)", {
+  testthat::skip_on_cran()
   k <- c(2, 1, 0)
   n <- c(6, 7, 7)
   N <- c(8, 11, 11)
@@ -409,6 +425,7 @@ test_that(desc = "(id: f3-v0.6.5-t1) Test frequentist poisson stratification wit
 })
 
 test_that(desc = "(id: f3-v0.6.5-t2) Test Bayesian poisson stratification with summary statistics (Derks et al., 2022, Table 1)", {
+  testthat::skip_on_cran()
   options("mc.iterations" = 200, "mc.warmup" = 100, "mc.chains" = 1)
   k <- c(2, 1, 0)
   n <- c(6, 7, 7)
@@ -434,6 +451,7 @@ test_that(desc = "(id: f3-v0.6.5-t2) Test Bayesian poisson stratification with s
 })
 
 test_that(desc = "(id: f3-v0.6.5-t3) Test frequentist binomial stratification with summary statistics (Derks et al., 2022, Table 1)", {
+  testthat::skip_on_cran()
   k <- c(2, 1, 0)
   n <- c(6, 7, 7)
   N <- c(8, 11, 11)
@@ -454,6 +472,7 @@ test_that(desc = "(id: f3-v0.6.5-t3) Test frequentist binomial stratification wi
 })
 
 test_that(desc = "(id: f3-v0.6.5-t4) Test Bayesian binomial stratification with summary statistics (Derks et al., 2022, Table 1)", {
+  testthat::skip_on_cran()
   options("mc.iterations" = 200, "mc.warmup" = 100, "mc.chains" = 1)
   k <- c(2, 1, 0)
   n <- c(6, 7, 7)
@@ -478,6 +497,7 @@ test_that(desc = "(id: f3-v0.6.5-t4) Test Bayesian binomial stratification with 
 })
 
 test_that(desc = "(id: f3-v0.6.5-t5) Test stratification with data (Derks et al., 2022, Table 4)", {
+  testthat::skip_on_cran()
   options("mc.iterations" = 200, "mc.warmup" = 100, "mc.chains" = 1)
   data("BuildIt")
   BuildIt$stratum <- factor(c("high", "medium", rep(c("low", "medium", "high"), times = 1166)))
@@ -522,6 +542,7 @@ test_that(desc = "(id: f3-v0.6.5-t5) Test stratification with data (Derks et al.
 })
 
 test_that(desc = "(id: f3-v0.6.5-t6) Validate poststratification with stan examples", {
+  testthat::skip_on_cran()
   # https://mc-stan.org/docs/2_23/stan-users-guide/some-examples.html
   # 28.1.2 Polling
   set.seed(1)
@@ -534,6 +555,7 @@ test_that(desc = "(id: f3-v0.6.5-t6) Validate poststratification with stan examp
 })
 
 test_that(desc = "(id: f3-v0.6.5-t7) Test evaluation with non-conjugate priors", {
+  testthat::skip_on_cran()
   # Cannot test for consistency due to sampling differences on OS's
   prior <- auditPrior(method = "param", likelihood = "normal", alpha = 0.025, beta = 0.05)
   res <- evaluation(materiality = 0.03, x = 0, n = 53, prior = prior, method = "binomial")
@@ -553,6 +575,7 @@ test_that(desc = "(id: f3-v0.6.5-t7) Test evaluation with non-conjugate priors",
 })
 
 test_that(desc = "(id: f3-v0.6.5-t8) Test hypergeometric and beta-binomial", {
+  testthat::skip_on_cran()
   N <- 10
   n <- 2
   x <- 1
@@ -574,6 +597,7 @@ test_that(desc = "(id: f3-v0.6.5-t8) Test hypergeometric and beta-binomial", {
 })
 
 test_that(desc = "(id: f3-v0.6.5-t9) Test Bayesian evaluation with different uniform priors, 5% materiality", {
+  testthat::skip_on_cran()
   set.seed(1)
   prior1 <- auditPrior(method = "default", likelihood = "binomial")
   prior2 <- auditPrior(method = "param", likelihood = "uniform", alpha = 0, beta = 1)
@@ -585,4 +609,28 @@ test_that(desc = "(id: f3-v0.6.5-t9) Test Bayesian evaluation with different uni
     res <- evaluation(materiality = 0.05, prior = priors[[i]], method = "binomial", x = 1, n = 100)
     expect_equal(res[["mle"]], 0.01, tolerance = 0.01)
   }
+})
+
+# jfa 0.7.0
+
+test_that(desc = "(id: f3-v0.7.0-t1) Evaluation with stringer.poisson method", {
+  testthat::skip_on_cran()
+  set.seed(1)
+  population <- data.frame(ID = sample(1000:100000, size = 1000, replace = FALSE), bookValue = runif(n = 1000, min = 100, max = 500))
+  jfaRes <- planning(conf.level = 0.95, materiality = 0.05, likelihood = "poisson")
+  samp <- selection(population, size = jfaRes, units = "items", method = "random")$sample
+  samp$auditValue <- samp[["bookValue"]]
+  jfaEval <- evaluation(conf.level = 0.95, materiality = 0.05, data = samp, values = "bookValue", values.audit = "auditValue", method = "stringer.poisson")
+  expect_equal(jfaEval[["ub"]], 0.04992887, tolerance = 0.001)
+})
+
+test_that(desc = "(id: f3-v0.7.0-t2) Evaluation with stringer.hypergeometric method", {
+  testthat::skip_on_cran()
+  set.seed(1)
+  population <- data.frame(ID = sample(1000:100000, size = 1000, replace = FALSE), bookValue = runif(n = 1000, min = 100, max = 500))
+  jfaRes <- planning(conf.level = 0.95, materiality = 0.05, likelihood = "poisson")
+  samp <- selection(population, size = jfaRes, units = "items", method = "random")$sample
+  samp$auditValue <- samp[["bookValue"]]
+  jfaEval <- evaluation(conf.level = 0.95, materiality = 0.05, data = samp, values = "bookValue", values.audit = "auditValue", method = "stringer.hypergeometric", N.units = sum(population$bookValue))
+  expect_equal(jfaEval[["ub"]], 0.04869673, tolerance = 0.001)
 })

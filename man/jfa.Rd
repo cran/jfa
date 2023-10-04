@@ -66,7 +66,7 @@ summary(stage2)
 sample <- stage2[['sample']]
 
 # Stage 4: Evaluation
-stage4 <- evaluation(data = sample, method = 'stringer',
+stage4 <- evaluation(data = sample, method = 'stringer.binomial',
                      values = 'bookValue', values.audit = 'auditValue')
 summary(stage4)
 
@@ -79,6 +79,17 @@ data('sinoForest')
 
 # Test first digits in the data against Benford's law
 digit_test(sinoForest[["value"]], check = "first", reference = "benford")
+
+######################################
+### Example 3: Algorithm auditing ####
+######################################
+
+# Load the compas data set
+data('compas')
+
+# Test algorithmic fairness against Caucasian ethnicity
+model_fairness(compas, "Ethnicity", "TwoYrRecidivism", "Predicted",
+               privileged = "Caucasian", positive = "yes")
 }
 \keyword{jfa} 
 \keyword{package}

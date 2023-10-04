@@ -17,7 +17,7 @@
 #'
 #' Methods defined for objects returned from the \code{\link{auditPrior}}, \code{\link{planning}}, \code{\link{selection}}, and \code{\link{evaluation}} functions.
 #'
-#' @param object,x    an object of class \code{jfaPrior}, \code{jfaPosterior}, \code{jfaPlanning}, \code{jfaSelection}, \code{jfaEvaluation}, \code{jfaDistr}, or \code{jfaRv}.
+#' @param object,x    an object of class \code{jfaPrior}, \code{jfaPosterior}, \code{jfaPlanning}, \code{jfaSelection}, \code{jfaEvaluation}, \code{jfaDistr}, \code{jfaRv}, or \code{jfaFairness}.
 #' @param digits      an integer specifying the number of digits to which output should be rounded. Used in \code{summary}.
 #' @param type        used in \code{plot}. Specifies the type of plot to produce.
 #' @param n           used in \code{predict}. Specifies the sample size for which predictions should be made.
@@ -616,13 +616,13 @@ print.jfaEvaluation <- function(x, digits = getOption("digits"), ...) {
   cat(strwrap(paste(out, collapse = ", ")), sep = "\n")
   if (!is.null(x[["p.value"]]) || !is.null(x[["posterior"]]$hypotheses)) {
     if (x[["alternative"]] == "less") {
-      cat(paste0("alternative hypothesis: true misstatement rate is less than ", x[["materiality"]]), sep = "\n")
+      cat(paste0("alternative hypothesis: true misstatement rate is less than ", format(x[["materiality"]], digits = max(1L, digits - 2L))), sep = "\n")
     }
     if (x[["alternative"]] == "two.sided") {
-      cat(paste0("alternative hypothesis: true misstatement rate is not equal to ", x[["materiality"]]), sep = "\n")
+      cat(paste0("alternative hypothesis: true misstatement rate is not equal to ", format(x[["materiality"]], digits = max(1L, digits - 2L))), sep = "\n")
     }
     if (x[["alternative"]] == "greater") {
-      cat(paste0("alternative hypothesis: true misstatement rate is greater than ", x[["materiality"]]), sep = "\n")
+      cat(paste0("alternative hypothesis: true misstatement rate is greater than ", format(x[["materiality"]], digits = max(1L, digits - 2L))), sep = "\n")
     }
   }
   if (!is.null(x[["ub"]])) {
@@ -693,6 +693,7 @@ print.summary.jfaEvaluation <- function(x, digits = getOption("digits"), ...) {
   }
   if (!is.null(x[["strata"]])) {
     cat(paste0("\nStrata (", nrow(x[["strata"]]), "):\n"))
+    rownames(x[["strata"]]) <- paste0("  ", rownames(x[["strata"]]))
     print(round(x[["strata"]], digits = max(1L, digits - 2L)), quote = FALSE)
   }
 }
@@ -797,9 +798,8 @@ plot.jfaEvaluation <- function(x, type = c("posterior", "estimates"), ...) {
 #' @method print jfaDistr
 #' @export
 print.jfaDistr <- function(x, digits = getOption("digits"), ...) {
-  cat("\n")
-  cat(strwrap("Digit Distribution Test", prefix = "\t"), sep = "\n")
-  cat("\n")
+  type <- if (!is.null(x$p.value)) "Classical" else "Bayesian"
+  cat(paste0("\n\t", type, " Digit Distribution Test\n\n"))
   cat("data:  ", x$data.name, "\n", sep = "")
   out <- character()
   if (!is.null(x$n)) {
@@ -815,7 +815,7 @@ print.jfaDistr <- function(x, digits = getOption("digits"), ...) {
     out <- c(out, paste(names(x$parameter), "=", format(x$parameter, digits = max(1L, digits - 2L))))
   }
   if (!is.null(x$bf)) {
-    out <- c(out, paste("BF10", "=", format(x$bf, digits = max(1L, digits - 2L))))
+    out <- c(out, paste("BF\u2081\u2080", "=", format(x$bf, digits = max(1L, digits - 2L))))
   }
   if (!is.null(x$p.value)) {
     fp <- format.pval(x$p.value, digits = max(1L, digits - 3L))
@@ -837,8 +837,8 @@ print.jfaDistr <- function(x, digits = getOption("digits"), ...) {
 #' @method print summary.jfaDistr
 #' @export
 print.summary.jfaDistr <- function(x, digits = getOption("digits"), ...) {
-  cat("\n")
-  cat(strwrap("Digit Distribution Test Summary", prefix = "\t"), sep = "\n")
+  type <- if (!is.null(x$p.value)) "Classical" else "Bayesian"
+  cat(paste0("\n\t", type, " Digit Distribution Test Summary\n"))
   cat("\nOptions:\n")
   cat(paste("  Confidence level:              ", format(x[["conf.level"]], digits = max(1L, digits - 2L))), "\n")
   cat(paste("  Digits:                        ", switch(x[["check"]],
@@ -868,7 +868,9 @@ print.summary.jfaDistr <- function(x, digits = getOption("digits"), ...) {
   }
   cat(paste("  Mean absolute difference (MAD):", format(x[["mad"]], digits = max(1L, digits - 2L))), "\n")
   cat(paste0("\nDigits (", length(x[["digits"]]), "):\n"))
-  print(round(x[["estimates"]], digits = max(1L, digits - 2L)), quote = FALSE)
+  x[["estimates"]] <- round(x[["estimates"]], digits = max(1L, digits - 2L))
+  x[["estimates"]][["d"]] <- paste0(" ", x[["estimates"]][["d"]])
+  print(x[["estimates"]], quote = FALSE, row.names = FALSE)
 }
 
 #' @rdname jfa-methods
@@ -901,72 +903,113 @@ summary.jfaDistr <- function(object, digits = getOption("digits"), ...) {
 #' @rdname jfa-methods
 #' @method plot jfaDistr
 #' @export
-plot.jfaDistr <- function(x, ...) {
-  y <- type <- d <- lb <- ub <- NULL
-  df <- data.frame(
-    x = c(x[["digits"]], x[["digits"]]),
-    y = c(x$observed / x$n, x$expected / x$n),
-    type = c(rep("Observed", length(x[["digits"]])), rep("Expected", length(x[["digits"]])))
-  )
-  yBreaks <- pretty(c(0, df$y, x[["estimates"]]$ub), min.n = 4)
-  if (x[["check"]] == "first" || x[["check"]] == "last") {
-    xBreaks <- x[["digits"]]
-    xLabels <- x[["digits"]]
-    pointSize <- 5
-    lineSize <- 1.5
-  } else {
-    xBreaks <- x[["digits"]]
-    xLabels <- c(
-      10, rep("", 9),
-      20, rep("", 9),
-      30, rep("", 9),
-      40, rep("", 9),
-      50, rep("", 9),
-      60, rep("", 9),
-      70, rep("", 9),
-      80, rep("", 9),
-      90, rep("", 8),
-      99
+plot.jfaDistr <- function(x, type = c("estimates", "robustness", "sequential"), ...) {
+  type <- match.arg(type)
+  if (type == "estimates") {
+    y <- type <- d <- lb <- ub <- NULL
+    df <- data.frame(
+      x = c(x[["digits"]], x[["digits"]]),
+      y = c(x$observed / x$n, x$expected / x$n),
+      type = c(rep("Observed", length(x[["digits"]])), rep("Expected", length(x[["digits"]])))
     )
-    pointSize <- 2
-    lineSize <- 1.2
+    yBreaks <- pretty(c(0, df$y, x[["estimates"]]$ub), min.n = 4)
+    if (x[["check"]] == "first" || x[["check"]] == "last") {
+      xBreaks <- x[["digits"]]
+      xLabels <- x[["digits"]]
+      pointSize <- 5
+      lineSize <- 1.5
+    } else {
+      xBreaks <- x[["digits"]]
+      xLabels <- c(
+        10, rep("", 9),
+        20, rep("", 9),
+        30, rep("", 9),
+        40, rep("", 9),
+        50, rep("", 9),
+        60, rep("", 9),
+        70, rep("", 9),
+        80, rep("", 9),
+        90, rep("", 8),
+        99
+      )
+      pointSize <- 2
+      lineSize <- 1.2
+    }
+    axisName <- switch(x[["check"]],
+      "first" = "Leading digit",
+      "firsttwo" = "Leading digits",
+      "last" = "Last digit"
+    )
+    xs <- rep(xBreaks[1], 2)
+    ys <- rep(yBreaks[1], 2)
+    types <- c("Observed", "Expected")
+    sizes <- c(7, 10)
+    shapes <- c(21, 22)
+    fills <- c("dodgerblue", "darkgray")
+    if (any(x[["deviation"]])) {
+      xs <- c(xs, xBreaks[1])
+      ys <- c(ys, yBreaks[1])
+      types <- c(types, "Deviation")
+      sizes <- c(sizes, 10)
+      shapes <- c(shapes, 22)
+      fills <- c(fills, "firebrick")
+    }
+    plotData <- data.frame(x = xs, y = ys, type = types)
+    plotData[["type"]] <- factor(plotData[["type"]], levels = types)
+    p <- ggplot2::ggplot(data = plotData, mapping = ggplot2::aes(x = x, y = y, fill = type)) +
+      ggplot2::geom_point(alpha = 0) +
+      ggplot2::geom_bar(data = subset(df, type == "Expected"), mapping = ggplot2::aes(x = x, y = y), fill = ifelse(x[["deviation"]], "firebrick", "darkgray"), stat = "identity", color = "black") +
+      ggplot2::geom_line(data = subset(df, type == "Observed"), mapping = ggplot2::aes(x = x, y = y), color = "dodgerblue", linewidth = lineSize) +
+      ggplot2::geom_errorbar(data = x[["estimates"]], mapping = ggplot2::aes(x = d, ymin = lb, ymax = ub), width = 0.5) +
+      ggplot2::geom_point(data = subset(df, type == "Observed"), mapping = ggplot2::aes(x = x, y = y), fill = "dodgerblue", size = pointSize, shape = 21) +
+      ggplot2::scale_x_continuous(name = axisName, breaks = xBreaks, labels = xLabels, limits = c(min(x[["digits"]]) - 0.5, max(x[["digits"]]) + 0.5), ) +
+      ggplot2::scale_y_continuous(name = "Relative frequency", breaks = yBreaks, limits = c(0, max(yBreaks))) +
+      ggplot2::geom_segment(x = -Inf, xend = -Inf, y = 0, yend = max(yBreaks)) +
+      ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = -Inf, yend = -Inf) +
+      ggplot2::labs(fill = "") +
+      ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = -5, r = 50))) +
+      ggplot2::guides(fill = ggplot2::guide_legend(override.aes = list(
+        size = sizes, shape = shapes, fill = fills, color = "black", alpha = 1
+      )))
+  } else if (type == "robustness") {
+    stopifnot('plot(..., type = "robustness") not supported for frequentist analyses with "prior = FALSE"' = !isFALSE(x[["prior"]]))
+    plotdata <- data.frame(x = seq(1, 101, 0.1), y = 1)
+    for (i in seq_len(nrow(plotdata))) {
+      plotdata[i, "y"] <- .multinomialBf(x[["observed"]], x[["estimates"]][["p.exp"]], rep(plotdata[i, "x"], length(x[["observed"]])))
+    }
+    p <- .plotBfRobustness(x, plotdata)
+  } else if (type == "sequential") {
+    stopifnot('plot(..., type = "sequential") not supported for frequentist analyses with "prior = FALSE"' = !isFALSE(x[["prior"]]))
+    plotdata <- data.frame(
+      x = rep(0:x[["n"]], 4), y = 1,
+      type = rep(c("user prior", "uniform prior", "concentrated prior", "ultraconcentrated prior"), each = x[["n"]] + 1)
+    )
+    loc <- 1
+    for (j in 1:4) {
+      prior_param <- switch(j,
+        "1" = as.numeric(x[["prior"]]),
+        "2" = 1,
+        "3" = 10,
+        "4" = 50
+      )
+      for (i in seq_len(x[["n"]] + 1)) {
+        if (plotdata$x[loc] != 0) {
+          d <- .extract_digits(x[["data"]][1:i], check = x[["check"]], include.zero = FALSE)
+          d <- d[!is.na(d)]
+          d_tab <- table(d)
+          dig <- if (x[["check"]] == "firsttwo") 10:99 else 1:9
+          obs <- rep(0, length(dig))
+          d_included <- as.numeric(names(d_tab))
+          index <- if (x[["check"]] == "firsttwo") d_included - 9 else d_included
+          obs[index] <- as.numeric(d_tab)
+          plotdata[loc, "y"] <- .multinomialBf(obs, x[["estimates"]][["p.exp"]], rep(prior_param, length(x[["observed"]])))
+        }
+        loc <- loc + 1
+      }
+    }
+    plotdata$type <- factor(plotdata$type, levels = c("user prior", "uniform prior", "concentrated prior", "ultraconcentrated prior"))
+    p <- .plotBfSequential(x, plotdata)
   }
-  axisName <- switch(x[["check"]],
-    "first" = "Leading digit",
-    "firsttwo" = "Leading digits",
-    "last" = "Last digit"
-  )
-  xs <- rep(xBreaks[1], 2)
-  ys <- rep(yBreaks[1], 2)
-  types <- c("Observed", "Expected")
-  sizes <- c(7, 10)
-  shapes <- c(21, 22)
-  fills <- c("dodgerblue", "darkgray")
-  if (any(x[["deviation"]])) {
-    xs <- c(xs, xBreaks[1])
-    ys <- c(ys, yBreaks[1])
-    types <- c(types, "Deviation")
-    sizes <- c(sizes, 10)
-    shapes <- c(shapes, 22)
-    fills <- c(fills, "firebrick")
-  }
-  plotData <- data.frame(x = xs, y = ys, type = types)
-  plotData[["type"]] <- factor(plotData[["type"]], levels = types)
-  p <- ggplot2::ggplot(data = plotData, mapping = ggplot2::aes(x = x, y = y, fill = type)) +
-    ggplot2::geom_point(alpha = 0) +
-    ggplot2::geom_bar(data = subset(df, type == "Expected"), mapping = ggplot2::aes(x = x, y = y), fill = ifelse(x[["deviation"]], "firebrick", "darkgray"), stat = "identity", color = "black") +
-    ggplot2::geom_line(data = subset(df, type == "Observed"), mapping = ggplot2::aes(x = x, y = y), color = "dodgerblue", linewidth = lineSize) +
-    ggplot2::geom_errorbar(data = x[["estimates"]], mapping = ggplot2::aes(x = d, ymin = lb, ymax = ub), width = 0.5) +
-    ggplot2::geom_point(data = subset(df, type == "Observed"), mapping = ggplot2::aes(x = x, y = y), fill = "dodgerblue", size = pointSize, shape = 21) +
-    ggplot2::scale_x_continuous(name = axisName, breaks = xBreaks, labels = xLabels, limits = c(min(x[["digits"]]) - 0.5, max(x[["digits"]]) + 0.5), ) +
-    ggplot2::scale_y_continuous(name = "Relative frequency", breaks = yBreaks, limits = c(0, max(yBreaks))) +
-    ggplot2::geom_segment(x = -Inf, xend = -Inf, y = 0, yend = max(yBreaks)) +
-    ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = -Inf, yend = -Inf) +
-    ggplot2::labs(fill = "") +
-    ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = -5, r = 50))) +
-    ggplot2::guides(fill = ggplot2::guide_legend(override.aes = list(
-      size = sizes, shape = shapes, fill = fills, color = "black", alpha = 1
-    )))
   p <- .theme_jfa(p, legend.position = "top")
   return(p)
 }
@@ -978,7 +1021,7 @@ plot.jfaDistr <- function(x, ...) {
 #' @export
 print.jfaRv <- function(x, digits = getOption("digits"), ...) {
   cat("\n")
-  cat(strwrap("Repeated Values Test", prefix = "\t"), sep = "\n")
+  cat(strwrap("Classical Repeated Values Test", prefix = "\t"), sep = "\n")
   cat("\n")
   cat("data:  ", x$data.name, "\n", sep = "")
   out <- character()
@@ -1019,5 +1062,359 @@ plot.jfaRv <- function(x, ...) {
     ggplot2::geom_segment(x = -Inf, xend = -Inf, y = 0, yend = max(yBreaks)) +
     ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = -Inf, yend = -Inf)
   p <- .theme_jfa(p)
+  return(p)
+}
+
+# Methods for class: jfaFairness ##############################################
+
+#' @rdname jfa-methods
+#' @method print jfaFairness
+#' @export
+print.jfaFairness <- function(x, digits = getOption("digits"), ...) {
+  type <- if (isFALSE(x[["prior"]])) "Classical" else "Bayesian"
+  cat(paste0("\n\t", type, " Algorithmic Fairness Test\n\n"))
+  cat("data: ", x[["data.name"]], "\n", sep = "")
+  out <- character()
+  if (!is.null(x$n)) {
+    out <- c(out, paste(names(x$n), "=", format(x$n, digits = max(1L, digits - 2L))))
+  }
+  if (!is.null(x$statistic)) {
+    out <- c(out, paste(names(x$statistic), "=", format(x$statistic, digits = max(1L, digits - 2L))))
+  }
+  if (!is.null(x$parameter)) {
+    out <- c(out, paste(names(x$parameter), "=", format(x$parameter, digits = max(1L, digits - 2L))))
+  }
+  if (!is.null(x$bf)) {
+    out <- c(out, paste("BF\u2081\u2080", "=", format(x$bf, digits = max(1L, digits - 2L))))
+  }
+  if (!is.null(x$p.value)) {
+    fp <- format.pval(x$p.value, digits = max(1L, digits - 3L))
+    out <- c(out, paste("p-value", if (startsWith(fp, "<")) fp else paste("=", fp)))
+  }
+  cat(strwrap(paste(out, collapse = ", ")), sep = "\n")
+  if (x[["measure"]] != "dp") {
+    cat("alternative hypothesis: fairness metrics are not equal across groups\n")
+  }
+  cat(paste0("\nsample estimates:"))
+  for (i in names(x[["confusion.matrix"]])[-which(names(x[["confusion.matrix"]]) == x[["privileged"]])]) {
+    if (x[["measure"]] == "dp") {
+      cat("\n ", paste0(i, ": ", format(x[["parity"]][[i]]$estimate, digits = max(1L, digits - 2L))))
+    } else {
+      if (isFALSE(x[["prior"]])) {
+        cat("\n ", paste0(i, ": ", format(x[["parity"]][[i]]$estimate, digits = max(1L, digits - 2L)), " [", format(x[["parity"]][[i]]$lb, digits = max(1L, digits - 2L)), ", ", format(x[["parity"]][[i]]$ub, digits = max(1L, digits - 2L)), "], p-value = ", format.pval(x[["odds.ratio"]][[i]]$p.value, digits = max(1L, digits - 2L))))
+      } else {
+        cat("\n ", paste0(i, ": ", format(x[["parity"]][[i]]$estimate, digits = max(1L, digits - 2L)), " [", format(x[["parity"]][[i]]$lb, digits = max(1L, digits - 2L)), ", ", format(x[["parity"]][[i]]$ub, digits = max(1L, digits - 2L)), "], BF\u2081\u2080 = ", format(x[["odds.ratio"]][[i]]$bf10, digits = max(1L, digits - 2L))))
+      }
+    }
+  }
+  if (x[["measure"]] != "dp") {
+    alternative <- switch(x[["alternative"]],
+      "two.sided" = "alternative hypothesis: true odds ratio is not equal to 1",
+      "less" = "alternative hypothesis: true odds ratio is less than 1",
+      "greater" = "alternative hypothesis: true odds ratio is greater than 1"
+    )
+    cat(paste0("\n", alternative))
+  }
+}
+
+#' @rdname jfa-methods
+#' @method print summary.jfaFairness
+#' @export
+print.summary.jfaFairness <- function(x, digits = getOption("digits"), ...) {
+  type <- if (isFALSE(x[["prior"]])) "Classical" else "Bayesian"
+  cat(paste0("\n\t", type, " Algorithmic Fairness Test Summary\n"))
+  cat("\nOptions:\n")
+  cat(paste("  Confidence level:   ", format(x[["conf.level"]], digits = max(1L, digits - 2L))), "\n")
+  measure <- switch(x[["measure"]],
+    "pp" = "Proportional parity (Disparate impact)",
+    "prp" = "Predictive rate parity (Equalized odds)",
+    "ap" = "Accuracy parity",
+    "fnrp" = "False negative rate parity",
+    "fprp" = "False positive rate parity",
+    "tprp" = "True positive rate parity (Equal opportunity)",
+    "npvp" = "Negative predictive value parity",
+    "sp" = "Specificity parity (True negative rate parity)",
+    "dp" = "Demographic parity (Statistical parity)"
+  )
+  cat("  Fairness metric:    ", measure)
+  if (length(x[["negative"]]) == 1) {
+    cat("\n  Model type:          Binary classification")
+  } else {
+    cat("\n  Model type:          Multi-class classification")
+  }
+  cat(paste0("\n  Privileged group:    ", x[["privileged"]]))
+  cat("\n  Positive class:     ", x[["positive"]], "\n")
+  if (!isFALSE(x[["prior"]]) && x[["measure"]] != "dp") {
+    cat("  Prior distribution: ", paste0("Dirichlet (", as.numeric(x[["prior"]]), ", ..., ", as.numeric(x[["prior"]]), ")"), "\n")
+  }
+  cat("\nData:\n")
+  cat(paste("  Sample size:        ", format(x[["n"]], digits = max(1L, digits - 2L))), "\n")
+  cat(paste("  Unprivileged groups:", format(length(x[["unprivileged"]]), digits = max(1L, digits - 2L))), "\n")
+  if (x[["measure"]] != "dp") {
+    cat("\nResults:\n")
+    if (!isFALSE(x[["prior"]])) {
+      cat(paste("  BF\u2081\u2080:               ", format(x[["bf"]], digits = max(1L, digits - 2L))), "\n")
+    } else {
+      cat(paste("  X-squared:          ", format(x[["statistic"]], digits = max(1L, digits - 2L))), "\n")
+      cat(paste("  Degrees of freedom: ", format(x[["parameter"]], digits = max(1L, digits - 2L))), "\n")
+      cat(paste("  p-value:            ", format.pval(x[["p.value"]], digits = max(1L, digits - 2L))), "\n")
+    }
+  }
+  cat(paste0("\nComparisons to privileged (P) group:\n"))
+  groups <- names(x[["confusion.matrix"]])
+  rownames <- groups
+  rownames[which(rownames == x[["privileged"]])] <- paste0(rownames[which(rownames == x[["privileged"]])], " (P)")
+  df <- data.frame(matrix("-", nrow = length(groups), ncol = if (x[["measure"]] == "dp") 2 else 4), row.names = paste0("  ", rownames))
+  measure <- switch(x[["measure"]],
+    "pp" = "Proportion",
+    "prp" = "Precision",
+    "ap" = "Accuracy",
+    "fnrp" = "False negative rate",
+    "fprp" = "False positive rate",
+    "tprp" = "True positive rate",
+    "npvp" = "Negative predictive value",
+    "sp" = "Specificity",
+    "dp" = "Positively classified"
+  )
+  colnames <- c(measure, "Parity")
+  if (x[["measure"]] != "dp") {
+    if (isFALSE(x[["prior"]])) {
+      colnames <- c(colnames, "Odds ratio", "p-value")
+    } else {
+      colnames <- c(colnames, "Odds ratio", "BF\u2081\u2080")
+    }
+  }
+  colnames(df) <- colnames
+  for (i in seq_along(groups)) {
+    metric_est <- format(x[["metric"]][[groups[i]]]$estimate, digits = max(1L, digits - 2L))
+    if (x[["measure"]] == "dp") {
+      df[i, 1] <- metric_est
+    } else {
+      metric_lb <- format(x[["metric"]][[groups[i]]]$lb, digits = max(1L, digits - 2L))
+      metric_ub <- format(x[["metric"]][[groups[i]]]$ub, digits = max(1L, digits - 2L))
+      df[i, 1] <- paste0(metric_est, " [", metric_lb, ", ", metric_ub, "]")
+    }
+    if (groups[i] != x[["privileged"]]) {
+      parity_est <- format(x[["parity"]][[groups[i]]]$estimate, digits = max(1L, digits - 2L))
+      if (x[["measure"]] == "dp") {
+        df[i, 2] <- parity_est
+      } else {
+        parity_lb <- format(x[["parity"]][[groups[i]]]$lb, digits = max(1L, digits - 2L))
+        parity_ub <- format(x[["parity"]][[groups[i]]]$ub, digits = max(1L, digits - 2L))
+        df[i, 2] <- paste0(parity_est, " [", parity_lb, ", ", parity_ub, "]")
+        odds_ratio_est <- format(x[["odds.ratio"]][[groups[i]]]$estimate, digits = max(1L, digits - 2L))
+        odds_ratio_lb <- format(x[["odds.ratio"]][[groups[i]]]$lb, digits = max(1L, digits - 2L))
+        odds_ratio_ub <- format(x[["odds.ratio"]][[groups[i]]]$ub, digits = max(1L, digits - 2L))
+        df[i, 3] <- paste0(odds_ratio_est, " [", odds_ratio_lb, ", ", odds_ratio_ub, "]")
+        if (isFALSE(x[["prior"]])) {
+          df[i, 4] <- format.pval(x[["odds.ratio"]][[groups[i]]][["p.value"]], digits = max(1L, digits - 2L))
+        } else {
+          df[i, 4] <- format(x[["odds.ratio"]][[groups[i]]][["bf10"]], digits = max(1L, digits - 2L))
+        }
+      }
+    }
+  }
+  print(df)
+  cat("\nModel performance:\n")
+  colnames(x[["performance"]][["all"]]) <- c(
+    "Support",
+    "Accuracy",
+    "Precision",
+    "Recall",
+    "F1 score"
+  )
+  rownames(x[["performance"]][["all"]]) <- paste0("  ", rownames(x[["performance"]][["all"]]))
+  print(x[["performance"]][["all"]])
+}
+
+#' @rdname jfa-methods
+#' @method summary jfaFairness
+#' @export
+summary.jfaFairness <- function(object, digits = getOption("digits"), ...) {
+  out <- list()
+  out[["privileged"]] <- object[["privileged"]]
+  out[["unprivileged"]] <- object[["unprivileged"]]
+  out[["positive"]] <- object[["positive"]]
+  out[["negative"]] <- object[["negative"]]
+  out[["confusion.matrix"]] <- object[["confusion.matrix"]]
+  out[["metric"]] <- object[["metric"]]
+  out[["performance"]] <- object[["performance"]]
+  out[["parity"]] <- object[["parity"]]
+  out[["odds.ratio"]] <- object[["odds.ratio"]]
+  out[["prior"]] <- object[["prior"]]
+  out[["measure"]] <- object[["measure"]]
+  out[["conf.level"]] <- object[["conf.level"]]
+  out[["n"]] <- object[["n"]]
+  if (!is.null(object[["bf"]])) {
+    out[["bf"]] <- object[["bf"]]
+  }
+  if (!is.null(object[["p.value"]])) {
+    out[["statistic"]] <- object[["statistic"]]
+    out[["parameter"]] <- object[["parameter"]]
+    out[["p.value"]] <- object[["p.value"]]
+  }
+  class(out) <- c("summary.jfaFairness", "list")
+  return(out)
+}
+
+#' @rdname jfa-methods
+#' @method plot jfaFairness
+#' @export
+plot.jfaFairness <- function(x, type = c("estimates", "posterior", "robustness", "sequential"), ...) {
+  type <- match.arg(type)
+  estimate <- lb <- ub <- group <- y <- NULL
+  groups <- names(x[["confusion.matrix"]])
+  ind <- which(groups == x[["privileged"]])
+  unprivileged <- groups[-ind]
+  if (type == "estimates") {
+    ratio <- x[["parity"]][["all"]]
+    ratio[["group"]] <- rownames(ratio)
+    yBreaks <- pretty(c(0, ratio[["estimate"]], 1, ratio[["ub"]]), min.n = 4)
+    yTitle <- switch(x[["measure"]],
+      pp = "Proportional parity",
+      prp = "Predictive rate parity",
+      ap = "Accuracy parity",
+      fnrp = "False negative rate parity",
+      fprp = "False positive rate parity",
+      tprp = "True positive rate parity",
+      npvp = "Negative predictive value parity",
+      sp = "Specificity parity",
+      dp = "Demographic parity"
+    )
+    if (x[["measure"]] == "dp") {
+      ratio$type <- "Expected"
+    } else {
+      ratio$type <- ifelse(ratio$ub < 1 | ratio$lb > 1, yes = "Deviation", no = "Expected")
+    }
+    ratio$type[which(groups == x[["privileged"]])] <- "Privileged group"
+    ratio$type <- factor(ratio$type, levels = c("Privileged group", "Expected", "Deviation"))
+    p <- ggplot2::ggplot(data = ratio, mapping = ggplot2::aes(x = group, y = estimate, group = group, fill = type)) +
+      ggplot2::geom_col(colour = "black") +
+      ggplot2::scale_x_discrete(name = x[["protected"]]) +
+      ggplot2::scale_y_continuous(name = yTitle, breaks = yBreaks, limits = range(yBreaks)) +
+      ggplot2::scale_fill_manual(name = NULL, values = c("dodgerblue", "lightgray", "firebrick"), breaks = c("Privileged group", "Expected", "Deviation")) +
+      ggplot2::geom_segment(x = -Inf, xend = -Inf, y = min(yBreaks), yend = max(yBreaks))
+    if (x[["measure"]] != "dp") {
+      p <- p + ggplot2::geom_errorbar(mapping = ggplot2::aes(ymin = lb, ymax = ub), width = 0.5)
+    }
+  } else if (type == "posterior") {
+    stopifnot('plot(..., type = "posterior") not supported for frequentist analyses with "prior = FALSE"' = !isFALSE(x[["prior"]]))
+    stopifnot('plot(..., type = "posterior") not supported for demographic parity' = x[["measure"]] != "dp")
+    plotdata <- data.frame(x = numeric(), y = numeric(), group = character(), xmin = numeric(), xmax = numeric(), type = character())
+    for (i in seq_along(unprivileged)) {
+      tmp <- data.frame(
+        x = x[["odds.ratio"]][[unprivileged[i]]]$density$x,
+        y = x[["odds.ratio"]][[unprivileged[i]]]$density$y,
+        group = unprivileged[i],
+        xmin = x[["odds.ratio"]][[unprivileged[i]]]$density$xmin,
+        xmax = x[["odds.ratio"]][[unprivileged[i]]]$density$xmax,
+        type = "Posterior"
+      )
+      plotdata <- rbind(plotdata, tmp)
+    }
+    tmp_prior <- data.frame(
+      x = x[["odds.ratio"]][[unprivileged[1]]]$density$prior_x,
+      y = x[["odds.ratio"]][[unprivileged[1]]]$density$prior_y,
+      group = unprivileged[1],
+      xmin = x[["odds.ratio"]][[unprivileged[1]]]$density$xmin,
+      xmax = x[["odds.ratio"]][[unprivileged[1]]]$density$xmax,
+      type = "Prior"
+    )
+    plotdata <- rbind(plotdata, tmp_prior)
+    xBreaks <- pretty(c(0, plotdata$xmin, plotdata$xmax), min.n = 4)
+    yBreaks <- pretty(c(0, plotdata$y), min.n = 4)
+    indexes <- which(plotdata$x < min(xBreaks) | plotdata$x > max(xBreaks))
+    if (length(indexes) > 0) {
+      plotdata <- plotdata[-indexes, ]
+    }
+    p <- ggplot2::ggplot(data = plotdata, mapping = ggplot2::aes(x = x, y = y, color = factor(group))) +
+      ggplot2::geom_path(data = subset(plotdata, plotdata$type == "Prior"), linetype = "dashed", color = "black") +
+      ggplot2::geom_path(data = subset(plotdata, plotdata$type == "Posterior"), linetype = "solid", show.legend = length(unprivileged) > 1) +
+      ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, limits = range(yBreaks)) +
+      ggplot2::scale_x_continuous(name = "Log odds ratio", breaks = xBreaks, limits = range(xBreaks)) +
+      ggplot2::geom_segment(x = -Inf, xend = -Inf, y = min(yBreaks), yend = max(yBreaks), inherit.aes = FALSE) +
+      ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = -Inf, yend = -Inf, inherit.aes = FALSE) +
+      ggplot2::guides(color = ggplot2::guide_legend(nrow = if (length(groups) > 3) 2 else 1, byrow = TRUE)) +
+      ggplot2::theme(
+        legend.spacing.y = ggplot2::unit(0, "cm"),
+        legend.margin = ggplot2::margin(0, 0, if (length(groups) > 3) -0.5 else 0, 0, "cm")
+      )
+    if (length(unprivileged) == 1) {
+      pointdata <- data.frame(x = c(0, 0, 0, 0), y = c(0, 0, 0, 0), type = factor(c("Prior", "Prior", "Posterior", "Posterior"), levels = c("Posterior", "Prior")))
+      p <- p + ggplot2::geom_path(data = pointdata, mapping = ggplot2::aes(x = x, y = y, linetype = factor(type)), inherit.aes = FALSE) +
+        ggplot2::scale_color_manual(name = NULL, values = "black") +
+        ggplot2::scale_linetype_manual(name = NULL, values = c("solid", "dashed"))
+    } else {
+      p <- p + ggplot2::scale_color_brewer(name = NULL, palette = "Dark2")
+    }
+  } else if (type == "robustness") {
+    stopifnot('plot(..., type = "robustness") not supported for frequentist analyses with "prior = FALSE"' = !isFALSE(x[["prior"]]))
+    stopifnot('plot(..., type = "robustness") not supported for demographic parity' = x[["measure"]] != "dp")
+    plotdata <- data.frame(x = seq(1, 101, 0.1), y = 0)
+    for (i in seq_len(nrow(plotdata))) {
+      plotdata[i, "y"] <- .contingencyTableBf(x[["crossTab"]], plotdata[i, "x"], "columns")
+    }
+    p <- .plotBfRobustness(x, plotdata)
+  } else if (type == "sequential") {
+    stopifnot('plot(..., type = "sequential") not supported for frequentist analyses with "prior = FALSE"' = !isFALSE(x[["prior"]]))
+    stopifnot('plot(..., type = "sequential") not supported for demographic parity' = x[["measure"]] != "dp")
+    plotdata <- data.frame(
+      x = rep(0:x[["n"]], each = 4), y = 1,
+      type = rep(c("user prior", "uniform prior", "concentrated prior", "ultraconcentrated prior"), times = x[["n"]] + 1)
+    )
+    loc <- 1
+    for (i in seq_len(x[["n"]] + 1)) {
+      if (plotdata$x[loc] != 0) {
+        crossTab <- matrix(0, nrow = 2, ncol = length(x[["unprivileged"]]) + 1)
+        tmpdat <- x[["data"]][1:i, ]
+        for (i in seq_len(nlevels(x[["data"]][, x[["protected"]]]))) {
+          group <- levels(x[["data"]][, x[["protected"]]])[i]
+          groupDat <- tmpdat[tmpdat[, x[["protected"]]] == group, ]
+          matrix <- table("Actual" = groupDat[, x[["target"]]], "Predicted" = groupDat[, x[["predictions"]]])
+          tp <- matrix[x[["positive"]], x[["positive"]]]
+          fp <- sum(matrix[x[["negative"]], x[["positive"]]])
+          tn <- sum(matrix[x[["negative"]], x[["negative"]]])
+          fn <- sum(matrix[x[["positive"]], x[["negative"]]])
+          num <- switch(x[["measure"]],
+            "pp" = tp + fp,
+            "prp" = tp,
+            "ap" = tp + tn,
+            "fnrp" = fn,
+            "fprp" = fp,
+            "tprp" = tp,
+            "npvp" = tn,
+            "sp" = tn
+          )
+          denom <- switch(x[["measure"]],
+            "pp" = tp + fp + tn + fn,
+            "prp" = tp + fp,
+            "ap" = tp + fp + tn + fn,
+            "fnrp" = tp + fn,
+            "fprp" = tn + fp,
+            "tprp" = tp + fn,
+            "npvp" = tn + fn,
+            "sp" = tn + fp
+          )
+          crossTab[1, i] <- num
+          crossTab[2, i] <- denom - num
+        }
+        for (j in 1:4) {
+          prior_param <- switch(j,
+            "1" = as.numeric(x[["prior"]]),
+            "2" = 1,
+            "3" = 10,
+            "4" = 50
+          )
+          plotdata[loc, "y"] <- .contingencyTableBf(crossTab, prior_param, "columns")
+          loc <- loc + 1
+        }
+      } else {
+        loc <- loc + 4
+      }
+    }
+    plotdata$type <- factor(plotdata$type, levels = c("user prior", "uniform prior", "concentrated prior", "ultraconcentrated prior"))
+    p <- .plotBfSequential(x, plotdata)
+  }
+  p <- .theme_jfa(p, legend.position = if (length(unprivileged) == 1 && type == "posterior") c(0.8, 0.8) else "top")
   return(p)
 }

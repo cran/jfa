@@ -12,7 +12,7 @@
 
 <meta name="author" content="Koen Derks" />
 
-<meta name="date" content="2023-07-16" />
+<meta name="date" content="2023-10-04" />
 
 <title>Audit sampling: Get started</title>
 
@@ -340,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Audit sampling: Get started</h1>
 <h4 class="author">Koen Derks</h4>
-<h4 class="date">2023-07-16</h4>
+<h4 class="date">2023-10-04</h4>
 
 
 <div id="TOC">
@@ -376,7 +376,8 @@ techniques to calculate sample sizes, select items from a population,
 and evaluate misstatement in a data sample. The <strong>jfa</strong>
 package enables users to create a prior probability distribution to
 perform Bayesian audit sampling using these functions. For more detailed
-explanations of each function, read the other vignettes on the <a href="https://koenderks.github.io/jfa/">package website</a>.</p>
+explanations of each function, read the other vignettes on the <a href="https://koenderks.github.io/jfa/articles/index.html">package
+website</a>.</p>
 </div>
 <div id="cheat-sheet" class="section level2">
 <h2>Cheat sheet</h2>
@@ -417,29 +418,31 @@ input for the <code>prior</code> argument in other functions. Moreover,
 <code>predict()</code> function to produce the predictions of the prior
 distribution on the data level.</p>
 <p><em>Full function with default arguments:</em></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">auditPrior</span>(<span class="at">method =</span> <span class="fu">c</span>(</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>             <span class="st">&quot;default&quot;</span>, <span class="st">&quot;strict&quot;</span>, <span class="st">&quot;param&quot;</span>, <span class="st">&quot;impartial&quot;</span>, <span class="st">&quot;hyp&quot;</span>,</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>             <span class="st">&quot;arm&quot;</span>, <span class="st">&quot;bram&quot;</span>, <span class="st">&quot;sample&quot;</span>, <span class="st">&quot;factor&quot;</span>, <span class="st">&quot;nonparam&quot;</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>           ),</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>           <span class="at">likelihood =</span> <span class="fu">c</span>(</span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>             <span class="st">&quot;poisson&quot;</span>, <span class="st">&quot;binomial&quot;</span>, <span class="st">&quot;hypergeometric&quot;</span>,</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>             <span class="st">&quot;normal&quot;</span>, <span class="st">&quot;uniform&quot;</span>, <span class="st">&quot;cauchy&quot;</span>, <span class="st">&quot;t&quot;</span>, <span class="st">&quot;chisq&quot;</span>,</span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>             <span class="st">&quot;exponential&quot;</span></span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>           ),</span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>           <span class="at">N.units =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>           <span class="at">alpha =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>           <span class="at">beta =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>           <span class="at">materiality =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>           <span class="at">expected =</span> <span class="dv">0</span>,</span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>           <span class="at">ir =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>           <span class="at">cr =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>           <span class="at">ub =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>           <span class="at">p.hmin =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>           <span class="at">x =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>           <span class="at">n =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>           <span class="at">factor =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>           <span class="at">samples =</span> <span class="cn">NULL</span>,</span>
-<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a>           <span class="at">conf.level =</span> <span class="fl">0.95</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">auditPrior</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="at">method =</span> <span class="fu">c</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    <span class="st">&quot;default&quot;</span>, <span class="st">&quot;strict&quot;</span>, <span class="st">&quot;param&quot;</span>, <span class="st">&quot;impartial&quot;</span>, <span class="st">&quot;hyp&quot;</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    <span class="st">&quot;arm&quot;</span>, <span class="st">&quot;bram&quot;</span>, <span class="st">&quot;sample&quot;</span>, <span class="st">&quot;factor&quot;</span>, <span class="st">&quot;nonparam&quot;</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  ),</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="at">likelihood =</span> <span class="fu">c</span>(</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>    <span class="st">&quot;poisson&quot;</span>, <span class="st">&quot;binomial&quot;</span>, <span class="st">&quot;hypergeometric&quot;</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>    <span class="st">&quot;normal&quot;</span>, <span class="st">&quot;uniform&quot;</span>, <span class="st">&quot;cauchy&quot;</span>, <span class="st">&quot;t&quot;</span>, <span class="st">&quot;chisq&quot;</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>    <span class="st">&quot;exponential&quot;</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>  ),</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>  <span class="at">N.units =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>  <span class="at">alpha =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>  <span class="at">beta =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>  <span class="at">materiality =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>  <span class="at">expected =</span> <span class="dv">0</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>  <span class="at">ir =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>  <span class="at">cr =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>  <span class="at">ub =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>  <span class="at">p.hmin =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>  <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>  <span class="at">n =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>  <span class="at">factor =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a>  <span class="at">samples =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a>  <span class="at">conf.level =</span> <span class="fl">0.95</span></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a>)</span></code></pre></div>
 <p><em>Supported options for the <code>method</code> argument:</em></p>
 <ul>
 <li><code>default</code>: Indifferent / noninformative prior
@@ -528,15 +531,17 @@ an object of class <code>jfaPrior</code> as returned by the
 <code>jfaPosterior</code> as returned by the <code>evaluation()</code>
 function.</p>
 <p><em>Full function with default arguments:</em></p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">planning</span>(<span class="at">materiality =</span> <span class="cn">NULL</span>,</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>         <span class="at">min.precision =</span> <span class="cn">NULL</span>,</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>         <span class="at">expected =</span> <span class="dv">0</span>,</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>         <span class="at">likelihood =</span> <span class="fu">c</span>(<span class="st">&quot;poisson&quot;</span>, <span class="st">&quot;binomial&quot;</span>, <span class="st">&quot;hypergeometric&quot;</span>),</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>         <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>         <span class="at">N.units =</span> <span class="cn">NULL</span>,</span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>         <span class="at">by =</span> <span class="dv">1</span>,</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>         <span class="at">max =</span> <span class="dv">5000</span>,</span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>         <span class="at">prior =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">planning</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="at">materiality =</span> <span class="cn">NULL</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="at">min.precision =</span> <span class="cn">NULL</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">expected =</span> <span class="dv">0</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">likelihood =</span> <span class="fu">c</span>(<span class="st">&quot;poisson&quot;</span>, <span class="st">&quot;binomial&quot;</span>, <span class="st">&quot;hypergeometric&quot;</span>),</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="at">N.units =</span> <span class="cn">NULL</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="at">by =</span> <span class="dv">1</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="at">max =</span> <span class="dv">5000</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  <span class="at">prior =</span> <span class="cn">FALSE</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>)</span></code></pre></div>
 <p><em>Supported options for the <code>likelihood</code>
 argument:</em></p>
 <ul>
@@ -592,16 +597,18 @@ the <code>size</code> argument can be an object of class
 <code>jfaPlanning</code> as returned by the <code>planning()</code>
 function.</p>
 <p><em>Full function with default arguments:</em></p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">selection</span>(data,</span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>          size,</span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>          <span class="at">units =</span> <span class="fu">c</span>(<span class="st">&quot;items&quot;</span>, <span class="st">&quot;values&quot;</span>),</span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>          <span class="at">method =</span> <span class="fu">c</span>(<span class="st">&quot;interval&quot;</span>, <span class="st">&quot;cell&quot;</span>, <span class="st">&quot;random&quot;</span>, <span class="st">&quot;sieve&quot;</span>),</span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>          <span class="at">values =</span> <span class="cn">NULL</span>,</span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>          <span class="at">order =</span> <span class="cn">NULL</span>,</span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>          <span class="at">decreasing =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>          <span class="at">randomize =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>          <span class="at">replace =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>          <span class="at">start =</span> <span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">selection</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  data,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  size,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">units =</span> <span class="fu">c</span>(<span class="st">&quot;items&quot;</span>, <span class="st">&quot;values&quot;</span>),</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">method =</span> <span class="fu">c</span>(<span class="st">&quot;interval&quot;</span>, <span class="st">&quot;cell&quot;</span>, <span class="st">&quot;random&quot;</span>, <span class="st">&quot;sieve&quot;</span>),</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">values =</span> <span class="cn">NULL</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="at">order =</span> <span class="cn">NULL</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="at">decreasing =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  <span class="at">randomize =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>  <span class="at">replace =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="at">start =</span> <span class="dv">1</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>)</span></code></pre></div>
 <p><em>Supported options for the <code>units</code> argument:</em></p>
 <ul>
 <li><code>items</code>: Sampling units are items (rows) (Leslie,
@@ -662,33 +669,41 @@ be an object of class <code>jfaPrior</code> as returned by the
 <code>jfaPosterior</code> as returned by the <code>evaluation()</code>
 function.</p>
 <p><em>Full function with default arguments:</em></p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">evaluation</span>(<span class="at">materiality =</span> <span class="cn">NULL</span>, </span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>           <span class="at">method =</span> <span class="fu">c</span>(</span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>             <span class="st">&quot;poisson&quot;</span>, <span class="st">&quot;binomial&quot;</span>, <span class="st">&quot;hypergeometric&quot;</span>,</span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>             <span class="st">&quot;stringer&quot;</span>, <span class="st">&quot;stringer.meikle&quot;</span>, <span class="st">&quot;stringer.lta&quot;</span>, <span class="st">&quot;stringer.pvz&quot;</span>,</span>
-<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>             <span class="st">&quot;rohrbach&quot;</span>, <span class="st">&quot;moment&quot;</span>, <span class="st">&quot;coxsnell&quot;</span>,</span>
-<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>             <span class="st">&quot;direct&quot;</span>, <span class="st">&quot;difference&quot;</span>, <span class="st">&quot;quotient&quot;</span>, <span class="st">&quot;regression&quot;</span>, <span class="st">&quot;mpu&quot;</span></span>
-<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>           ),</span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">&quot;less&quot;</span>, <span class="st">&quot;two.sided&quot;</span>, <span class="st">&quot;greater&quot;</span>),</span>
-<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>           <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
-<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>           <span class="at">data =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>           <span class="at">values =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>           <span class="at">values.audit =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>           <span class="at">strata =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>           <span class="at">times =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>           <span class="at">x =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>           <span class="at">n =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a>           <span class="at">N.units =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a>           <span class="at">N.items =</span> <span class="cn">NULL</span>,</span>
-<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a>           <span class="at">pooling =</span> <span class="fu">c</span>(<span class="st">&quot;none&quot;</span>, <span class="st">&quot;complete&quot;</span>, <span class="st">&quot;partial&quot;</span>), </span>
-<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a>           <span class="at">prior =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">evaluation</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>  <span class="at">materiality =</span> <span class="cn">NULL</span>, </span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="at">method =</span> <span class="fu">c</span>(</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>    <span class="st">&quot;poisson&quot;</span>, <span class="st">&quot;binomial&quot;</span>, <span class="st">&quot;hypergeometric&quot;</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>    <span class="st">&quot;stringer.poisson&quot;</span>, <span class="st">&quot;stringer.binomial&quot;</span>, <span class="st">&quot;stringer.hypergeometric&quot;</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>    <span class="st">&quot;stringer.meikle&quot;</span>, <span class="st">&quot;stringer.lta&quot;</span>, <span class="st">&quot;stringer.pvz&quot;</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>    <span class="st">&quot;rohrbach&quot;</span>, <span class="st">&quot;moment&quot;</span>, <span class="st">&quot;coxsnell&quot;</span>, <span class="st">&quot;mpu&quot;</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>    <span class="st">&quot;direct&quot;</span>, <span class="st">&quot;difference&quot;</span>, <span class="st">&quot;quotient&quot;</span>, <span class="st">&quot;regression&quot;</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>  ),</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>  <span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">&quot;less&quot;</span>, <span class="st">&quot;two.sided&quot;</span>, <span class="st">&quot;greater&quot;</span>),</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>  <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>  <span class="at">data =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>  <span class="at">values =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>  <span class="at">values.audit =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>  <span class="at">strata =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>  <span class="at">times =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a>  <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a>  <span class="at">n =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a>  <span class="at">N.units =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a>  <span class="at">N.items =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a>  <span class="at">pooling =</span> <span class="fu">c</span>(<span class="st">&quot;none&quot;</span>, <span class="st">&quot;complete&quot;</span>, <span class="st">&quot;partial&quot;</span>), </span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a>  <span class="at">prior =</span> <span class="cn">FALSE</span></span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a>)</span></code></pre></div>
 <p><em>Supported options for the <code>method</code> argument:</em></p>
 <ul>
 <li><code>poisson</code>: Poisson likelihood (Stewart, 2012).</li>
 <li><code>binomial</code>: Binomial likelihood (Stewart, 2012).</li>
 <li><code>hypergeometric</code>: Hypergeometric likelihood (Stewart,
 2012).</li>
-<li><code>stringer</code>: Stringer bound (Bickel, 1992).</li>
+<li><code>stringer.poisson</code>: Stringer bound using Poisson
+distribution (Touw &amp; Hoogduin, 2011).</li>
+<li><code>stringer.binomial</code>: Stringer bound using binomial
+distribution (Bickel, 1992).</li>
+<li><code>stringer.hypergeometric</code>: Stringer bound using
+hypergeometric distribution.</li>
 <li><code>stringer.meikle</code>: Stringer bound with Meikle’s
 correction (Meikle, 1972).</li>
 <li><code>stringer.lta</code>: Stringer bound with LTA correction
@@ -757,9 +772,11 @@ function and automatically creates a <code>html</code> or
 <code>pdf</code> report containing the analysis results and their
 interpretation.</p>
 <p><em>Full function with default arguments:</em></p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">report</span>(object,</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>       <span class="at">file =</span> <span class="st">&quot;report.html&quot;</span>,</span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>       <span class="at">format =</span> <span class="fu">c</span>(<span class="st">&quot;html_document&quot;</span>, <span class="st">&quot;pdf_document&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">report</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>  object,</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">&quot;report.html&quot;</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>  <span class="at">format =</span> <span class="fu">c</span>(<span class="st">&quot;html_document&quot;</span>, <span class="st">&quot;pdf_document&quot;</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>)</span></code></pre></div>
 <p><em>Example usage:</em></p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Generate an automatic report</span></span>
 <span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">report</span>(<span class="at">object =</span> x, <span class="at">file =</span> <span class="st">&#39;myReport.html&#39;</span>)</span></code></pre></div>
@@ -835,7 +852,7 @@ Bayes factors based on the beta-binomial distribution</a></li>
 <h2>References</h2>
 <ul>
 <li>Bickel, P. J. (1992). Inference and auditing: The Stringer bound.
-<em>International Statistical Review</em>, 60(2), 197–209. - <a href="https://www.jstor.org/stable/1403650">View online</a></li>
+<em>International Statistical Review</em>, 60(2), 197-209. - <a href="https://www.jstor.org/stable/1403650">View online</a></li>
 <li>Cox, D. R., &amp; Snell, E. J. (1979). On sampling and the
 estimation of rare errors. <em>Biometrika</em>, 66(1), 125-132. - <a href="https://doi.org/10.1093/biomet/66.1.125">View online</a></li>
 <li>Derks, K., de Swart, J., van Batenburg, P., Wagenmakers, E.-J.,
@@ -859,7 +876,7 @@ online</a></li>
 Information into the Statistical Model. <em>PsyArXiv</em> - <a href="https://doi.org/10.31234/osf.io/byj2a">View online</a></li>
 <li>Dworin, L. D. and Grimlund, R. A. (1984). Dollar-unit sampling for
 accounts receivable and inventory. <em>The Accounting Review</em>,
-59(2), 218–241. - <a href="https://www.jstor.org/stable/247296">View
+59(2), 218-241. - <a href="https://www.jstor.org/stable/247296">View
 online</a></li>
 <li>Dyer, D., &amp; Pierce, R. L. (1993). On the choice of the prior
 distribution in hypergeometric sampling. <em>Communications in
@@ -884,7 +901,7 @@ behaviour of the Stringer bound. <em>Statistica Neerlandica</em>, 50(3),
 online</a></li>
 <li>Rietveld, C. (1978). De zeefmethode als selectiemethode voor
 statistische steekproeven in de controlepraktijk (1). <em>Compact:
-Computer en Accountant</em>, 15, 2–11.</li>
+Computer en Accountant</em>, 15, 2-11.</li>
 <li>Rohrbach, K. J. (1993). Variance augmentation to achieve nominal
 coverage probability in sampling from audit populations. <em>Auditing: A
 Journal of Practice &amp; Theory</em>, 12(2), 79-97.</li>

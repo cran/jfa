@@ -1,65 +1,56 @@
 #include /include/license.stan
 
 data {
-  int<lower=1> S;
-  int<lower=1> n[S];
-  int<lower=0> k[S];
-  real<lower=0> alpha;
-  real<lower=0> beta;
-  int beta_prior;
-  int gamma_prior;
-  int normal_prior;
-  int uniform_prior;
-  int cauchy_prior;
-  int t_prior;
-  int chisq_prior;
-  int exponential_prior;
-  int use_likelihood;
-  int binomial_likelihood;
-  int poisson_likelihood;
+  int<lower=1> S;                      // number of strata
+  array[S] int<lower=0> n;             // stratum sample size
+  array[S] int<lower=0> k;             // stratum misstatements
+  real<lower=0> alpha;                 // prior parameter alpha
+  real<lower=0> beta;                  // prior parameter beta
+  int beta_prior;                      // beta prior {0 = no, 1 = yes}
+  int gamma_prior;                     // gamma prior {0 = no, 1 = yes}
+  int normal_prior;                    // normal prior {0 = no, 1 = yes}
+  int uniform_prior;                   // uniform prior {0 = no, 1 = yes}
+  int cauchy_prior;                    // Cauchy prior {0 = no, 1 = yes}
+  int t_prior;                         // Student-t prior {0 = no, 1 = yes}
+  int chisq_prior;                     // Chi-squared prior {0 = no, 1 = yes} 
+  int exponential_prior;               // exponential prior {0 = no, 1 = yes}
+  int use_likelihood;                  // apply likelihood {0 = no, 1 = yes}
+  int binomial_likelihood;             // binomial likelihood {0 = no, 1 = yes}
+  int poisson_likelihood;              // Poisson likelihood {0 = no, 1 = yes}
 }
 parameters {
-  real<lower=0, upper=1> theta;
-  real<lower=0> sigma;
-  vector[S] alpha_s;
-}
-transformed parameters {
-  real mu;
-  mu = logit(theta);
+  real<lower=0, upper=1> phi;          // population probability of misstatement
+  real<lower=1> nu;                    // population concentration
+  vector<lower=0, upper=1>[S] theta_s; // stratum probability of misstatement
 }
 model {
+  // Hyperpriors
   if (beta_prior) {
-    theta ~ beta(alpha, beta);
+    phi ~ beta(alpha, beta);
   } else if (gamma_prior) {
-    theta ~ gamma(alpha, beta);
+    phi ~ gamma(alpha, beta);
   } else if (normal_prior) {
-    theta ~ normal(alpha, beta);
+    phi ~ normal(alpha, beta);
   } else if (uniform_prior) {
-    theta ~ uniform(alpha, beta);
+    phi ~ uniform(alpha, beta);
   } else if (cauchy_prior) {
-    theta ~ cauchy(alpha, beta);
+    phi ~ cauchy(alpha, beta);
   } else if (t_prior) {
-    theta ~ student_t(alpha, 0, 1);
+    phi ~ student_t(alpha, 0, 1);
   } else if (chisq_prior) {
-    theta ~ chi_square(alpha);
+    phi ~ chi_square(alpha);
   } else if (exponential_prior) {
-    theta ~ exponential(alpha);
+    phi ~ exponential(alpha);
   }
-  sigma ~ normal(0, 1);
-  alpha_s ~ normal(0, 1);
+  nu ~ pareto(1, 1.5);
+  // Prior
+  theta_s ~ beta(phi * nu, (1 - phi) * nu);
+  // Likelihood
   if (use_likelihood) {
     if (binomial_likelihood) {
-      k ~ binomial_logit(n, mu + sigma * alpha_s);
+      k ~ binomial(n, theta_s);
     } else if (poisson_likelihood) {
-      for (i in 1:S){
-        k[i] ~ poisson(inv_logit(mu + sigma * alpha_s[i]) * n[i]);
-      }
+      k ~ poisson(to_vector(n) .* theta_s);
     }
-  }
-}
-generated quantities {
-  vector<lower=0, upper=1>[S] theta_s;
-  for (i in 1:S) {
-    theta_s[i] = inv_logit(mu + sigma * alpha_s[i]);
   }
 }
