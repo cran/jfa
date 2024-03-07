@@ -1,3 +1,23 @@
+# jfa 0.7.1
+
+**New features**
+
+- Added the option to calculate a frequentist multi-stage sampling plan with the `planning()` function. This can be done by providing a vector of integers to the `expected` argument that specifies the intended sampling plan. For instance, `expected = c(1, 0)` gives the sample size for a two-stage sampling plan in which the auditor is allowed to extend the initial sample after finding one misstatement and is allowed to approve the population if the initial sample contains no misstatements.
+- Added inflated methods to evaluate taintings in the evaluation function via `method = "inflated.poisson"` and `method = "hurdle.beta"`. Since these methods rely on mcmc sampling, they can take any form of prior. They can also be fitted using maximum likelihood estimation with `prior = FALSE`.
+
+**Minor changes**
+
+- For all plotting functions, `type = "estimates"` is now the default option.
+
+**Major changes**
+
+- Removed the `report()` function as it did not align with the rest of the functionality in the package.
+
+**Bug fixes**
+
+- Fixed a bug in `selection()` where the numeric data in the sample was returned as character if the original data was entered as character only (i.e., `selection(data.frame(x = c("hello", "bye", "hi")), size = 2)`).
+- `N.units` is now only taken from the prior if the user does not provide it manually to the `planning()` and `evaluation()` functions.
+
 # jfa 0.7.0
 
 **New features**

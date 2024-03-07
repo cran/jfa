@@ -29,15 +29,6 @@
   return(p)
 }
 
-.markdown_call <- function(x) {
-  if (length(grep("::", x)) > 0) {
-    parts <- strsplit(x, "::")[[1]]
-    return(getExportedValue(parts[1], parts[2]))
-  } else {
-    return(x)
-  }
-}
-
 .functional_density <- function(likelihood, analytical = TRUE) {
   if (analytical) {
     form <- switch(likelihood,
@@ -258,7 +249,7 @@
         "hypergeometric" = .qhyper(prob, N.units, n.obs, x.obs)
       )
     } else {
-      ub <- as.numeric(stats::quantile(samples[1:(length(samples) / 2)], prob))
+      ub <- as.numeric(stats::quantile(samples[seq_len(length(samples) / 2)], prob))
     }
   }
   return(ub)
@@ -284,6 +275,39 @@
     }
   }
   return(lb)
+}
+
+.comp_sequential <- function(n, likelihood, materiality, expected, N.units = NULL) {
+  K <- ceiling(materiality * N.units)
+  p <- switch(likelihood,
+    "poisson" = stats::ppois(expected[1] - 1, lambda = n * materiality),
+    "binomial" = stats::pbinom(expected[1] - 1, size = n, prob = materiality),
+    "hypergeometric" = stats::phyper(q = expected[1] - 1, m = K, n = N.units - K, k = n)
+  )
+  p_take <- 1
+  for (j in 1:(length(expected) - 1)) {
+    p1 <- switch(likelihood,
+      "poisson" = stats::dpois(expected[j], lambda = n * materiality),
+      "binomial" = stats::dbinom(expected[j], size = n, prob = materiality),
+      "hypergeometric" = stats::dhyper(expected[j], m = K, n = N.units - K, k = n)
+    )
+    if (j < (length(expected) - 1)) {
+      p2 <- switch(likelihood,
+        "poisson" = stats::ppois(expected[j + 1] - 1, lambda = n * materiality),
+        "binomial" = stats::pbinom(expected[j + 1] - 1, size = n, prob = materiality),
+        "hypergeometric" = stats::phyper(q = expected[j + 1] - 1, m = K, n = N.units - K, k = n)
+      )
+    } else {
+      p2 <- switch(likelihood,
+        "poisson" = stats::ppois(expected[j + 1], lambda = n * materiality),
+        "binomial" = stats::pbinom(expected[j + 1], size = n, prob = materiality),
+        "hypergeometric" = stats::phyper(q = expected[j + 1], m = K, n = N.units - K, k = n)
+      )
+    }
+    p <- p + (p_take * p1 * p2)
+    p_take <- p_take * p1
+  }
+  return(p)
 }
 
 # Talens, E. (2005). Statistical Auditing and the AOQL-method
@@ -461,7 +485,7 @@
 
 .bf01_twosided_samples <- function(materiality, nstrata, stratum_samples) {
   bf01 <- numeric(nstrata - 1)
-  for (i in 1:(nstrata - 1)) {
+  for (i in seq_len(nstrata - 1)) {
     prior_samples <- stratum_samples[, (nstrata - 1) + i]
     posterior_samples <- stratum_samples[, i]
     prior_densfit <- .bounded_density(as.numeric(prior_samples))
@@ -487,7 +511,7 @@
   less <- function(x) length(which(x < materiality)) / length(x)
   greater <- function(x) length(which(x > materiality)) / length(x)
   prior_samples <- stratum_samples[, nstrata:ncol(stratum_samples)]
-  post_samples <- stratum_samples[, 1:(nstrata - 1)]
+  post_samples <- stratum_samples[, seq_len(nstrata - 1)]
   prior_odds_less <- apply(prior_samples, 2, less) / apply(prior_samples, 2, greater)
   post_odds_less <- apply(post_samples, 2, less) / apply(post_samples, 2, greater)
   bf10 <- post_odds_less / prior_odds_less
@@ -542,6 +566,337 @@
   return(samples)
 }
 
+.mcmc_twopart_cp <- function(likelihood, n.obs, taints, diff, N.items, N.units, prior) {
+  if (likelihood == "hurdle.beta") {
+    data <- list(
+      n = n.obs,
+      y = taints,
+      alpha = prior[["description"]]$alpha,
+      beta = prior[["description"]]$beta,
+      beta_prior = as.numeric(prior[["likelihood"]] == "binomial"),
+      gamma_prior = as.numeric(prior[["likelihood"]] == "poisson"),
+      normal_prior = as.numeric(prior[["likelihood"]] == "normal"),
+      uniform_prior = as.numeric(prior[["likelihood"]] == "uniform"),
+      cauchy_prior = as.numeric(prior[["likelihood"]] == "cauchy"),
+      t_prior = as.numeric(prior[["likelihood"]] == "t"),
+      chisq_prior = as.numeric(prior[["likelihood"]] == "chisq"),
+      binomial_likelihood = as.numeric(likelihood == "binomial"),
+      poisson_likelihood = as.numeric(likelihood == "poisson"),
+      exponential_prior = as.numeric(likelihood == "exponential")
+    )
+    model <- stanmodels[["beta_zero_one"]]
+    pars <- c("phi", "nu", "prob")
+  } else if (likelihood == "inflated.poisson") {
+    data <- list(
+      n = n.obs,
+      y = round(diff),
+      N = N.items,
+      B = N.units,
+      alpha = prior[["description"]]$alpha,
+      beta = prior[["description"]]$beta,
+      beta_prior = as.numeric(prior[["likelihood"]] == "binomial"),
+      gamma_prior = as.numeric(prior[["likelihood"]] == "poisson"),
+      normal_prior = as.numeric(prior[["likelihood"]] == "normal"),
+      uniform_prior = as.numeric(prior[["likelihood"]] == "uniform"),
+      cauchy_prior = as.numeric(prior[["likelihood"]] == "cauchy"),
+      t_prior = as.numeric(prior[["likelihood"]] == "t"),
+      chisq_prior = as.numeric(prior[["likelihood"]] == "chisq"),
+      exponential_prior = as.numeric(likelihood == "exponential")
+    )
+    model <- stanmodels[["poisson_zero"]]
+    pars <- c("p_error", "lambda")
+  }
+  suppressWarnings({
+    raw_prior <- rstan::sampling(
+      object = model,
+      data = c(data, use_likelihood = 0),
+      pars = c("theta", pars),
+      iter = getOption("mc.iterations", 2000),
+      warmup = getOption("mc.warmup", 1000),
+      chains = getOption("mc.chains", 4),
+      cores = getOption("mc.cores", 1),
+      seed = sample.int(.Machine$integer.max, 1),
+      control = list(adapt_delta = 0.95),
+      refresh = getOption("mc.refresh", 0)
+    )
+    raw_posterior <- rstan::sampling(
+      object = model,
+      data = c(data, use_likelihood = 1),
+      pars = c("theta", pars),
+      iter = getOption("mc.iterations", 2000),
+      warmup = getOption("mc.warmup", 1000),
+      chains = getOption("mc.chains", 4),
+      cores = getOption("mc.cores", 1),
+      seed = sample.int(.Machine$integer.max, 1),
+      control = list(adapt_delta = 0.95),
+      refresh = getOption("mc.refresh", 0)
+    )
+  })
+  out <- list()
+  samples <- cbind(
+    rstan::extract(raw_posterior)$theta,
+    rstan::extract(raw_prior)$theta
+  )
+  complete_samples <- !is.null(samples) && ncol(samples) == 2
+  stopifnot("Stan model could not be fitted...check your priors" = complete_samples)
+  out[["samples"]] <- samples
+  # Parameter estimates
+  probs <- c(0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975)
+  samps <- rstan::extract(raw_posterior)
+  if (likelihood == "inflated.poisson") {
+    estimates <- data.frame(
+      mode = c(
+        .comp_mode_bayes(analytical = FALSE, samples = samps[["p_error"]]),
+        .comp_mode_bayes(analytical = FALSE, samples = samps[["lambda"]])
+      ),
+      mean = c(
+        mean(samps[["p_error"]]),
+        mean(samps[["lambda"]])
+      ),
+      sd = c(
+        stats::sd(samps[["p_error"]]),
+        stats::sd(samps[["lambda"]])
+      ),
+      row.names = c("p(error)", "mean")
+    )
+    estimates <- cbind.data.frame(estimates, rbind(
+      stats::quantile(samps[["p_error"]], probs),
+      stats::quantile(samps[["lambda"]], probs)
+    ))
+  } else {
+    if (likelihood == "hurdle.beta") {
+      estimates <- data.frame(
+        mode = c(
+          .comp_mode_bayes(analytical = FALSE, samples = samps[["prob"]][, 3]),
+          .comp_mode_bayes(analytical = FALSE, samples = samps[["phi"]]),
+          .comp_mode_bayes(analytical = FALSE, samples = samps[["nu"]]),
+          .comp_mode_bayes(analytical = FALSE, samples = samps[["prob"]][, 2])
+        ),
+        mean = c(
+          mean(1 - samps[["prob"]][, 1]),
+          mean(samps[["phi"]]),
+          mean(samps[["nu"]]),
+          mean(samps[["prob"]][, 2])
+        ),
+        sd = c(
+          stats::sd(1 - samps[["prob"]][, 1]),
+          stats::sd(samps[["phi"]]),
+          stats::sd(samps[["nu"]]),
+          stats::sd(samps[["prob"]][, 2])
+        ),
+        row.names = c("p(error)", "mean", "concentration", "p(full)")
+      )
+      estimates <- cbind.data.frame(estimates, rbind(
+        stats::quantile(1 - samps[["prob"]][, 1], probs),
+        stats::quantile(samps[["phi"]], probs),
+        stats::quantile(samps[["nu"]], probs),
+        stats::quantile(samps[["prob"]][, 2], probs)
+      ))
+    } else {
+      estimates <- data.frame(
+        mode = c(
+          .comp_mode_bayes(analytical = FALSE, samples = samps[["p_error"]]),
+          .comp_mode_bayes(analytical = FALSE, samples = samps[["phi"]]),
+          .comp_mode_bayes(analytical = FALSE, samples = samps[["nu"]])
+        ),
+        mean = c(
+          mean(samps[["p_error"]]),
+          mean(samps[["phi"]]),
+          mean(samps[["nu"]])
+        ),
+        sd = c(
+          stats::sd(samps[["p_error"]]),
+          stats::sd(samps[["phi"]]),
+          stats::sd(samps[["nu"]])
+        ),
+        row.names = c("p(taint)", "mean", "concentration")
+      )
+      estimates <- cbind.data.frame(estimates, rbind(
+        stats::quantile(samps[["p_error"]], probs),
+        stats::quantile(samps[["phi"]], probs),
+        stats::quantile(samps[["nu"]], probs)
+      ))
+    }
+  }
+  out[["estimates"]] <- estimates
+  return(out)
+}
+
+.optim_twopart_cp <- function(likelihood, n.obs, taints, diff, N.items, N.units, alternative, conf.level) {
+  no_nonzero_taints <- all(taints == 0)
+  has_nondiscrete_taints <- any(taints > 0 & taints < 1)
+  if (no_nonzero_taints || (likelihood == "hurdle.beta" && !has_nondiscrete_taints)) {
+    num_draws <- 0
+  } else {
+    num_draws <- getOption("mc.iterations", 2000)
+  }
+  if (likelihood == "hurdle.beta") {
+    data <- list(
+      n = n.obs,
+      y = taints,
+      alpha = 0,
+      beta = 0,
+      beta_prior = 0,
+      gamma_prior = 0,
+      normal_prior = 0,
+      uniform_prior = 0,
+      cauchy_prior = 0,
+      t_prior = 0,
+      chisq_prior = 0,
+      binomial_likelihood = 0,
+      poisson_likelihood = 0,
+      exponential_prior = 0
+    )
+    model <- stanmodels[["beta_zero_one"]]
+  } else if (likelihood == "inflated.poisson") {
+    data <- list(
+      n = n.obs,
+      y = round(diff),
+      N = N.items,
+      B = N.units,
+      alpha = 0,
+      beta = 0,
+      beta_prior = 0,
+      gamma_prior = 0,
+      normal_prior = 0,
+      uniform_prior = 0,
+      cauchy_prior = 0,
+      t_prior = 0,
+      chisq_prior = 0,
+      binomial_likelihood = 0,
+      poisson_likelihood = 0,
+      exponential_prior = 0
+    )
+    model <- stanmodels[["poisson_zero"]]
+  }
+  out <- list()
+  if (no_nonzero_taints || (likelihood == "hurdle.beta" && !has_nondiscrete_taints)) {
+    if (no_nonzero_taints) {
+      message("Warning: No misstatements observed, cannot calculate upper and / or lower bound(s)")
+      out[["mle"]] <- 0
+    } else {
+      message("Warning: No taints observed, cannot calculate upper and / or lower bound(s)")
+      out[["mle"]] <- sum(taints == 1) / n.obs
+    }
+    out[["lb"]] <- switch(alternative,
+      "less" = 0,
+      "two.sided" = NA,
+      "greater" = NA
+    )
+    out[["ub"]] <- switch(alternative,
+      "less" = NA,
+      "two.sided" = NA,
+      "greater" = 1
+    )
+  } else {
+    if (likelihood == "inflated.poisson") {
+      p <- length(which(taints > 0)) / n.obs
+      lambda <- sum(diff) / sum(diff > 0)
+      theta <- (p * lambda * N.items) / N.units
+    } else {
+      if (likelihood == "hurdle.beta") {
+        p <- sum(taints > 0 & taints < 1) / n.obs
+        phi <- sum(taints[taints > 0 & taints < 1]) / sum(taints > 0 & taints < 1)
+        p2 <- sum(taints == 1) / n.obs
+        theta <- p * phi + p2
+      } else {
+        p <- sum(taints > 0) / n.obs
+        phi <- sum(taints) / sum(taints > 0)
+        theta <- p * phi
+      }
+    }
+    out[["mle"]] <- theta
+    suppressWarnings({
+      raw <- rstan::optimizing(
+        object = model,
+        data = c(data, use_likelihood = 1),
+        iter = getOption("mc.iterations", 2000),
+        draws = num_draws,
+        seed = sample.int(.Machine$integer.max, 1),
+        refresh = getOption("mc.refresh", 0),
+        verbose = FALSE
+      )
+    })
+    out[["lb"]] <- switch(alternative,
+      "less" = 0,
+      "two.sided" = stats::quantile(raw$theta_tilde[, "theta"], (1 - conf.level) / 2),
+      "greater" = stats::quantile(raw$theta_tilde[, "theta"], 1 - conf.level)
+    )
+    out[["ub"]] <- switch(alternative,
+      "less" = stats::quantile(raw$theta_tilde[, "theta"], conf.level),
+      "two.sided" = stats::quantile(raw$theta_tilde[, "theta"], conf.level + (1 - conf.level) / 2),
+      "greater" = 1
+    )
+    # Parameter estimates
+    probs <- c(0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975)
+    if (likelihood == "inflated.poisson") {
+      estimates <- data.frame(
+        mode = c(
+          .comp_mode_bayes(analytical = FALSE, samples = raw$theta_tilde[, "p_error"]),
+          .comp_mode_bayes(analytical = FALSE, samples = raw$theta_tilde[, "lambda"])
+        ),
+        mean = c(p, lambda),
+        sd = c(
+          stats::sd(raw$theta_tilde[, "p_error"]),
+          stats::sd(raw$theta_tilde[, "lambda"])
+        ),
+        row.names = c("p(error)", "mean")
+      )
+      estimates <- cbind.data.frame(estimates, rbind(
+        stats::quantile(raw$theta_tilde[, "p_error"], probs),
+        stats::quantile(raw$theta_tilde[, "lambda"], probs)
+      ))
+    } else {
+      if (likelihood == "hurdle.beta") {
+        estimates <- data.frame(
+          mode = c(
+            .comp_mode_bayes(analytical = FALSE, samples = 1 - raw$theta_tilde[, "prob[1]"]),
+            .comp_mode_bayes(analytical = FALSE, samples = raw$theta_tilde[, "phi"]),
+            .comp_mode_bayes(analytical = FALSE, samples = raw$theta_tilde[, "nu"]),
+            .comp_mode_bayes(analytical = FALSE, samples = raw$theta_tilde[, "prob[2]"])
+          ),
+          mean = c(p, phi, mean(raw$theta_tilde[, "nu"]), p2),
+          sd = c(
+            stats::sd(1 - raw$theta_tilde[, "prob[1]"]),
+            stats::sd(raw$theta_tilde[, "phi"]),
+            stats::sd(raw$theta_tilde[, "nu"]),
+            stats::sd(raw$theta_tilde[, "prob[2]"])
+          ),
+          row.names = c("p(error)", "mean", "concentration", "p(full error)")
+        )
+        estimates <- cbind.data.frame(estimates, rbind(
+          stats::quantile(1 - raw$theta_tilde[, "prob[1]"], probs),
+          stats::quantile(raw$theta_tilde[, "phi"], probs),
+          stats::quantile(raw$theta_tilde[, "nu"], probs),
+          stats::quantile(raw$theta_tilde[, "prob[2]"], probs)
+        ))
+      } else {
+        estimates <- data.frame(
+          mode = c(
+            .comp_mode_bayes(analytical = FALSE, samples = raw$theta_tilde[, "p_error"]),
+            .comp_mode_bayes(analytical = FALSE, samples = raw$theta_tilde[, "phi"]),
+            .comp_mode_bayes(analytical = FALSE, samples = raw$theta_tilde[, "nu"])
+          ),
+          mean = c(p, phi, mean(raw$theta_tilde[, "nu"])),
+          sd = c(
+            stats::sd(raw$theta_tilde[, "p_error"]),
+            stats::sd(raw$theta_tilde[, "phi"]),
+            stats::sd(raw$theta_tilde[, "nu"])
+          ),
+          row.names = c("p(taint)", "mean", "concentration")
+        )
+        estimates <- cbind.data.frame(estimates, rbind(
+          stats::quantile(raw$theta_tilde[, "p_error"], probs),
+          stats::quantile(raw$theta_tilde[, "phi"], probs),
+          stats::quantile(raw$theta_tilde[, "nu"], probs)
+        ))
+      }
+    }
+    out[["estimates"]] <- estimates
+  }
+  return(out)
+}
+
 .mcmc_pp <- function(likelihood, n.obs, t.obs, t, nstrata, stratum, prior) {
   stopifnot("'method = hypergeometric' does not support pooling" = prior[["likelihood"]] != "hypergeometric")
   if (likelihood == "binomial" || likelihood == "poisson") {
@@ -563,6 +918,7 @@
       exponential_prior = as.numeric(likelihood == "exponential")
     )
     model <- stanmodels[["pp_error"]]
+    pars <- c("phi", "nu")
   } else if (likelihood == "beta") {
     data <- list(
       S = nstrata - 1,
@@ -580,12 +936,13 @@
       exponential_prior = as.numeric(likelihood == "exponential")
     )
     model <- stanmodels[["pp_taint"]]
+    pars <- c("phi", "nu", "mu", "sigma")
   }
   suppressWarnings({
     raw_prior <- rstan::sampling(
       object = model,
       data = c(data, use_likelihood = 0),
-      pars = "theta_s",
+      pars = c("theta_s", pars),
       iter = getOption("mc.iterations", 2000),
       warmup = getOption("mc.warmup", 1000),
       chains = getOption("mc.chains", 4),
@@ -597,7 +954,7 @@
     raw_posterior <- rstan::sampling(
       object = model,
       data = c(data, use_likelihood = 1),
-      pars = "theta_s",
+      pars = c("theta_s", pars),
       iter = getOption("mc.iterations", 2000),
       warmup = getOption("mc.warmup", 1000),
       chains = getOption("mc.chains", 4),
@@ -607,15 +964,74 @@
       refresh = getOption("mc.refresh", 0)
     )
   })
-  samples <- cbind(rstan::extract(raw_posterior)$theta_s, rstan::extract(raw_prior)$theta_s)
-  stopifnot("Stan model could not be fitted...check your priors" = !is.null(samples) && ncol(samples) == (nstrata - 1) * 2)
-  return(samples)
+  samples <- cbind(
+    rstan::extract(raw_posterior)$theta_s,
+    rstan::extract(raw_prior)$theta_s
+  )
+  complete_samples <- !is.null(samples) && ncol(samples) == (nstrata - 1) * 2
+  stopifnot("Stan model could not be fitted...check your priors" = complete_samples)
+  out <- list()
+  out[["samples"]] <- samples
+  # Parameter estimates
+  probs <- c(0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975)
+  samps <- rstan::extract(raw_posterior)
+  if (likelihood == "binomial" || likelihood == "poisson") {
+    estimates <- data.frame(
+      mode = c(
+        .comp_mode_bayes(analytical = FALSE, samples = samps[["phi"]]),
+        .comp_mode_bayes(analytical = FALSE, samples = samps[["nu"]])
+      ),
+      mean = c(
+        mean(samps[["phi"]]),
+        mean(samps[["nu"]])
+      ),
+      sd = c(
+        stats::sd(samps[["phi"]]),
+        stats::sd(samps[["nu"]])
+      ),
+      row.names = c("mean", "concentration")
+    )
+    estimates <- cbind.data.frame(estimates, rbind(
+      stats::quantile(samps[["phi"]], probs),
+      stats::quantile(samps[["nu"]], probs)
+    ))
+  } else {
+    estimates <- data.frame(
+      mode = c(
+        .comp_mode_bayes(analytical = FALSE, samples = samps[["phi"]]),
+        .comp_mode_bayes(analytical = FALSE, samples = samps[["nu"]]),
+        .comp_mode_bayes(analytical = FALSE, samples = samps[["mu"]]),
+        .comp_mode_bayes(analytical = FALSE, samples = samps[["sigma"]])
+      ),
+      mean = c(
+        mean(samps[["phi"]]),
+        mean(samps[["nu"]]),
+        mean(samps[["mu"]]),
+        mean(samps[["sigma"]])
+      ),
+      sd = c(
+        stats::sd(samps[["phi"]]),
+        stats::sd(samps[["nu"]]),
+        stats::sd(samps[["mu"]]),
+        stats::sd(samps[["sigma"]])
+      ),
+      row.names = c("mean (average)", "mean (concentration)", "concentration (average)", "concentration (sd)")
+    )
+    estimates <- cbind.data.frame(estimates, rbind(
+      stats::quantile(samps[["phi"]], probs),
+      stats::quantile(samps[["nu"]], probs),
+      stats::quantile(samps[["mu"]], probs),
+      stats::quantile(samps[["sigma"]], probs)
+    ))
+  }
+  out[["estimates"]] <- estimates
+  return(out)
 }
 
 .mcmc_analytical <- function(nstrata, t.obs, n.obs, N.units, prior) {
   iterations <- getOption("jfa.iterations", 1e5)
   samples <- matrix(NA, ncol = nstrata * 2, nrow = iterations)
-  for (i in 1:nstrata) {
+  for (i in seq_len(nstrata)) {
     samples[, i] <- switch(prior[["likelihood"]],
       "poisson" = stats::rgamma(n = iterations, prior[["description"]]$alpha + t.obs[i], prior[["description"]]$beta + n.obs[i]),
       "binomial" = stats::rbeta(n = iterations, prior[["description"]]$alpha + t.obs[i], prior[["description"]]$beta + n.obs[i] - t.obs[i]),
@@ -635,7 +1051,7 @@
 .mcmc_emulate <- function(likelihood, alternative, nstrata, t.obs, n.obs, N.units) {
   iterations <- getOption("jfa.iterations", 1e5)
   if (alternative == "two.sided") {
-    alpha <- rep(1:0, each = iterations)
+    alpha <- rep(c(1, 0), each = iterations)
     beta <- 1 - alpha
     iterations <- iterations * 2
   } else if (alternative == "less") {
@@ -646,7 +1062,7 @@
     beta <- 1
   }
   samples <- matrix(NA, ncol = nstrata * 2, nrow = iterations)
-  for (i in 1:nstrata) {
+  for (i in seq_len(nstrata)) {
     samples[, i] <- switch(likelihood,
       "poisson" = stats::rgamma(n = iterations, alpha + t.obs[i], beta + n.obs[i]),
       "binomial" = stats::rbeta(n = iterations, alpha + t.obs[i], beta + n.obs[i] - t.obs[i]),
@@ -702,7 +1118,7 @@
     if (include.zero) {
       digits <- as.numeric(substring(abs(x), 1, 1))
     } else {
-      digits <- as.numeric(substring(format(abs(x), scientific = TRUE), 1, 1))
+      digits <- trunc((10^((floor(log10(abs(x))) * -1))) * abs(x))
       digits[x == 0] <- NA
     }
   } else if (check == "firsttwo") {
@@ -711,7 +1127,7 @@
       x <- gsub(x = x, pattern = "[.]", replacement = "")
       digits <- as.numeric(substring(x, 1, 2))
     } else {
-      digits <- as.numeric(substring(format(abs(x), scientific = TRUE), 1, 3)) * 10
+      digits <- trunc((10^((floor(log10(abs(x))) * -1) + 1)) * abs(x))
       digits[x == 0] <- NA
     }
   } else if (check == "before") {
@@ -735,9 +1151,10 @@
       stringedX <- format(abs(x) %% 1, drop0trailing = FALSE)
       digits <- as.numeric(substring(stringedX, nchar(stringedX) - 1, nchar(stringedX)))
     } else {
-      stringedX <- format(abs(x) %% 1, drop0trailing = FALSE)
+      stringedX <- format(abs(x), scientific = FALSE, drop0trailing = TRUE)
       digits <- as.numeric(substring(stringedX, nchar(stringedX) - 1, nchar(stringedX)))
-      digits[x %% 2 == 0] <- NA
+      digits <- ifelse(digits <= 9 & digits >= 1, digits * 10, ifelse(digits < 1, digits * 100, digits))
+      digits[x == 0] <- NA
     }
   } else if (check == "last") {
     if (include.zero) {
@@ -930,7 +1347,7 @@
     ggplot2::scale_fill_manual(name = NULL, values = c("red", "lightgray", "black", "white", "cornsilk2"), labels = function(x) parse(text = x)) +
     ggplot2::geom_segment(x = -Inf, xend = -Inf, y = min(yBreaks), yend = max(yBreaks), inherit.aes = FALSE) +
     ggplot2::geom_segment(x = 1, xend = 101, y = -Inf, yend = -Inf, inherit.aes = FALSE) +
-    ggplot2::geom_segment(data = dfArrow, ggplot2::aes(x = x, y = y, xend = xend, yend = yend), lineend = "round", linejoin = "bevel", arrow = ggplot2::arrow(length = ggplot2::unit(0.4, "cm")), size = 1, inherit.aes = FALSE) +
+    ggplot2::geom_segment(data = dfArrow, ggplot2::aes(x = x, y = y, xend = xend, yend = yend), lineend = "round", linejoin = "bevel", arrow = ggplot2::arrow(length = ggplot2::unit(0.4, "cm")), linewidth = 1, inherit.aes = FALSE) +
     ggplot2::geom_text(data = dfArrowTxt, mapping = ggplot2::aes(x = x, y = y, label = label), parse = TRUE, size = 0.4 * 12, inherit.aes = FALSE, hjust = 0) +
     ggplot2::guides(fill = ggplot2::guide_legend(nrow = 5, byrow = TRUE)) +
     ggplot2::theme(
@@ -1028,7 +1445,7 @@
     ggplot2::scale_colour_manual(name = NULL, values = c("black", "darkgray", "black", "black")) +
     ggplot2::geom_segment(x = -Inf, xend = -Inf, y = min(yBreaks), yend = max(yBreaks), inherit.aes = FALSE) +
     ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = -Inf, yend = -Inf, inherit.aes = FALSE) +
-    ggplot2::geom_segment(data = dfArrow, ggplot2::aes(x = x, y = y, xend = xend, yend = yend), lineend = "round", linejoin = "bevel", arrow = ggplot2::arrow(length = ggplot2::unit(0.4, "cm")), size = 1, inherit.aes = FALSE) +
+    ggplot2::geom_segment(data = dfArrow, ggplot2::aes(x = x, y = y, xend = xend, yend = yend), lineend = "round", linejoin = "bevel", arrow = ggplot2::arrow(length = ggplot2::unit(0.4, "cm")), linewidth = 1, inherit.aes = FALSE) +
     ggplot2::geom_text(data = dfArrowTxt, mapping = ggplot2::aes(x = x, y = y, label = label), parse = TRUE, size = 0.4 * 12, inherit.aes = FALSE, hjust = 0) +
     ggplot2::guides(linetype = ggplot2::guide_legend(nrow = 2, ncol = 2, byrow = FALSE), colour = ggplot2::guide_legend(nrow = 2, ncol = 2, byrow = TRUE)) +
     ggplot2::theme(

@@ -114,7 +114,6 @@
 #' @seealso \code{\link{auditPrior}}
 #'          \code{\link{planning}}
 #'          \code{\link{evaluation}}
-#'          \code{\link{report}}
 #'
 #' @references Derks, K., de Swart, J., Wagenmakers, E.-J., Wille, J., &
 #'   Wetzels, R. (2021). JASP for audit: Bayesian tools for the auditing
@@ -180,8 +179,7 @@ selection <- function(data,
     stop(paste0("'", order, "' is not a column in 'data'"))
   }
   if (method == "interval") {
-    valid_start <- (start >= 1) && (start %% 1 == 0)
-    stopifnot("'start' must be an integer >= 1" = valid_start)
+    stopifnot("'start' must be a positive value > 0" = start > 0)
   }
   interval <- NULL
   book_values <- NULL
@@ -234,7 +232,7 @@ selection <- function(data,
     interval <- sum(book_values) / size
     intervals <- 0:size * interval
     sample_items <- NULL
-    for (i in 1:size) {
+    for (i in seq_len(size)) {
       selected_unit <- stats::runif(1, intervals[i], intervals[i + 1])
       selected_item <- which(selected_unit <= cumsum(book_values))[1]
       sample_items <- c(sample_items, row_numbers[selected_item])
@@ -245,7 +243,7 @@ selection <- function(data,
     if (start > interval) {
       stop(paste0("'start' must be <= the selectioninterval (", interval, ")"))
     }
-    selected_items <- start + 0:(size - 1) * interval
+    selected_items <- ceiling(start + 0:(size - 1) * interval)
     sample_items <- row_numbers[selected_items]
   } else if (method == "interval" && use_mus) {
     # Fixed interval monetary unit sampling
@@ -255,7 +253,7 @@ selection <- function(data,
     }
     selected_units <- start + 0:(size - 1) * interval
     sample_items <- NULL
-    for (i in 1:size) {
+    for (i in seq_len(size)) {
       selected_item <- which(selected_units[i] <= cumsum(book_values))[1]
       sample_items <- c(sample_items, row_numbers[selected_item])
     }
@@ -264,13 +262,14 @@ selection <- function(data,
     stopifnot("'method = sieve' does not accomodate 'units = items'" = use_mus)
     ri <- book_values / stats::runif(length(book_values), 0, 1)
     sample_items <- row_numbers[order(-ri)]
-    sample_items <- sample_items[1:size]
+    sample_items <- sample_items[seq_len(size)]
   }
   # Data
   names_match <- match(unique(sample_items), names(table(sample_items)))
   row_match <- match(unique(sample_items), row_numbers)
   count <- as.numeric(table(sample_items)[names_match])
-  sample <- cbind(unique(sample_items), count, data[row_match, ])
+  rows_index <- as.numeric(unique(sample_items))
+  sample <- cbind.data.frame(rows_index, count, data[row_match, ])
   colnames(sample) <- c("row", "times", colnames(data))
   # Initialize results
   result <- list()

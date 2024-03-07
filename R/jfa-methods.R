@@ -333,7 +333,7 @@ print.jfaPlanning <- function(x, ...) {
   cat("\n")
   if (is.null(x[["prior"]])) cat(strwrap("Classical Audit Sample Planning", prefix = "\t"), sep = "\n") else cat(strwrap("Bayesian Audit Sample Planning", prefix = "\t"), sep = "\n")
   cat("\n")
-  cat("minimum sample size =", x[["n"]], "\nsample size obtained in", x[["iterations"]], "iterations via method", if (is.null(x[["prior"]])) paste0("'", x[["likelihood"]], "'\n") else paste0("'", x[["likelihood"]], "' + 'prior'\n"))
+  cat("minimum sample size =", x[["n"]], if (x[["sequential"]] && is.null(x[["prior"]])) paste0("(", x[["n_staged"]], " per stage)"), "\nsample size obtained in", x[["iterations"]], "iterations via method", if (is.null(x[["prior"]])) paste0("'", x[["likelihood"]], if (x[["sequential"]]) "' + 'sequential", "'\n") else paste0("'", x[["likelihood"]], "' + 'prior'\n"))
 }
 
 #' @rdname jfa-methods
@@ -390,6 +390,7 @@ summary.jfaPlanning <- function(object, digits = getOption("digits"), ...) {
     "n" = object[["n"]],
     "ub" = round(object[["ub"]], digits),
     "precision" = round(object[["precision"]], digits),
+    "sequential" = object[["sequential"]],
     stringsAsFactors = FALSE
   )
   if (!is.null(object[["p.value"]])) {
@@ -417,98 +418,142 @@ summary.jfaPlanning <- function(object, digits = getOption("digits"), ...) {
 #' @method plot jfaPlanning
 #' @export
 plot.jfaPlanning <- function(x, ...) {
-  if (is.null(x[["prior"]])) {
-    if (inherits(x, "jfaPlanning")) {
-      likelihood <- x[["likelihood"]]
-    } else if (inherits(x, "jfaEvaluation")) {
-      likelihood <- x[["method"]]
-    }
-    xs <- 0:max(10, x[["x"]])
-    if (likelihood == "hypergeometric") {
-      ys <- stats::dhyper(x = xs, m = x[["K"]], n = x[["N.units"]] - x[["K"]], k = x[["n"]])
-    } else if (likelihood == "binomial") {
-      ys <- stats::dbinom(x = xs, size = x[["n"]], prob = x[["materiality"]])
-    } else if (likelihood == "poisson") {
-      ys <- stats::dpois(x = xs, lambda = x[["n"]] * x[["materiality"]])
-    }
-    ncolored <- 1 + ceiling(x[["x"]])
-    fill <- c(rep("firebrick", ncolored), rep("darkgray", length(xs) - ncolored))
-    df <- data.frame(x = xs, y = ys)
-    y_breaks <- pretty(c(0, df$y), min.n = 4)
-    p <- ggplot2::ggplot(data = df, mapping = ggplot2::aes(x = x, y = y)) +
-      ggplot2::geom_col(position = "identity", fill = fill, colour = "black") +
-      ggplot2::annotate(geom = "text", x = df$x, y = df$y, label = round(df$y, 3), vjust = -0.5, size = 3) +
-      ggplot2::scale_x_continuous(name = "Misstatements", breaks = xs) +
-      ggplot2::scale_y_continuous(name = "Probability", breaks = y_breaks, limits = c(0, max(y_breaks))) +
-      ggplot2::geom_segment(x = -Inf, xend = -Inf, y = 0, yend = max(y_breaks)) +
-      ggplot2::geom_segment(x = 0, xend = max(xs), y = -Inf, yend = -Inf)
-    p <- .theme_jfa(p)
-  } else {
-    y <- type <- NULL
-    x1 <- x2 <- seq(0, 1, length.out = 1001)
-    if (x[["prior"]][["description"]]$density == "gamma") {
-      y1 <- stats::dgamma(x1, x[["prior"]][["description"]]$alpha, x[["prior"]][["description"]]$beta)
-    } else if (x[["prior"]][["description"]]$density == "beta") {
-      y1 <- stats::dbeta(x1, x[["prior"]][["description"]]$alpha, x[["prior"]][["description"]]$beta)
-    } else if (x[["prior"]][["description"]]$density == "beta-binomial") {
-      x1 <- x2 <- seq(0, x[["N.units"]], by = 1)
-      y1 <- extraDistr::dbbinom(x1, x[["prior"]][["N.units"]], x[["prior"]][["description"]]$alpha, x[["prior"]][["description"]]$beta)
-    } else if (x[["prior"]][["description"]]$density == "normal") {
-      y1 <- truncdist::dtrunc(x1, spec = "norm", a = 0, b = 1, mean = x[["prior"]][["description"]]$alpha, sd = x[["prior"]][["description"]]$beta)
-    } else if (x[["prior"]][["description"]]$density == "uniform") {
-      y1 <- truncdist::dtrunc(x1, spec = "unif", a = 0, b = 1, min = x[["prior"]][["description"]]$alpha, max = x[["prior"]][["description"]]$beta)
-    } else if (x[["prior"]][["description"]]$density == "Cauchy") {
-      y1 <- truncdist::dtrunc(x1, spec = "cauchy", a = 0, b = 1, location = x[["prior"]][["description"]]$alpha, scale = x[["prior"]][["description"]]$beta)
-    } else if (x[["prior"]][["description"]]$density == "Student-t") {
-      y1 <- truncdist::dtrunc(x1, spec = "t", a = 0, b = 1, df = x[["prior"]][["description"]]$alpha)
-    } else if (x[["prior"]][["description"]]$density == "chi-squared") {
-      y1 <- truncdist::dtrunc(x1, spec = "chisq", a = 0, b = 1, df = x[["prior"]][["description"]]$alpha)
-    } else if (x[["prior"]][["description"]]$density == "exponential") {
-      y1 <- truncdist::dtrunc(x1, spec = "exp", a = 0, b = 1, rate = x[["prior"]][["description"]]$alpha)
-    } else if (x[["prior"]][["description"]]$density == "MCMC") {
-      y1 <- x[["prior"]][["fitted.density"]]$y
-    }
-    if (x[["posterior"]][["description"]]$density == "gamma") {
-      y2 <- stats::dgamma(x2, x[["posterior"]][["description"]]$alpha, x[["posterior"]][["description"]]$beta)
-    } else if (x[["posterior"]][["description"]]$density == "beta") {
-      y2 <- stats::dbeta(x2, x[["posterior"]][["description"]]$alpha, x[["posterior"]][["description"]]$beta)
-    } else if (x[["posterior"]][["description"]]$density == "beta-binomial") {
-      y2 <- extraDistr::dbbinom(x2 - x[["x"]], x[["posterior"]][["N.units"]] - x[["n"]], x[["posterior"]][["description"]]$alpha, x[["posterior"]][["description"]]$beta)
-    } else if (x[["posterior"]][["description"]]$density == "MCMC") {
-      y2 <- x[["posterior"]][["fitted.density"]]$y
-    }
-    df <- data.frame(x = c(x1, x2), y = c(y1, y2), type = c(rep("Prior", length(y1)), rep("Posterior", length(y2))))
-    yMax <- if (is.infinite(max(df$y))) max(y2) else max(df$y)
-    yBreaks <- pretty(c(0, yMax * 1.05), min.n = 4)
-    xBreaks <- pretty(df$x, min.n = 4)
-    p <- ggplot2::ggplot(data = df, mapping = ggplot2::aes(x = x, y = y))
-    if (x[["prior"]][["description"]]$density != "beta-binomial") {
-      p <- p + ggplot2::geom_line(mapping = ggplot2::aes(linetype = type)) +
-        ggplot2::scale_linetype_manual(name = NULL, values = c("solid", "dashed")) +
-        ggplot2::scale_x_continuous(name = "Population misstatement", breaks = xBreaks, limits = c(0, 1)) +
-        ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, limits = range(yBreaks))
+  if (is.null(x[["sequential"]]) || isFALSE(x[["sequential"]])) {
+    if (is.null(x[["prior"]])) {
+      if (inherits(x, "jfaPlanning")) {
+        likelihood <- x[["likelihood"]]
+      } else if (inherits(x, "jfaEvaluation")) {
+        likelihood <- x[["method"]]
+      }
+      xs <- 0:max(10, x[["x"]])
+      if (likelihood == "hypergeometric") {
+        ys <- stats::dhyper(x = xs, m = x[["K"]], n = x[["N.units"]] - x[["K"]], k = x[["n"]])
+      } else if (likelihood == "binomial") {
+        ys <- stats::dbinom(x = xs, size = x[["n"]], prob = x[["materiality"]])
+      } else if (likelihood == "poisson") {
+        ys <- stats::dpois(x = xs, lambda = x[["n"]] * x[["materiality"]])
+      }
+      ncolored <- 1 + ceiling(x[["x"]])
+      fill <- c(rep("firebrick", ncolored), rep("darkgray", length(xs) - ncolored))
+      df <- data.frame(x = xs, y = ys)
+      y_breaks <- pretty(c(0, df$y), min.n = 4)
+      p <- ggplot2::ggplot(data = df, mapping = ggplot2::aes(x = x, y = y)) +
+        ggplot2::geom_col(position = "identity", fill = fill, colour = "black") +
+        ggplot2::annotate(geom = "text", x = df$x, y = df$y, label = round(df$y, 3), vjust = -0.5, size = 3) +
+        ggplot2::scale_x_continuous(name = "Misstatements", breaks = xs) +
+        ggplot2::scale_y_continuous(name = "Probability", breaks = y_breaks, limits = c(0, max(y_breaks))) +
+        ggplot2::geom_segment(x = -Inf, xend = -Inf, y = 0, yend = max(y_breaks)) +
+        ggplot2::geom_segment(x = 0, xend = max(xs), y = -Inf, yend = -Inf)
+      p <- .theme_jfa(p)
     } else {
-      p <- p + ggplot2::geom_col(mapping = ggplot2::aes(fill = type), alpha = 0.75, colour = "black", position = "identity") +
-        ggplot2::scale_fill_manual(name = NULL, values = c("darkgray", "lightgray")) +
-        ggplot2::scale_x_continuous(name = "Population misstatements", breaks = xBreaks, limits = c(xBreaks[1] - 1, max(xBreaks) + 1)) +
-        ggplot2::scale_y_continuous(name = "Probability", breaks = yBreaks, limits = range(yBreaks))
-    }
-    if (inherits(x, "jfaEvaluation")) {
+      y <- type <- NULL
+      x1 <- x2 <- seq(0, 1, length.out = 1001)
+      if (x[["prior"]][["description"]]$density == "gamma") {
+        y1 <- stats::dgamma(x1, x[["prior"]][["description"]]$alpha, x[["prior"]][["description"]]$beta)
+      } else if (x[["prior"]][["description"]]$density == "beta") {
+        y1 <- stats::dbeta(x1, x[["prior"]][["description"]]$alpha, x[["prior"]][["description"]]$beta)
+      } else if (x[["prior"]][["description"]]$density == "beta-binomial") {
+        x1 <- x2 <- seq(0, x[["N.units"]], by = 1)
+        y1 <- extraDistr::dbbinom(x1, x[["prior"]][["N.units"]], x[["prior"]][["description"]]$alpha, x[["prior"]][["description"]]$beta)
+      } else if (x[["prior"]][["description"]]$density == "normal") {
+        y1 <- truncdist::dtrunc(x1, spec = "norm", a = 0, b = 1, mean = x[["prior"]][["description"]]$alpha, sd = x[["prior"]][["description"]]$beta)
+      } else if (x[["prior"]][["description"]]$density == "uniform") {
+        y1 <- truncdist::dtrunc(x1, spec = "unif", a = 0, b = 1, min = x[["prior"]][["description"]]$alpha, max = x[["prior"]][["description"]]$beta)
+      } else if (x[["prior"]][["description"]]$density == "Cauchy") {
+        y1 <- truncdist::dtrunc(x1, spec = "cauchy", a = 0, b = 1, location = x[["prior"]][["description"]]$alpha, scale = x[["prior"]][["description"]]$beta)
+      } else if (x[["prior"]][["description"]]$density == "Student-t") {
+        y1 <- truncdist::dtrunc(x1, spec = "t", a = 0, b = 1, df = x[["prior"]][["description"]]$alpha)
+      } else if (x[["prior"]][["description"]]$density == "chi-squared") {
+        y1 <- truncdist::dtrunc(x1, spec = "chisq", a = 0, b = 1, df = x[["prior"]][["description"]]$alpha)
+      } else if (x[["prior"]][["description"]]$density == "exponential") {
+        y1 <- truncdist::dtrunc(x1, spec = "exp", a = 0, b = 1, rate = x[["prior"]][["description"]]$alpha)
+      } else if (x[["prior"]][["description"]]$density == "MCMC") {
+        y1 <- x[["prior"]][["fitted.density"]]$y
+      }
+      if (x[["posterior"]][["description"]]$density == "gamma") {
+        y2 <- stats::dgamma(x2, x[["posterior"]][["description"]]$alpha, x[["posterior"]][["description"]]$beta)
+      } else if (x[["posterior"]][["description"]]$density == "beta") {
+        y2 <- stats::dbeta(x2, x[["posterior"]][["description"]]$alpha, x[["posterior"]][["description"]]$beta)
+      } else if (x[["posterior"]][["description"]]$density == "beta-binomial") {
+        y2 <- extraDistr::dbbinom(x2 - x[["x"]], x[["posterior"]][["N.units"]] - x[["n"]], x[["posterior"]][["description"]]$alpha, x[["posterior"]][["description"]]$beta)
+      } else if (x[["posterior"]][["description"]]$density == "MCMC") {
+        y2 <- x[["posterior"]][["fitted.density"]]$y
+      }
+      df <- data.frame(x = c(x1, x2), y = c(y1, y2), type = c(rep("Prior", length(y1)), rep("Posterior", length(y2))))
+      yMax <- if (is.infinite(max(df$y))) max(y2) else max(df$y)
+      yBreaks <- pretty(c(0, yMax * 1.05), min.n = 4)
+      xBreaks <- pretty(df$x, min.n = 4)
+      p <- ggplot2::ggplot(data = df, mapping = ggplot2::aes(x = x, y = y))
       if (x[["prior"]][["description"]]$density != "beta-binomial") {
-        p <- p + ggplot2::geom_segment(x = x[["lb"]], xend = x[["ub"]], y = max(yBreaks), yend = max(yBreaks)) +
-          ggplot2::geom_segment(x = x[["lb"]], xend = x[["lb"]], y = max(yBreaks) - ((yBreaks[2] - yBreaks[1]) / 10), yend = max(yBreaks) + ((yBreaks[2] - yBreaks[1]) / 10)) +
-          ggplot2::geom_segment(x = x[["ub"]], xend = x[["ub"]], y = max(yBreaks) - ((yBreaks[2] - yBreaks[1]) / 10), yend = max(yBreaks) + ((yBreaks[2] - yBreaks[1]) / 10)) +
-          ggplot2::geom_point(x = x[["mle"]], y = max(yBreaks), size = 2, fill = "darkgray", colour = "black", shape = 21)
+        p <- p + ggplot2::geom_line(mapping = ggplot2::aes(linetype = type)) +
+          ggplot2::scale_linetype_manual(name = NULL, values = c("solid", "dashed")) +
+          ggplot2::scale_x_continuous(name = "Population misstatement", breaks = xBreaks, limits = c(0, 1)) +
+          ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, limits = range(yBreaks))
       } else {
-        p <- p + ggplot2::geom_segment(x = ceiling(x[["lb"]] * x[["N.units"]]), xend = ceiling(x[["ub"]] * x[["N.units"]]), y = max(yBreaks), yend = max(yBreaks)) +
-          ggplot2::geom_segment(x = ceiling(x[["lb"]] * x[["N.units"]]), xend = ceiling(x[["lb"]] * x[["N.units"]]), y = max(yBreaks) - ((yBreaks[2] - yBreaks[1]) / 10), yend = max(yBreaks) + ((yBreaks[2] - yBreaks[1]) / 10)) +
-          ggplot2::geom_segment(x = ceiling(x[["ub"]] * x[["N.units"]]), xend = ceiling(x[["ub"]] * x[["N.units"]]), y = max(yBreaks) - ((yBreaks[2] - yBreaks[1]) / 10), yend = max(yBreaks) + ((yBreaks[2] - yBreaks[1]) / 10)) +
-          ggplot2::geom_point(x = ceiling(x[["mle"]] * x[["N.units"]]), y = max(yBreaks), size = 2, fill = "darkgray", colour = "black", shape = 21)
+        p <- p + ggplot2::geom_col(mapping = ggplot2::aes(fill = type), alpha = 0.75, colour = "black", position = "identity") +
+          ggplot2::scale_fill_manual(name = NULL, values = c("darkgray", "lightgray")) +
+          ggplot2::scale_x_continuous(name = "Population misstatements", breaks = xBreaks, limits = c(xBreaks[1] - 1, max(xBreaks) + 1)) +
+          ggplot2::scale_y_continuous(name = "Probability", breaks = yBreaks, limits = range(yBreaks))
+      }
+      if (inherits(x, "jfaEvaluation")) {
+        if (x[["prior"]][["description"]]$density != "beta-binomial") {
+          p <- p + ggplot2::geom_segment(x = x[["lb"]], xend = x[["ub"]], y = max(yBreaks), yend = max(yBreaks)) +
+            ggplot2::geom_segment(x = x[["lb"]], xend = x[["lb"]], y = max(yBreaks) - ((yBreaks[2] - yBreaks[1]) / 10), yend = max(yBreaks) + ((yBreaks[2] - yBreaks[1]) / 10)) +
+            ggplot2::geom_segment(x = x[["ub"]], xend = x[["ub"]], y = max(yBreaks) - ((yBreaks[2] - yBreaks[1]) / 10), yend = max(yBreaks) + ((yBreaks[2] - yBreaks[1]) / 10)) +
+            ggplot2::geom_point(x = x[["mle"]], y = max(yBreaks), size = 2, fill = "darkgray", colour = "black", shape = 21)
+        } else {
+          p <- p + ggplot2::geom_segment(x = ceiling(x[["lb"]] * x[["N.units"]]), xend = ceiling(x[["ub"]] * x[["N.units"]]), y = max(yBreaks), yend = max(yBreaks)) +
+            ggplot2::geom_segment(x = ceiling(x[["lb"]] * x[["N.units"]]), xend = ceiling(x[["lb"]] * x[["N.units"]]), y = max(yBreaks) - ((yBreaks[2] - yBreaks[1]) / 10), yend = max(yBreaks) + ((yBreaks[2] - yBreaks[1]) / 10)) +
+            ggplot2::geom_segment(x = ceiling(x[["ub"]] * x[["N.units"]]), xend = ceiling(x[["ub"]] * x[["N.units"]]), y = max(yBreaks) - ((yBreaks[2] - yBreaks[1]) / 10), yend = max(yBreaks) + ((yBreaks[2] - yBreaks[1]) / 10)) +
+            ggplot2::geom_point(x = ceiling(x[["mle"]] * x[["N.units"]]), y = max(yBreaks), size = 2, fill = "darkgray", colour = "black", shape = 21)
+        }
+      }
+      p <- p + ggplot2::geom_segment(x = -Inf, xend = -Inf, y = 0, yend = max(yBreaks)) +
+        ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = -Inf, yend = -Inf)
+      p <- .theme_jfa(p, legend.position = c(0.8, 0.8))
+    }
+  } else {
+    stopifnot("plot(...) not supported for multi-stage sampling plans with > 2 stages" = length(x[["k_staged"]]) == 2)
+    k_1_approve <- x[["k_staged"]][1] - 1
+    k_1_disapprove <- x[["k_staged"]][1]
+    k_2_approve <- x[["k_staged"]][2]
+    n_min <- jfa::planning(materiality = x[["materiality"]], expected = k_1_approve, likelihood = x[["likelihood"]], N.units = x[["N.units"]], conf.level = x[["conf.level"]])$n
+    n_max <- jfa::planning(materiality = x[["materiality"]], expected = sum(k_1_disapprove + k_2_approve), likelihood = x[["likelihood"]], N.units = x[["N.units"]], conf.level = x[["conf.level"]])$n
+    n1 <- seq(n_min, n_max, 1)
+    n2 <- rep(-1, length(n1))
+    for (i in seq_along(n1)) {
+      p <- 1
+      while (p > 1 - x[["conf.level"]]) {
+        n2[i] <- n2[i] + 1
+        p <- switch(x[["likelihood"]],
+          "poisson" = stats::ppois(k_1_approve, lambda = n1[i] * x[["materiality"]]) + stats::dpois(k_1_disapprove, lambda = n1[i] * x[["materiality"]]) * stats::ppois(k_2_approve, lambda = n2[i] * x[["materiality"]]),
+          "binomial" = stats::pbinom(k_1_approve, size = n1[i], prob = x[["materiality"]]) + stats::dbinom(k_1_disapprove, size = n1[i], prob = x[["materiality"]]) * stats::pbinom(k_2_approve, size = n2[i], prob = x[["materiality"]]),
+          "hypergeometric" = stats::phyper(k_1_approve, m = x[["K"]], n = x[["N.units"]] - x[["K"]], k = n1[i]) + stats::dhyper(k_1_disapprove, m = x[["K"]], n = x[["N.units"]] - x[["K"]], k = n1[i]) * stats::phyper(k_2_approve, m = x[["K"]], n = x[["N.units"]] - x[["K"]], k = n2[i])
+        )
       }
     }
-    p <- p + ggplot2::geom_segment(x = -Inf, xend = -Inf, y = 0, yend = max(yBreaks)) +
+    lines <- seq(1, length(n1), length.out = 5)
+    xBreaks <- pretty(c(n1, x[["n_staged"]]), min.n = 4)
+    yBreaks <- pretty(c(n2, x[["n_staged"]]), min.n = 4)
+    n1_lines <- n1[lines]
+    n2_lines <- n2[lines]
+    p <- ggplot2::ggplot(data.frame(x = n1, y = n2), ggplot2::aes(x = x, y = y)) +
+      ggplot2::scale_x_continuous(name = parse(text = "Initial~sample~size~n[1]"), breaks = xBreaks, limits = range(xBreaks)) +
+      ggplot2::scale_y_continuous(name = parse(text = "Follow*'-'*up~sample~size~n[2]"), breaks = yBreaks, limits = range(yBreaks))
+    for (i in seq_along(n1_lines)) {
+      p <- p + ggplot2::geom_segment(x = n1_lines[i], xend = n1_lines[i], y = -Inf, yend = n2_lines[i], color = "lightgray", linewidth = 0.25) +
+        ggplot2::geom_segment(x = -Inf, xend = n1_lines[i], y = n2_lines[i], yend = n2_lines[i], color = "lightgray", linewidth = 0.25) +
+        ggplot2::annotate(geom = "text", x = n1_lines[i], y = n2_lines[i], label = sum(n1_lines[i] + n2_lines[i]), hjust = -0.25, vjust = 0, size = 3)
+    }
+    p <- p + ggplot2::geom_segment(x = x[["n_staged"]], xend = x[["n_staged"]], y = -Inf, yend = x[["n_staged"]], color = "red", linewidth = 0.25) +
+      ggplot2::geom_segment(x = -Inf, xend = x[["n_staged"]], y = x[["n_staged"]], yend = x[["n_staged"]], color = "red", linewidth = 0.25) +
+      ggplot2::annotate(geom = "text", x = x[["n_staged"]], y = x[["n_staged"]], label = paste0(x[["n"]], "~(n[1] == n[2])"), hjust = -0.05, vjust = 0, size = 3, col = "red", parse = TRUE) +
+      ggplot2::geom_line() +
+      ggplot2::geom_point(data = data.frame(x = x[["n_staged"]], y = x[["n_staged"]]), fill = "red", shape = 21) +
+      ggplot2::geom_point(data = data.frame(x = n1_lines, y = n2_lines), ggplot2::aes(x = x, y = y), fill = "lightgray", shape = 21) +
+      ggplot2::geom_segment(x = -Inf, xend = -Inf, y = min(yBreaks), yend = max(yBreaks)) +
       ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = -Inf, yend = -Inf)
-    p <- .theme_jfa(p, legend.position = c(0.8, 0.8))
+    p <- .theme_jfa(p)
   }
   return(p)
 }
@@ -749,10 +794,15 @@ summary.jfaEvaluation <- function(object, digits = getOption("digits"), ...) {
 #' @rdname jfa-methods
 #' @method plot jfaEvaluation
 #' @export
-plot.jfaEvaluation <- function(x, type = c("posterior", "estimates"), ...) {
+plot.jfaEvaluation <- function(x, type = c("estimates", "posterior"), ...) {
   y <- lb <- ub <- NULL
   type <- match.arg(type)
   if (type == "posterior") {
+    if (!(x[["method"]] %in% c("binomial", "poisson", "hypergeometric", "inflated.poisson", "hurdle.beta"))) {
+      stop(paste0('plot(..., type = "posterior") not supported for method = "', x[["method"]], '"'))
+    } else if (x[["method"]] %in% c("inflated.poisson", "hurdle.beta") && is.null(x[["prior"]])) {
+      stop(paste0('plot(..., type = "posterior") not supported for method = "', x[["method"]], '" without "prior = TRUE"'))
+    }
     p <- plot.jfaPlanning(x, ...)
   } else {
     xs <- 0
@@ -781,7 +831,7 @@ plot.jfaEvaluation <- function(x, type = c("posterior", "estimates"), ...) {
         linetype = "dashed"
       )
     }
-    p <- p + ggplot2::geom_errorbar(size = 0.5, width = 0.25) +
+    p <- p + ggplot2::geom_errorbar(linewidth = 0.5, width = 0.25) +
       ggplot2::geom_point(size = 2.5, fill = "darkgray", colour = "black", shape = 21) +
       ggplot2::scale_x_continuous(name = NULL, breaks = xBreaks, limits = xLimits, labels = df$lab) +
       ggplot2::scale_y_continuous(name = "Misstatement", limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
@@ -967,12 +1017,13 @@ plot.jfaDistr <- function(x, type = c("estimates", "robustness", "sequential"), 
       ggplot2::geom_segment(x = -Inf, xend = -Inf, y = 0, yend = max(yBreaks)) +
       ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = -Inf, yend = -Inf) +
       ggplot2::labs(fill = "") +
-      ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = -5, r = 50))) +
+      ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = 0, r = 25))) +
       ggplot2::guides(fill = ggplot2::guide_legend(override.aes = list(
         size = sizes, shape = shapes, fill = fills, color = "black", alpha = 1
       )))
   } else if (type == "robustness") {
     stopifnot('plot(..., type = "robustness") not supported for frequentist analyses with "prior = FALSE"' = !isFALSE(x[["prior"]]))
+    stopifnot('plot(..., type = "robustness") not supported for Bayesian analyses with custom prior' = length(x[["prior"]]) == 1)
     plotdata <- data.frame(x = seq(1, 101, 0.1), y = 1)
     for (i in seq_len(nrow(plotdata))) {
       plotdata[i, "y"] <- .multinomialBf(x[["observed"]], x[["estimates"]][["p.exp"]], rep(plotdata[i, "x"], length(x[["observed"]])))
@@ -980,12 +1031,13 @@ plot.jfaDistr <- function(x, type = c("estimates", "robustness", "sequential"), 
     p <- .plotBfRobustness(x, plotdata)
   } else if (type == "sequential") {
     stopifnot('plot(..., type = "sequential") not supported for frequentist analyses with "prior = FALSE"' = !isFALSE(x[["prior"]]))
+    stopifnot('plot(..., type = "robustness") not supported for Bayesian analyses with custom prior' = length(x[["prior"]]) == 1)
     plotdata <- data.frame(
       x = rep(0:x[["n"]], 4), y = 1,
       type = rep(c("user prior", "uniform prior", "concentrated prior", "ultraconcentrated prior"), each = x[["n"]] + 1)
     )
     loc <- 1
-    for (j in 1:4) {
+    for (j in seq_len(4)) {
       prior_param <- switch(j,
         "1" = as.numeric(x[["prior"]]),
         "2" = 1,
@@ -994,10 +1046,10 @@ plot.jfaDistr <- function(x, type = c("estimates", "robustness", "sequential"), 
       )
       for (i in seq_len(x[["n"]] + 1)) {
         if (plotdata$x[loc] != 0) {
-          d <- .extract_digits(x[["data"]][1:i], check = x[["check"]], include.zero = FALSE)
+          d <- .extract_digits(x[["data"]][seq_len(i)], check = x[["check"]], include.zero = FALSE)
           d <- d[!is.na(d)]
           d_tab <- table(d)
-          dig <- if (x[["check"]] == "firsttwo") 10:99 else 1:9
+          dig <- if (x[["check"]] == "firsttwo") 10:99 else seq_len(9)
           obs <- rep(0, length(dig))
           d_included <- as.numeric(names(d_tab))
           index <- if (x[["check"]] == "firsttwo") d_included - 9 else d_included
@@ -1352,7 +1404,7 @@ plot.jfaFairness <- function(x, type = c("estimates", "posterior", "robustness",
     stopifnot('plot(..., type = "robustness") not supported for demographic parity' = x[["measure"]] != "dp")
     plotdata <- data.frame(x = seq(1, 101, 0.1), y = 0)
     for (i in seq_len(nrow(plotdata))) {
-      plotdata[i, "y"] <- .contingencyTableBf(x[["crossTab"]], plotdata[i, "x"], "columns")
+      plotdata[i, "y"] <- .contingencyTableBf(x[["crossTab"]], plotdata[i, "x"], "none")
     }
     p <- .plotBfRobustness(x, plotdata)
   } else if (type == "sequential") {
@@ -1366,7 +1418,7 @@ plot.jfaFairness <- function(x, type = c("estimates", "posterior", "robustness",
     for (i in seq_len(x[["n"]] + 1)) {
       if (plotdata$x[loc] != 0) {
         crossTab <- matrix(0, nrow = 2, ncol = length(x[["unprivileged"]]) + 1)
-        tmpdat <- x[["data"]][1:i, ]
+        tmpdat <- x[["data"]][seq_len(i), ]
         for (i in seq_len(nlevels(x[["data"]][, x[["protected"]]]))) {
           group <- levels(x[["data"]][, x[["protected"]]])[i]
           groupDat <- tmpdat[tmpdat[, x[["protected"]]] == group, ]
@@ -1398,14 +1450,14 @@ plot.jfaFairness <- function(x, type = c("estimates", "posterior", "robustness",
           crossTab[1, i] <- num
           crossTab[2, i] <- denom - num
         }
-        for (j in 1:4) {
+        for (j in seq_len(4)) {
           prior_param <- switch(j,
             "1" = as.numeric(x[["prior"]]),
             "2" = 1,
             "3" = 10,
             "4" = 50
           )
-          plotdata[loc, "y"] <- .contingencyTableBf(crossTab, prior_param, "columns")
+          plotdata[loc, "y"] <- .contingencyTableBf(crossTab, prior_param, "none")
           loc <- loc + 1
         }
       } else {

@@ -94,8 +94,8 @@ This function aims to assess fairness in algorithmic
 decision-making systems by computing and testing the equality of one of
 several model-agnostic fairness metrics between protected classes. The
 metrics are computed based on a set of true labels and the predictions of an
-algorithm. The ratio of these metrics between any unpriveleged protected
-class and the priveleged protected class is called parity. This measure can
+algorithm. The ratio of these metrics between any unprivileged protected
+class and the privileged protected class is called parity. This measure can
 quantify potential fairness or discrimination in the algorithms predictions.
 Available parity metrics include predictive rate parity, proportional parity,
 accuracy parity, false negative rate parity, false positive rate parity, true
@@ -113,29 +113,29 @@ The following model-agnostic fairness metrics are computed based on
   to the methodology described in Fisher (1970) and Jamil et al. (2017).
 
   \itemize{
-    \item{Predictive rate parity (\code{prp}): }{calculated as TP / (TP +
+    \item{Predictive rate parity (\code{prp}): calculated as TP / (TP +
       FP), its ratio quantifies whether the predictive rate is equal across
       protected classes.}
-    \item{Proportional parity (\code{pp}): }{calculated as (TP + FP) / (TP +
+    \item{Proportional parity (\code{pp}): calculated as (TP + FP) / (TP +
       FP + TN + FN), its ratio quantifies whether the positive prediction
       rate is equal across protected classes.}
-    \item{Accuracy parity (\code{ap}): }{calculated as (TP + TN) / (TP + FP +
+    \item{Accuracy parity (\code{ap}): calculated as (TP + TN) / (TP + FP +
       TN + FN), quantifies whether the accuracy is the same across groups.}
-    \item{False negative rate parity (\code{fnrp}): }{calculated as FN / (FP
+    \item{False negative rate parity (\code{fnrp}): calculated as FN / (FP
       + FN), quantifies whether the false negative rate is the same across
       groups.}
-    \item{False positive rate parity (\code{fprp}): }{calculated as FP / (TN
-      + FP), quantifes whether the false positive rate is the same across
+    \item{False positive rate parity (\code{fprp}): calculated as FP / (TN
+      + FP), quantifies whether the false positive rate is the same across
       groups.}
-    \item{True positive rate parity (\code{tprp}): }{calculated as TP / (TP +
+    \item{True positive rate parity (\code{tprp}): calculated as TP / (TP +
       FN), quantifies whether the true positive rate is the same across
       groups.}
-    \item{Negative predicted value parity (\code{npvp}): }{calculated as TN /
+    \item{Negative predicted value parity (\code{npvp}): calculated as TN /
       (TN + FN), quantifies whether the negative predicted value is equal
       across groups.}
-    \item{Specificity parity (\code{sp}): }{calculated as TN / (TN + FP),
+    \item{Specificity parity (\code{sp}): calculated as TN / (TN + FP),
       quantifies whether the true positive rate is the same across groups.}
-    \item{Demographic parity (\code{dp}): }{calculated as TP + FP, quantifies
+    \item{Demographic parity (\code{dp}): calculated as TP + FP, quantifies
       whether the positive predictions are equal across groups.}
   }
 
@@ -168,7 +168,7 @@ Calders, T., & Verwer, S. (2010). Three naive Bayes approaches
   Discovery}. Springer Science and Business Media LLC.
   \doi{10.1007/s10618-010-0190-x}
 
-Chouldechova, A. (2017). Fair Pprediction with disparate impact:
+Chouldechova, A. (2017). Fair prediction with disparate impact:
   A study of bias in recidivism prediction instruments. In \emph{Big Data}.
   Mary Ann Liebert Inc. \doi{10.1089/big.2016.0047}
 

@@ -7,7 +7,7 @@
 
 # jfa: Statistical Methods for Auditing <img src='https://github.com/koenderks/jfa/raw/development/man/figures/logo.png' width='149' height='173' align='right'/>
 
-**jfa** is an R package that provides statistical methods for auditing. The package includes functions for planning, performing, evaluating, and reporting audit samples compliant with international auditing standards, as well as functions for auditing data, such as testing the distribution of leading digits against Benford's law, and functions for auditing algorithms with respect to fairness. In addition to offering classical (frequentist) methods, **jfa** also provides a straightforward implementation of their Bayesian counterparts.
+**jfa** is an R package that provides statistical methods for auditing. The package includes functions for planning, performing, and evaluating audit samples compliant with international auditing standards, as well as functions for auditing data, such as testing the distribution of leading digits against Benford's law, and functions for auditing algorithms with respect to fairness. In addition to offering classical (frequentist) methods, **jfa** also provides a straightforward implementation of their Bayesian counterparts.
 
 - [Audit sampling: Get started](https://koenderks.github.io/jfa/articles/audit-sampling.html)
 - [Data auditing: Get started](https://koenderks.github.io/jfa/articles/data-auditing.html)
@@ -36,37 +36,9 @@ install.packages("jfa")
 
 #### Development Version
 
-To install the development version from GitHub, first make sure that you can install the **rstan** package and C++ toolchain by following these [instructions](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started). Once **rstan** is successfully installed, you can install **jfa** from GitHub using the **remotes** package by executing the following in R:
+To install the development version from GitHub, first make sure that you can install the **rstan** package and C++ toolchain by following these [instructions](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started). Once **rstan** is successfully installed, you can install **jfa** from GitHub using the **remotes** package by executing the following command in R:
 
 ```r
 # install.packages("remotes")
 remotes::install_github("koenderks/jfa", INSTALL_opts = "--no-multiarch")
-```
-
-### Contributing
-
-The **jfa** project is an open-source initiative with the objective of providing value to the audit community. Therefore, the collaboration and support of the community in benchmarking and expanding the package is greatly appreciated. Participating in this endeavor does not require extensive time or expertise, as comprehensive information can be found on the repository's [Wiki](https://github.com/koenderks/jfa/wiki) page.
-
-Individuals who are interested in contributing to the validation of the package through the addition of a benchmark are encouraged to consult the Wiki page on [how to contribute a benchmark to jfa](https://github.com/koenderks/jfa/wiki/Benchmarks). Similarly, individuals who wish to contribute to the improvement of the package by incorporating a statistical method are advised to review the Wiki page on [how to contribute a method to jfa](https://github.com/koenderks/jfa/wiki/Methods).
-
-### Citation
-
-To obtain the preferred citation for **jfa**, run the following code in the R console:
-
-```
-citation("jfa")
-
-#>  To cite jfa in publications, please use:
-#>
-#>    Derks, K. (2023). jfa: Statistical methods for auditing. R package version 0.7.0.
-#>
-#>  A BibTeX entry for LaTeX users is
-#>
-#>    @Manual{jfa,
-#>      title = {jfa: Statistical methods for auditing},
-#>      author = {Koen Derks},
-#>      year = {2023},
-#>      note = {R package version 0.7.0},
-#>      url = {https://CRAN.R-project.org/package=jfa},
-#>    }
 ```

@@ -8,9 +8,10 @@ evaluation(
   materiality = NULL,
   method = c(
     "poisson", "binomial", "hypergeometric",
+    "inflated.poisson", "hurdle.beta",
     "stringer.poisson", "stringer.binomial", "stringer.hypergeometric",
     "stringer.meikle", "stringer.lta", "stringer.pvz", "stringer",
-    "rohrbach", "moment", "coxsnell", "mpu",
+    "rohrbach", "moment", "coxsnell", "mpu", "pps",
     "direct", "difference", "quotient", "regression"
   ),
   alternative = c("less", "two.sided", "greater"),
@@ -40,8 +41,8 @@ options are \code{poisson} (default), \code{binomial},
 \code{hypergeometric}, \code{stringer.poisson}, \code{stringer.binomial},
 \code{stringer.hypergeometric}, \code{stringer.meikle},
 \code{stringer.lta}, \code{stringer.pvz}, \code{rohrbach}, \code{moment},
-\code{mpu}, \code{direct}, \code{difference}, \code{quotient}, or
-\code{regression}. See the details section for more information.}
+\code{mpu}, \code{pps}, \code{direct}, \code{difference}, \code{quotient},
+or \code{regression}. See the details section for more information.}
 
 \item{alternative}{a character indicating the alternative hypothesis and
 the type of confidence / credible interval returned by the function.
@@ -57,7 +58,7 @@ confidence level (i.e., 1 - audit risk / detection risk).}
 \code{data} containing the book values of the items.}
 
 \item{values.audit}{a character specifying name of a numeric column in
-\code{data} containing the audit (true) values of the items.}
+\code{data} containing the audit (i.e., true) values of the items.}
 
 \item{strata}{a character specifying name of a factor column in
 \code{data} indicating to which stratum the item belongs.}
@@ -175,6 +176,14 @@ This section lists the available options for the \code{method}
  \item{\code{hypergeometric}:          Evaluates the sample with the
    hypergeometric distribution. If combined with \code{prior = TRUE},
    performs Bayesian evaluation using a \emph{beta-binomial} prior.}
+ \item{\code{inflated.poisson}:        Inflated Poisson model incorporating
+    the explicit probability of misstatement being zero. If
+    \code{prior = TRUE}, performs Bayesian evaluation using a \emph{beta}
+    prior.}
+ \item{\code{hurdle.beta}:             Hurdle beta model incorporating the
+    explicit probability of a taint being zero, one, or in between. If
+    \code{prior = TRUE}, this setup performs Bayesian evaluation using a
+    \emph{beta} prior.}
  \item{\code{stringer.poisson}:        Evaluates the sample with the Stringer
    bound using the Poisson distribution.}
  \item{\code{stringer.binomial}:       Evaluates the sample with the Stringer
@@ -196,8 +205,10 @@ This section lists the available options for the \code{method}
    modified moment bound (Dworin and Grimlund, 1984).}
  \item{\code{coxsnell}:                Evaluates the sample using the Cox and
    Snell bound (Cox and Snell, 1979).}
- \item{\code{mpu}:                     Evaluates the sample using the
-   mean-per-unit estimator.}
+ \item{\code{mpu}:                     Evaluates the sample with the
+   mean-per-unit estimator using the Normal distribution.}
+ \item{\code{pps}:                     Evaluates the sample with the
+   proportional-to-size estimator using the Student-t distribution.}
  \item{\code{direct}:                  Evaluates the sample using the direct
    estimator (Touw and Hoogduin, 2011).}
  \item{\code{difference}:              Evaluates the sample using the
@@ -291,7 +302,6 @@ Touw, P., and Hoogduin, L. (2011). \emph{Statistiek voor Audit en
 \code{\link{auditPrior}}
          \code{\link{planning}}
          \code{\link{selection}}
-         \code{\link{report}}
 }
 \author{
 Koen Derks, \email{k.derks@nyenrode.nl}
