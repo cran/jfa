@@ -59,8 +59,8 @@ print.summary.jfaPrior <- function(x, digits = getOption("digits"), ...) {
     "hyp" = paste0("p(\u0398 < ", x[["materiality"]], ") = ", x[["p.h1"]], "; p(\u0398 > ", x[["materiality"]], ") = ", x[["p.h0"]]),
     "arm" = paste0("ir = ", x[["ir"]], "; cr = ", x[["icr"]], "; dr = ", x[["dr"]]),
     "bram" = paste0("mode = ", x[["mode.prior"]], "; upper bound = ", x[["ub.prior"]]),
-    "sample" = paste0("earlier sample of ", x[["n.prior"]], " items with ", x[["x.prior"]], " errors"),
-    "factor" = paste0("earlier sample of ", x[["n.prior"]], " items with ", x[["x.prior"]], " errors weighted by ", x[["factor"]]),
+    "sample" = paste0("earlier sample of ", x[["n.prior"]], " items with ", x[["x.prior"]], " error(s)"),
+    "power" = paste0("earlier sample of ", x[["n.prior"]], " items with ", x[["x.prior"]], " error(s) weighted by ", x[["delta"]]),
     "param" = paste0("\u03B1 = ", x[["alpha"]], "; \u03B2 = ", x[["beta"]]),
     "nonparam" = "nonparametric prior",
     "mcmc" = "nonparametric prior"
@@ -124,11 +124,11 @@ summary.jfaPrior <- function(object, digits = getOption("digits"), ...) {
     out[["materiality"]] <- round(object[["materiality"]], digits)
     out[["p.h1"]] <- round(object[["specifics"]]$p.h1, digits)
     out[["p.h0"]] <- round(object[["specifics"]]$p.h0, digits)
-  } else if (object[["method"]] == "sample" || object[["method"]] == "factor") {
+  } else if (object[["method"]] == "sample" || object[["method"]] == "power") {
     out[["n.prior"]] <- object[["specifics"]]$n
     out[["x.prior"]] <- object[["specifics"]]$x
-    if (object[["method"]] == "factor") {
-      out[["factor"]] <- round(object[["specifics"]]$factor, digits)
+    if (object[["method"]] == "power") {
+      out[["delta"]] <- round(object[["specifics"]]$delta, digits)
     }
   } else if (object[["method"]] == "param") {
     out[["alpha"]] <- round(object[["specifics"]]$alpha, digits)
@@ -225,7 +225,7 @@ plot.jfaPrior <- function(x, ...) {
       p <- p + ggplot2::geom_line(linetype = "solid")
     }
     p <- p + ggplot2::scale_x_continuous(name = "Population misstatement", breaks = xBreaks, limits = range(xBreaks)) +
-      ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, limits = range(yBreaks))
+      ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, limits = c(0, max(yBreaks)))
   } else {
     if (inherits(x, "jfaPrior")) {
       p <- p + ggplot2::geom_col(colour = "black", fill = "lightgray")
@@ -233,7 +233,7 @@ plot.jfaPrior <- function(x, ...) {
       p <- p + ggplot2::geom_col(colour = "black", fill = "darkgray")
     }
     p <- p + ggplot2::scale_x_continuous(name = "Population misstatements", breaks = xBreaks, limits = c(xBreaks[1] - 1, max(xBreaks) + 1)) +
-      ggplot2::scale_y_continuous(name = "Probability", breaks = yBreaks, limits = range(yBreaks))
+      ggplot2::scale_y_continuous(name = "Probability", breaks = yBreaks, limits = c(0, max(yBreaks)))
   }
   p <- p + ggplot2::geom_segment(x = -Inf, xend = -Inf, y = 0, yend = max(yBreaks)) +
     ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = -Inf, yend = -Inf)
@@ -488,12 +488,12 @@ plot.jfaPlanning <- function(x, ...) {
         p <- p + ggplot2::geom_line(mapping = ggplot2::aes(linetype = type)) +
           ggplot2::scale_linetype_manual(name = NULL, values = c("solid", "dashed")) +
           ggplot2::scale_x_continuous(name = "Population misstatement", breaks = xBreaks, limits = c(0, 1)) +
-          ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, limits = range(yBreaks))
+          ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, limits = c(0, max(yBreaks)))
       } else {
         p <- p + ggplot2::geom_col(mapping = ggplot2::aes(fill = type), alpha = 0.75, colour = "black", position = "identity") +
           ggplot2::scale_fill_manual(name = NULL, values = c("darkgray", "lightgray")) +
           ggplot2::scale_x_continuous(name = "Population misstatements", breaks = xBreaks, limits = c(xBreaks[1] - 1, max(xBreaks) + 1)) +
-          ggplot2::scale_y_continuous(name = "Probability", breaks = yBreaks, limits = range(yBreaks))
+          ggplot2::scale_y_continuous(name = "Probability", breaks = yBreaks, limits = c(0, max(yBreaks)))
       }
       if (inherits(x, "jfaEvaluation")) {
         if (x[["prior"]][["description"]]$density != "beta-binomial") {
@@ -510,7 +510,7 @@ plot.jfaPlanning <- function(x, ...) {
       }
       p <- p + ggplot2::geom_segment(x = -Inf, xend = -Inf, y = 0, yend = max(yBreaks)) +
         ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = -Inf, yend = -Inf)
-      p <- .theme_jfa(p, legend.position = c(0.8, 0.8))
+      p <- .theme_jfa(p, legend.position = "inside", legend.position.inside = c(0.8, 0.8))
     }
   } else {
     stopifnot("plot(...) not supported for multi-stage sampling plans with > 2 stages" = length(x[["k_staged"]]) == 2)
@@ -1110,7 +1110,7 @@ plot.jfaRv <- function(x, ...) {
   p <- ggplot2::ggplot(data = df, mapping = ggplot2::aes(x = x, y = y)) +
     ggplot2::geom_bar(fill = "darkgray", color = "black", linewidth = 0.2, stat = "identity") +
     ggplot2::scale_x_continuous(name = "Value", breaks = xBreaks, limits = range(xBreaks)) +
-    ggplot2::scale_y_continuous(name = "Frequency", breaks = yBreaks, limits = range(yBreaks)) +
+    ggplot2::scale_y_continuous(name = "Frequency", breaks = yBreaks, limits = c(0, max(yBreaks))) +
     ggplot2::geom_segment(x = -Inf, xend = -Inf, y = 0, yend = max(yBreaks)) +
     ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = -Inf, yend = -Inf)
   p <- .theme_jfa(p)
@@ -1382,7 +1382,7 @@ plot.jfaFairness <- function(x, type = c("estimates", "posterior", "robustness",
     p <- ggplot2::ggplot(data = plotdata, mapping = ggplot2::aes(x = x, y = y, color = factor(group))) +
       ggplot2::geom_path(data = subset(plotdata, plotdata$type == "Prior"), linetype = "dashed", color = "black") +
       ggplot2::geom_path(data = subset(plotdata, plotdata$type == "Posterior"), linetype = "solid", show.legend = length(unprivileged) > 1) +
-      ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, limits = range(yBreaks)) +
+      ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, limits = c(0, max(yBreaks))) +
       ggplot2::scale_x_continuous(name = "Log odds ratio", breaks = xBreaks, limits = range(xBreaks)) +
       ggplot2::geom_segment(x = -Inf, xend = -Inf, y = min(yBreaks), yend = max(yBreaks), inherit.aes = FALSE) +
       ggplot2::geom_segment(x = min(xBreaks), xend = max(xBreaks), y = -Inf, yend = -Inf, inherit.aes = FALSE) +
@@ -1467,6 +1467,6 @@ plot.jfaFairness <- function(x, type = c("estimates", "posterior", "robustness",
     plotdata$type <- factor(plotdata$type, levels = c("user prior", "uniform prior", "concentrated prior", "ultraconcentrated prior"))
     p <- .plotBfSequential(x, plotdata)
   }
-  p <- .theme_jfa(p, legend.position = if (length(unprivileged) == 1 && type == "posterior") c(0.8, 0.8) else "top")
+  p <- .theme_jfa(p, legend.position = if (length(unprivileged) == 1 && type == "posterior") "inside" else "top", legend.position.inside = c(0.8, 0.8))
   return(p)
 }

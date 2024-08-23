@@ -395,7 +395,7 @@ public:
               1, lp__);
       local_scalar_t__ nu = DUMMY_VAR__;
       current_statement__ = 4;
-      nu = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(1,
+      nu = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(0,
              lp__);
       Eigen::Matrix<local_scalar_t__,-1,1> prob =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(3, DUMMY_VAR__);
@@ -467,7 +467,7 @@ public:
         current_statement__ = 32;
         lp_accum__.add(stan::math::beta_lpdf<propto__>(phi, 1, 1));
         current_statement__ = 33;
-        lp_accum__.add(stan::math::pareto_lpdf<propto__>(nu, 1, 1.5));
+        lp_accum__.add(stan::math::normal_lpdf<propto__>(nu, 0, 100));
         current_statement__ = 38;
         if (use_likelihood) {
           current_statement__ = 34;
@@ -546,7 +546,7 @@ public:
               1, lp__);
       double nu = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 4;
-      nu = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(1,
+      nu = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(0,
              lp__);
       Eigen::Matrix<double,-1,1> prob =
         Eigen::Matrix<double,-1,1>::Constant(3,
@@ -627,7 +627,7 @@ public:
       local_scalar_t__ nu = DUMMY_VAR__;
       current_statement__ = 4;
       nu = in__.read<local_scalar_t__>();
-      out__.write_free_lb(1, nu);
+      out__.write_free_lb(0, nu);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
     }
@@ -680,7 +680,7 @@ public:
       local_scalar_t__ nu = DUMMY_VAR__;
       current_statement__ = 4;
       nu = context__.vals_r("nu")[(1 - 1)];
-      out__.write_free_lb(1, nu);
+      out__.write_free_lb(0, nu);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
     }

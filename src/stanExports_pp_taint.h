@@ -30,7 +30,7 @@ stan::math::profile_map profiles__;
 static constexpr std::array<const char*, 58> locations_array__ =
   {" (found before start of program)",
   " (in 'pp_taint', line 34, column 2 to column 29)",
-  " (in 'pp_taint', line 35, column 2 to column 20)",
+  " (in 'pp_taint', line 35, column 2 to column 19)",
   " (in 'pp_taint', line 36, column 2 to column 19)",
   " (in 'pp_taint', line 37, column 2 to column 22)",
   " (in 'pp_taint', line 38, column 2 to column 38)",
@@ -59,7 +59,7 @@ static constexpr std::array<const char*, 58> locations_array__ =
   " (in 'pp_taint', line 44, column 4 to column 28)",
   " (in 'pp_taint', line 43, column 18 to line 45, column 3)",
   " (in 'pp_taint', line 43, column 2 to line 59, column 3)",
-  " (in 'pp_taint', line 60, column 2 to column 23)",
+  " (in 'pp_taint', line 60, column 2 to column 22)",
   " (in 'pp_taint', line 61, column 2 to column 22)",
   " (in 'pp_taint', line 62, column 2 to column 24)",
   " (in 'pp_taint', line 64, column 2 to column 43)",
@@ -275,7 +275,7 @@ public:
               1, lp__);
       local_scalar_t__ nu = DUMMY_VAR__;
       current_statement__ = 2;
-      nu = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(50,
+      nu = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(1,
              lp__);
       local_scalar_t__ mu = DUMMY_VAR__;
       current_statement__ = 3;
@@ -352,7 +352,7 @@ public:
           }
         }
         current_statement__ = 31;
-        lp_accum__.add(stan::math::pareto_lpdf<propto__>(nu, 50, 1.5));
+        lp_accum__.add(stan::math::pareto_lpdf<propto__>(nu, 1, 1.5));
         current_statement__ = 32;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(mu, 1, 100));
         current_statement__ = 33;
@@ -415,7 +415,7 @@ public:
               1, lp__);
       double nu = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 2;
-      nu = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(50,
+      nu = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(1,
              lp__);
       double mu = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 3;
@@ -480,7 +480,7 @@ public:
       local_scalar_t__ nu = DUMMY_VAR__;
       current_statement__ = 2;
       nu = in__.read<local_scalar_t__>();
-      out__.write_free_lb(50, nu);
+      out__.write_free_lb(1, nu);
       local_scalar_t__ mu = DUMMY_VAR__;
       current_statement__ = 3;
       mu = in__.read<local_scalar_t__>();
@@ -545,7 +545,7 @@ public:
       local_scalar_t__ nu = DUMMY_VAR__;
       current_statement__ = 2;
       nu = context__.vals_r("nu")[(1 - 1)];
-      out__.write_free_lb(50, nu);
+      out__.write_free_lb(1, nu);
       local_scalar_t__ mu = DUMMY_VAR__;
       current_statement__ = 3;
       mu = context__.vals_r("mu")[(1 - 1)];

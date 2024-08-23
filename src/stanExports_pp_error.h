@@ -30,7 +30,7 @@ stan::math::profile_map profiles__;
 static constexpr std::array<const char*, 57> locations_array__ =
   {" (found before start of program)",
   " (in 'pp_error', line 35, column 2 to column 29)",
-  " (in 'pp_error', line 36, column 2 to column 20)",
+  " (in 'pp_error', line 36, column 2 to column 19)",
   " (in 'pp_error', line 37, column 2 to column 38)",
   " (in 'pp_error', line 56, column 4 to column 29)",
   " (in 'pp_error', line 55, column 32 to line 57, column 3)",
@@ -56,7 +56,7 @@ static constexpr std::array<const char*, 57> locations_array__ =
   " (in 'pp_error', line 42, column 4 to column 28)",
   " (in 'pp_error', line 41, column 18 to line 43, column 3)",
   " (in 'pp_error', line 41, column 2 to line 57, column 3)",
-  " (in 'pp_error', line 58, column 2 to column 23)",
+  " (in 'pp_error', line 58, column 2 to column 22)",
   " (in 'pp_error', line 60, column 2 to column 43)",
   " (in 'pp_error', line 66, column 6 to column 43)",
   " (in 'pp_error', line 65, column 35 to line 67, column 5)",
@@ -275,7 +275,7 @@ public:
               1, lp__);
       local_scalar_t__ nu = DUMMY_VAR__;
       current_statement__ = 2;
-      nu = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(50,
+      nu = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(1,
              lp__);
       Eigen::Matrix<local_scalar_t__,-1,1> theta_s =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(S, DUMMY_VAR__);
@@ -338,7 +338,7 @@ public:
           }
         }
         current_statement__ = 28;
-        lp_accum__.add(stan::math::pareto_lpdf<propto__>(nu, 50, 1.5));
+        lp_accum__.add(stan::math::pareto_lpdf<propto__>(nu, 1, 1.5));
         current_statement__ = 29;
         lp_accum__.add(stan::math::beta_lpdf<propto__>(theta_s, (phi * nu),
                          ((1 - phi) * nu)));
@@ -402,7 +402,7 @@ public:
               1, lp__);
       double nu = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 2;
-      nu = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(50,
+      nu = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(1,
              lp__);
       Eigen::Matrix<double,-1,1> theta_s =
         Eigen::Matrix<double,-1,1>::Constant(S,
@@ -449,7 +449,7 @@ public:
       local_scalar_t__ nu = DUMMY_VAR__;
       current_statement__ = 2;
       nu = in__.read<local_scalar_t__>();
-      out__.write_free_lb(50, nu);
+      out__.write_free_lb(1, nu);
       Eigen::Matrix<local_scalar_t__,-1,1> theta_s =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(S, DUMMY_VAR__);
       current_statement__ = 3;
@@ -490,7 +490,7 @@ public:
       local_scalar_t__ nu = DUMMY_VAR__;
       current_statement__ = 2;
       nu = context__.vals_r("nu")[(1 - 1)];
-      out__.write_free_lb(50, nu);
+      out__.write_free_lb(1, nu);
       Eigen::Matrix<local_scalar_t__,-1,1> theta_s =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(S, DUMMY_VAR__);
       {
