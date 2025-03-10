@@ -53,7 +53,7 @@ test_that(desc = "Benchmark against fairness package", {
   fairness_tpr <- fairness::equal_odds(compas, outcome = "TwoYrRecidivism", preds = "Predicted", group = "Ethnicity", outcome_base = "no", base = "Caucasian")$Metric
   expect_equal(jfa_tprp[["metric"]][["all"]][["estimate"]], as.numeric(fairness_tpr[1, ]))
   expect_equal(jfa_tprp[["parity"]][["all"]][["estimate"]], as.numeric(fairness_tpr[2, ]))
-  # Negative predicted value parity
+  # Negative predictive value parity
   jfa_npvp <- model_fairness(compas, "Ethnicity", "TwoYrRecidivism", "Predicted", privileged = "Caucasian", positive = "yes", metric = "npvp")
   fairness_npv <- fairness::npv_parity(compas, outcome = "TwoYrRecidivism", preds = "Predicted", group = "Ethnicity", outcome_base = "no", base = "Caucasian")$Metric
   expect_equal(jfa_npvp[["metric"]][["all"]][["estimate"]], as.numeric(fairness_npv[1, ]))

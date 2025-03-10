@@ -13,7 +13,7 @@ model_fairness(
   positive = NULL,
   metric = c(
     "prp", "pp", "ap", "fnrp", "fprp",
-    "tprp", "npvp", "sp", "dp"
+    "tprp", "npvp", "sp", "dp", "eo"
   ),
   alternative = c("two.sided", "less", "greater"),
   conf.level = 0.95,
@@ -41,7 +41,9 @@ the column \code{target} to be used as the positive class. If \code{NULL}
 (the default), the first factor level of the \code{target} column is used.}
 
 \item{metric}{a character indicating the fairness metrics to compute.
-See the Details section below for more information.}
+This can also be an object of class \code{jfaFairnessSelection} as returned
+by the \code{fairness_selection} function. See the Details section below
+for more information on possible fairness metrics.}
 
 \item{alternative}{a character indicating the alternative hypothesis and
 the type of confidence / credible interval used in the individual
@@ -99,7 +101,7 @@ class and the privileged protected class is called parity. This measure can
 quantify potential fairness or discrimination in the algorithms predictions.
 Available parity metrics include predictive rate parity, proportional parity,
 accuracy parity, false negative rate parity, false positive rate parity, true
-positive rate parity, negative predicted value parity, specificity parity,
+positive rate parity, negative predictive value parity, specificity parity,
 and demographic parity. The function returns an object of class
 \code{jfaFairness} that can be used with associated \code{summary()} and
 \code{plot()} methods.
@@ -121,28 +123,32 @@ The following model-agnostic fairness metrics are computed based on
       rate is equal across protected classes.}
     \item{Accuracy parity (\code{ap}): calculated as (TP + TN) / (TP + FP +
       TN + FN), quantifies whether the accuracy is the same across groups.}
-    \item{False negative rate parity (\code{fnrp}): calculated as FN / (FP
+    \item{False negative rate parity (\code{fnrp}): calculated as FN / (TP
       + FN), quantifies whether the false negative rate is the same across
       groups.}
     \item{False positive rate parity (\code{fprp}): calculated as FP / (TN
       + FP), quantifies whether the false positive rate is the same across
       groups.}
-    \item{True positive rate parity (\code{tprp}): calculated as TP / (TP +
-      FN), quantifies whether the true positive rate is the same across
-      groups.}
-    \item{Negative predicted value parity (\code{npvp}): calculated as TN /
-      (TN + FN), quantifies whether the negative predicted value is equal
+    \item{True positive rate parity (\code{tprp}, also known as equal
+     opportunity): calculated as TP / (TP + FN), quantifies whether the true
+     positive rate is the same across groups.}
+    \item{Negative predictive value parity (\code{npvp}): calculated as TN /
+      (TN + FN), quantifies whether the negative predictive value is equal
       across groups.}
     \item{Specificity parity (\code{sp}): calculated as TN / (TN + FP),
       quantifies whether the true positive rate is the same across groups.}
     \item{Demographic parity (\code{dp}): calculated as TP + FP, quantifies
       whether the positive predictions are equal across groups.}
+    \item{Equalized odds (\code{eo}): calculated as a combination of the true
+     positive rate and the false positive rate, quantifies whether the true
+     positive rate and, simultaneously, the false positive rate are the same
+     across groups}
   }
 
   Note that, in an audit context, not all fairness measures are equally
   appropriate in all situations. The fairness tree below aids in choosing
-  which fairness measure is appropriate for the situation at hand (Büyük,
-  2023).
+  which fairness measure is appropriate for the situation at hand (Picogna et
+  al., 2025).
 
   \if{html}{\figure{fairness-tree.png}{options: width="100\%" alt="fairness-tree"}}
   \if{latex}{\figure{fairness-tree.pdf}{options: width=5in}}
@@ -160,9 +166,6 @@ model_fairness(
 )
 }
 \references{
-Büyük, S. (2023). \emph{Automatic Fairness Criteria and Fair
-  Model Selection for Critical ML Tasks}, Master Thesis, Utrecht University.
-
 Calders, T., & Verwer, S. (2010). Three naive Bayes approaches
   for discrimination-free classification. In \emph{Data Mining and Knowledge
   Discovery}. Springer Science and Business Media LLC.
@@ -194,8 +197,12 @@ Jamil, T., Ly, A., Morey, R. D., Love, J., Marsman, M., &
 Pessach, D. & Shmueli, E. (2022). A review on fairness in machine
   learning. \emph{ACM Computing Surveys}, 55(3), 1-44. \doi{10.1145/3494672}
 
+Picogna, F., de Swart, J., Kaya, H., & Wetzels, R. (2025). How to
+  choose a fairness measure: A decision-making workflow for auditors.
+  \doi{10.31219/osf.io/cpxmf_v1}
+
 Zafar, M. B., Valera, I., Gomez Rodriguez, M., & Gummadi, K. P.
-  (2017). Fairness beyond disparate Ttreatment & disparate impact. In
+  (2017). Fairness beyond disparate treatment & disparate impact. In
   \emph{Proceedings of the 26th International Conference on World Wide Web}.
   \doi{10.1145/3038912.3052660}
 }

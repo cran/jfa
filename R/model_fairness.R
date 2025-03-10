@@ -24,7 +24,7 @@
 #' quantify potential fairness or discrimination in the algorithms predictions.
 #' Available parity metrics include predictive rate parity, proportional parity,
 #' accuracy parity, false negative rate parity, false positive rate parity, true
-#' positive rate parity, negative predicted value parity, specificity parity,
+#' positive rate parity, negative predictive value parity, specificity parity,
 #' and demographic parity. The function returns an object of class
 #' \code{jfaFairness} that can be used with associated \code{summary()} and
 #' \code{plot()} methods.
@@ -38,36 +38,38 @@
 #'   positive = NULL,
 #'   metric = c(
 #'     "prp", "pp", "ap", "fnrp", "fprp",
-#'     "tprp", "npvp", "sp", "dp"
+#'     "tprp", "npvp", "sp", "dp", "eo"
 #'   ),
 #'   alternative = c("two.sided", "less", "greater"),
 #'   conf.level = 0.95,
 #'   prior = FALSE
 #' )
 #'
-#' @param data         a data frame containing the input data.
-#' @param protected    a character specifying the column name in \code{data}
+#' @param data        a data frame containing the input data.
+#' @param protected   a character specifying the column name in \code{data}
 #'   containing the protected classes (i.e., the sensitive attribute).
-#' @param target       a character specifying the column name in \code{data}
+#' @param target      a character specifying the column name in \code{data}
 #'   containing the true labels of the target (i.e., to be predicted) variable.
-#' @param predictions  a character specifying the column name in \code{data}
+#' @param predictions a character specifying the column name in \code{data}
 #'   containing the predicted labels of the target variable.
 #' @param privileged  a character specifying the factor level of the column
 #'   \code{protected} to be used as the privileged group. If \code{NULL} (the
 #'   default), the first factor level of the \code{protected} column is used.
-#' @param positive     a character specifying the factor level positive class of
+#' @param positive    a character specifying the factor level positive class of
 #'   the column \code{target} to be used as the positive class. If \code{NULL}
 #'   (the default), the first factor level of the \code{target} column is used.
 #' @param metric      a character indicating the fairness metrics to compute.
-#'   See the Details section below for more information.
-#' @param alternative   a character indicating the alternative hypothesis and
+#'   This can also be an object of class \code{jfaFairnessSelection} as returned
+#'   by the \code{fairness_selection} function. See the Details section below
+#'   for more information on possible fairness metrics.
+#' @param alternative a character indicating the alternative hypothesis and
 #'   the type of confidence / credible interval used in the individual
 #'   comparisons to the privileged group. Possible options are  \code{two.sided}
 #'   (default), \code{less}, or \code{greater}. The alternative hypothesis
 #'   relating to the overall equality is always two sided.
-#' @param conf.level   a numeric value between 0 and 1 specifying the
+#' @param conf.level  a numeric value between 0 and 1 specifying the
 #'   confidence level (i.e., 1 - audit risk / detection risk).
-#' @param prior        a logical specifying whether to use a prior distribution,
+#' @param prior       a logical specifying whether to use a prior distribution,
 #'   or a numeric value equal to or larger than 1 specifying the prior
 #'   concentration parameter. If this argument is specified as \code{FALSE}
 #'   (default), classical estimation is performed and if it is \code{TRUE},
@@ -90,28 +92,32 @@
 #'       rate is equal across protected classes.}
 #'     \item{Accuracy parity (\code{ap}): calculated as (TP + TN) / (TP + FP +
 #'       TN + FN), quantifies whether the accuracy is the same across groups.}
-#'     \item{False negative rate parity (\code{fnrp}): calculated as FN / (FP
+#'     \item{False negative rate parity (\code{fnrp}): calculated as FN / (TP
 #'       + FN), quantifies whether the false negative rate is the same across
 #'       groups.}
 #'     \item{False positive rate parity (\code{fprp}): calculated as FP / (TN
 #'       + FP), quantifies whether the false positive rate is the same across
 #'       groups.}
-#'     \item{True positive rate parity (\code{tprp}): calculated as TP / (TP +
-#'       FN), quantifies whether the true positive rate is the same across
-#'       groups.}
-#'     \item{Negative predicted value parity (\code{npvp}): calculated as TN /
-#'       (TN + FN), quantifies whether the negative predicted value is equal
+#'     \item{True positive rate parity (\code{tprp}, also known as equal
+#'      opportunity): calculated as TP / (TP + FN), quantifies whether the true
+#'      positive rate is the same across groups.}
+#'     \item{Negative predictive value parity (\code{npvp}): calculated as TN /
+#'       (TN + FN), quantifies whether the negative predictive value is equal
 #'       across groups.}
 #'     \item{Specificity parity (\code{sp}): calculated as TN / (TN + FP),
 #'       quantifies whether the true positive rate is the same across groups.}
 #'     \item{Demographic parity (\code{dp}): calculated as TP + FP, quantifies
 #'       whether the positive predictions are equal across groups.}
+#'     \item{Equalized odds (\code{eo}): calculated as a combination of the true
+#'      positive rate and the false positive rate, quantifies whether the true
+#'      positive rate and, simultaneously, the false positive rate are the same
+#'      across groups}
 #'   }
 #'
 #'   Note that, in an audit context, not all fairness measures are equally
 #'   appropriate in all situations. The fairness tree below aids in choosing
-#'   which fairness measure is appropriate for the situation at hand (Büyük,
-#'   2023).
+#'   which fairness measure is appropriate for the situation at hand (Picogna et
+#'   al., 2025).
 #'
 #'   \if{html}{\figure{fairness-tree.png}{options: width="100\%" alt="fairness-tree"}}
 #'   \if{latex}{\figure{fairness-tree.pdf}{options: width=5in}}
@@ -147,8 +153,6 @@
 #'
 #' @author Koen Derks, \email{k.derks@nyenrode.nl}
 #'
-#' @references Büyük, S. (2023). \emph{Automatic Fairness Criteria and Fair
-#'   Model Selection for Critical ML Tasks}, Master Thesis, Utrecht University.
 #' @references Calders, T., & Verwer, S. (2010). Three naive Bayes approaches
 #'   for discrimination-free classification. In \emph{Data Mining and Knowledge
 #'   Discovery}. Springer Science and Business Media LLC.
@@ -173,8 +177,11 @@
 #'   \doi{10.3758/s13428-016-0739-8}
 #' @references Pessach, D. & Shmueli, E. (2022). A review on fairness in machine
 #'   learning. \emph{ACM Computing Surveys}, 55(3), 1-44. \doi{10.1145/3494672}
+#' @references Picogna, F., de Swart, J., Kaya, H., & Wetzels, R. (2025). How to
+#'   choose a fairness measure: A decision-making workflow for auditors.
+#'   \doi{10.31219/osf.io/cpxmf_v1}
 #' @references Zafar, M. B., Valera, I., Gomez Rodriguez, M., & Gummadi, K. P.
-#'   (2017). Fairness beyond disparate Ttreatment & disparate impact. In
+#'   (2017). Fairness beyond disparate treatment & disparate impact. In
 #'   \emph{Proceedings of the 26th International Conference on World Wide Web}.
 #'   \doi{10.1145/3038912.3052660}
 #'
@@ -201,12 +208,16 @@ model_fairness <- function(data,
                            positive = NULL,
                            metric = c(
                              "prp", "pp", "ap", "fnrp", "fprp",
-                             "tprp", "npvp", "sp", "dp"
+                             "tprp", "npvp", "sp", "dp", "eo"
                            ),
                            alternative = c("two.sided", "less", "greater"),
                            conf.level = 0.95,
                            prior = FALSE) {
-  metric <- match.arg(metric)
+  if (inherits(metric, "jfaFairnessSelection")) {
+    metric <- metric[["measure"]]
+  } else {
+    metric <- match.arg(metric)
+  }
   alternative <- match.arg(alternative)
   dname <- deparse(substitute(data))
   data <- as.data.frame(data, row.names = seq_len(nrow(data)))
@@ -232,6 +243,9 @@ model_fairness <- function(data,
     positive <- targetLevels[1]
   }
   stopifnot("'positive' is not a class in 'target'" = positive %in% targetLevels)
+  if (metric == "eo") {
+    stop("Equalized odds (EO) requires simultaneous evaluation of 'True Positive Rate' (TPR) and 'False Positive Rate' (FPR). You must first select 'metric = tprp', then 'metric = fprp', and ensure both fairness measures conclude no discrimination for both privileged and unprivileged groups before concluding no discrimination according to EO.")
+  }
   confmat <- list()
   samples_list <- list()
   unprivileged <- groups[-which(groups == privileged)]

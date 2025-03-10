@@ -22,7 +22,7 @@ A data frame with 202 rows and 12 variables.
 }
 }
 \source{
-\url{https://towardsdatascience.com/data-driven-audit-1-automated-sampling-using-python-52e83347add5}
+\url{https://medium.com/towards-data-science/data-driven-audit-1-automated-sampling-using-python-52e83347add5}
 }
 \usage{
 data(carrier)

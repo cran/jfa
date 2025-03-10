@@ -25,7 +25,7 @@
 #' @format A data frame with 100 rows and 2 variables.
 #' \describe{
 #'   \item{TwoYrRecidivism}{yes/no for recidivism or no recidivism.}
-#'   \item{AgeAboveFoutryFive}{yes/no for age above 45 years or not}
+#'   \item{AgeAboveFourtyFive}{yes/no for age above 45 years or not}
 #'    \item{AgeBelowTwentyFive}{yes/no for age below 25 years or not}
 #'    \item{Gender}{female/male for gender}
 #'    \item{Misdemeanor}{yes/no for having recorded misdemeanor(s) or not}

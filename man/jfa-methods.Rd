@@ -35,6 +35,8 @@
 \alias{print.summary.jfaFairness}
 \alias{summary.jfaFairness}
 \alias{plot.jfaFairness}
+\alias{print.jfaFairnessSelection}
+\alias{plot.jfaFairnessSelection}
 \title{Methods for jfa objects}
 \usage{
 \method{print}{jfaPrior}(x, ...)
@@ -81,7 +83,7 @@
 
 \method{summary}{jfaEvaluation}(object, digits = getOption("digits"), ...)
 
-\method{plot}{jfaEvaluation}(x, type = c("estimates", "posterior"), ...)
+\method{plot}{jfaEvaluation}(x, type = c("estimates", "posterior", "sequential"), ...)
 
 \method{print}{jfaDistr}(x, digits = getOption("digits"), ...)
 
@@ -102,6 +104,10 @@
 \method{summary}{jfaFairness}(object, digits = getOption("digits"), ...)
 
 \method{plot}{jfaFairness}(x, type = c("estimates", "posterior", "robustness", "sequential"), ...)
+
+\method{print}{jfaFairnessSelection}(x, ...)
+
+\method{plot}{jfaFairnessSelection}(x, ...)
 }
 \arguments{
 \item{...}{further arguments, currently ignored.}

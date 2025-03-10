@@ -517,8 +517,8 @@ plot.jfaPlanning <- function(x, ...) {
     k_1_approve <- x[["k_staged"]][1] - 1
     k_1_disapprove <- x[["k_staged"]][1]
     k_2_approve <- x[["k_staged"]][2]
-    n_min <- jfa::planning(materiality = x[["materiality"]], expected = k_1_approve, likelihood = x[["likelihood"]], N.units = x[["N.units"]], conf.level = x[["conf.level"]])$n
-    n_max <- jfa::planning(materiality = x[["materiality"]], expected = sum(k_1_disapprove + k_2_approve), likelihood = x[["likelihood"]], N.units = x[["N.units"]], conf.level = x[["conf.level"]])$n
+    n_min <- planning(materiality = x[["materiality"]], expected = k_1_approve, likelihood = x[["likelihood"]], N.units = x[["N.units"]], conf.level = x[["conf.level"]])$n
+    n_max <- planning(materiality = x[["materiality"]], expected = sum(k_1_disapprove + k_2_approve), likelihood = x[["likelihood"]], N.units = x[["N.units"]], conf.level = x[["conf.level"]])$n
     n1 <- seq(n_min, n_max, 1)
     n2 <- rep(-1, length(n1))
     for (i in seq_along(n1)) {
@@ -794,7 +794,7 @@ summary.jfaEvaluation <- function(object, digits = getOption("digits"), ...) {
 #' @rdname jfa-methods
 #' @method plot jfaEvaluation
 #' @export
-plot.jfaEvaluation <- function(x, type = c("estimates", "posterior"), ...) {
+plot.jfaEvaluation <- function(x, type = c("estimates", "posterior", "sequential"), ...) {
   y <- lb <- ub <- NULL
   type <- match.arg(type)
   if (type == "posterior") {
@@ -804,6 +804,32 @@ plot.jfaEvaluation <- function(x, type = c("estimates", "posterior"), ...) {
       stop(paste0('plot(..., type = "posterior") not supported for method = "', x[["method"]], '" without "prior = TRUE"'))
     }
     p <- plot.jfaPlanning(x, ...)
+  } else if (type == "sequential") {
+    stopifnot('plot(..., type = "sequential") not supported when "data" is not provided' = !is.null(x[["data"]]))
+    stopifnot('plot(..., type = "sequential") not supported for frequentist analyses with "prior = FALSE"' = !is.null(x[["prior"]]))
+    stopifnot('plot(..., type = "sequential") not supported when "materiality" is not provided' = !is.null(x[["posterior"]][["hypotheses"]]))
+    stopifnot('plot(..., type = "sequential") not supported when "stratum" is provided' = is.null(x[["data"]][["strata"]]))
+    bf <- numeric(x[["n"]])
+    taints <- rep(x[["data"]][["taint"]], times = x[["data"]][["times"]])
+    for (i in seq_len(x[["n"]])) {
+      if (x[["method"]] == "hypergeometric") {
+        subtaints <- sum(ceiling(taints[seq_len(i)]))
+      } else {
+        subtaints <- sum(taints[seq_len(i)])
+      }
+      bf[i] <- evaluation(
+        materiality = x[["materiality"]],
+        method = x[["method"]],
+        alternative = x[["alternative"]],
+        prior = x[["prior"]],
+        N.units = x[["N.units"]],
+        n = i,
+        x = subtaints
+      )[["posterior"]][["hypotheses"]][["bf.h1"]]
+    }
+    plotdata <- data.frame(x = seq(0, x[["n"]], 1), y = c(1, bf))
+    p <- .plotBfSequential(x, plotdata)
+    p <- .theme_jfa(p)
   } else {
     xs <- 0
     labels <- "Population"
@@ -1179,7 +1205,7 @@ print.summary.jfaFairness <- function(x, digits = getOption("digits"), ...) {
   cat(paste("  Confidence level:   ", format(x[["conf.level"]], digits = max(1L, digits - 2L))), "\n")
   measure <- switch(x[["measure"]],
     "pp" = "Proportional parity (Disparate impact)",
-    "prp" = "Predictive rate parity (Equalized odds)",
+    "prp" = "Predictive rate parity",
     "ap" = "Accuracy parity",
     "fnrp" = "False negative rate parity",
     "fprp" = "False positive rate parity",
@@ -1469,4 +1495,396 @@ plot.jfaFairness <- function(x, type = c("estimates", "posterior", "robustness",
   }
   p <- .theme_jfa(p, legend.position = if (length(unprivileged) == 1 && type == "posterior") "inside" else "top", legend.position.inside = c(0.8, 0.8))
   return(p)
+}
+
+# Methods for class: jfaFairnessSelection #####################################################
+
+#' @rdname jfa-methods
+#' @method print jfaFairnessSelection
+#' @export
+print.jfaFairnessSelection <- function(x, ...) {
+  cat("\n")
+  cat(strwrap("Fairness Measure for Model Evaluation", prefix = "\t"), sep = "\n")
+  cat("\n")
+  cat("Selected fairness measure:", x[["name"]], "\n\n")
+  cat("Based on:\n")
+  cat(paste0("  Answer to question 1 (q1):\t", x[["q1"]][["name"]], " (", x[["q1"]][["value"]], ")\n"))
+  if (!is.null(x[["q2"]])) {
+    cat(paste0("  Answer to question 2 (q2):\t", x[["q2"]][["name"]], " (", x[["q2"]][["value"]], ")\n"))
+  }
+  if (!is.null(x[["q3"]])) {
+    cat(paste0("  Answer to question 3 (q3):\t", x[["q3"]][["name"]], " (", x[["q3"]][["value"]], ")\n"))
+  }
+  if (!is.null(x[["q4"]])) {
+    cat(paste0("  Answer to question 4 (q4):\t", x[["q4"]][["name"]], " (", x[["q4"]][["value"]], ")\n"))
+  }
+}
+
+#' @rdname jfa-methods
+#' @method plot jfaFairnessSelection
+#' @export
+plot.jfaFairnessSelection <- function(x, ...) {
+  xmin <- xmax <- ymin <- ymax <- label <- text_color <- path_type <- NULL
+  measure <- x$name
+  if (measure == "Predictive Rate Parity") {
+    rects <- data.frame(
+      xmin = c(-0.8, -6, 5.5, -11.4, 1, 9.8, -18, -10, -2, -23, -13.5),
+      xmax = c(6.2, 0.2, 9.5, -4, 7, 13.8, -12, -4, 2, -17.5, -8),
+      ymin = c(3, -4, -4, -8, -8, -8, -16, -16, -16, -22, -22),
+      ymax = c(7, -1, -1, -12, -12, -12, -19, -19, -19, -25, -25),
+      label = c("1. Is the ground \ntruth information on the true \nvalues of the classification \nrelevant in your context?", "2. In what type of \nclassification are you \ninterested?", "Disparate Impact", "3. What is more important: \na correct classification of the positive class, \n a correct classification of the negative class, \nor both?", "4. What are the errors \nwith the highest cost?", "Equalized Odds", "4. What are the errors \nwith the highest cost?", "4. What are the errors \nwith the highest cost?", "Accuracy Parity", "Predictive Rate Parity", "Equal Opportunity"),
+      fill = c("white", "white", "lightgrey", "white", "lightgrey", "lightgrey", "white", "lightgrey", "lightgrey", "white", "lightgrey"),
+      text_color = c("black", "black", "black", "black", "black", "black", "black", "black", "black", "black", "black")
+    )
+    rects$path_type <- ifelse(rects$fill == "white", "Followed Path", "Ignored Path")
+    plotWorkflow <- ggplot2::ggplot() +
+      ggplot2::geom_rect(data = rects, ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = path_type), color = "black") +
+      ggplot2::geom_text(data = rects, ggplot2::aes(x = (xmin + xmax) / 2, y = (ymin + ymax) / 2, label = label, color = text_color), size = 3.20) +
+      ggplot2::scale_fill_manual(values = c("Followed Path" = "white", "Ignored Path" = "lightgrey"), name = NULL, labels = c("Followed Path", "Ignored Path")) +
+      ggplot2::scale_color_identity() +
+      ggplot2::xlim(-23, 20) +
+      ggplot2::ylim(-28, 9) +
+      ggplot2::theme_void() +
+      ggplot2::geom_segment(ggplot2::aes(x = -0.8, xend = -3.1, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -1.95, y = 1, label = "YES (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 6.2, xend = 7.5, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.85, y = 1, label = "NO (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -6, xend = -7.7, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -6.85, y = -6, label = "CORRECT (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -2.6, xend = 3, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 0.2, y = -6, label = "INCORRECT (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 0.2, xend = 11.8, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.6375, y = -6, label = "CORRECT AND INCORRECT (3)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -11.4, xend = -15, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -13.2, y = -14, label = "POSITIVE (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -7.7, xend = -7.7, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -7.7, y = -14, label = "NEGATIVE (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -4, xend = 0, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -2, y = -14, label = "BOTH (3)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -18, xend = -20.25, y = -19, yend = -21.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -19.125, y = -20.5, label = "FP (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -12, xend = -10.75, y = -19, yend = -21.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -11.375, y = -20.5, label = "FN (2)"), fill = "lightgray", size = 3) +
+      ggplot2::theme(legend.position = c(.07, .95), legend.justification = c("left", "top"), legend.box.just = "left", legend.margin = ggplot2::margin(6, 6, 6, 6), legend.title = ggplot2::element_text(color = "black", size = 2)) +
+      ggplot2::guides(fill = ggplot2::guide_legend(title = "Legend", title.theme = ggplot2::element_text(size = 11)))
+  } else if (measure == "Equal Opportunity") {
+    rects <- data.frame(
+      xmin = c(-0.8, -6, 5.5, -11.4, 1, 9.8, -18, -10, -2, -23, -13.5),
+      xmax = c(6.2, 0.2, 9.5, -4, 7, 13.8, -12, -4, 2, -17.5, -8),
+      ymin = c(3, -4, -4, -8, -8, -8, -16, -16, -16, -22, -22),
+      ymax = c(7, -1, -1, -12, -12, -12, -19, -19, -19, -25, -25),
+      label = c("1. Is the ground \ntruth information on the true \nvalues of the classification \nrelevant in your context?", "2. In what type of \nclassification are you \ninterested?", "Disparate Impact", "3. What is more important: \na correct classification of the positive class, \n a correct classification of the negative class, \nor both?", "4. What are the errors \nwith the highest cost?", "Equalized Odds", "4. What are the errors \nwith the highest cost?", "4. What are the errors \nwith the highest cost?", "Accuracy Parity", "Predictive Rate Parity", "Equal Opportunity"),
+      fill = c("white", "white", "lightgrey", "white", "lightgrey", "lightgrey", "white", "lightgrey", "lightgrey", "lightgrey", "white"),
+      text_color = c("black", "black", "black", "black", "black", "black", "black", "black", "black", "black", "black")
+    )
+    rects$path_type <- ifelse(rects$fill == "white", "Followed Path", "Ignored Path")
+    plotWorkflow <- ggplot2::ggplot() +
+      ggplot2::geom_rect(data = rects, ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = path_type), color = "black") +
+      ggplot2::geom_text(data = rects, ggplot2::aes(x = (xmin + xmax) / 2, y = (ymin + ymax) / 2, label = label, color = text_color), size = 3.20) +
+      ggplot2::scale_fill_manual(values = c("Followed Path" = "white", "Ignored Path" = "lightgrey"), name = NULL, labels = c("Followed Path", "Ignored Path")) +
+      ggplot2::scale_color_identity() +
+      ggplot2::xlim(-23, 20) +
+      ggplot2::ylim(-28, 9) +
+      ggplot2::theme_void() +
+      ggplot2::geom_segment(ggplot2::aes(x = -0.8, xend = -3.1, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -1.95, y = 1, label = "YES (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 6.2, xend = 7.5, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.85, y = 1, label = "NO (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -6, xend = -7.7, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -6.85, y = -6, label = "CORRECT (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -2.6, xend = 3, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 0.2, y = -6, label = "INCORRECT (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 0.2, xend = 11.8, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.6375, y = -6, label = "CORRECT AND INCORRECT (3)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -11.4, xend = -15, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -13.2, y = -14, label = "POSITIVE (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -7.7, xend = -7.7, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -7.7, y = -14, label = "NEGATIVE (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -4, xend = 0, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -2, y = -14, label = "BOTH (3)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -18, xend = -20.25, y = -19, yend = -21.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -19.125, y = -20.5, label = "FP (1)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -12, xend = -10.75, y = -19, yend = -21.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -11.375, y = -20.5, label = "FN (2)"), color = "black", size = 3) +
+      ggplot2::theme(legend.position = c(.07, .95), legend.justification = c("left", "top"), legend.box.just = "left", legend.margin = ggplot2::margin(6, 6, 6, 6), legend.title = ggplot2::element_text(color = "black", size = 2)) +
+      ggplot2::guides(fill = ggplot2::guide_legend(title = "Legend", title.theme = ggplot2::element_text(size = 11)))
+  } else if (measure == "Specificity Parity") {
+    rects <- data.frame(
+      xmin = c(-0.8, -6, 5.5, -11.4, 1, 9.8, -18, -10, -2, -13, -5.6),
+      xmax = c(6.2, 0.2, 9.5, -4, 7, 13.8, -12, -4, 2, -8.4, -1.2),
+      ymin = c(3, -4, -4, -8, -8, -8, -16, -16, -16, -22, -22),
+      ymax = c(7, -1, -1, -12, -12, -12, -19, -19, -19, -25, -25),
+      label = c("1. Is the ground \ntruth information on the true \nvalues of the classification \nrelevant in your context?", "2. In what type of \nclassification are you \ninterested?", "Disparate Impact", "3. What is more important: \na correct classification of the positive class, \n a correct classification of the negative class, \nor both?", "4. What are the errors \nwith the highest cost?", "Equalized Odds", "4. What are the errors \nwith the highest cost?", "4. What are the errors \nwith the highest cost?", "Accuracy Parity", "Specificity Parity", "Negative Predictive\n Value Parity"),
+      fill = c("white", "white", "lightgrey", "white", "lightgrey", "lightgrey", "lightgrey", "white", "lightgrey", "white", "lightgrey"),
+      text_color = c("black", "black", "black", "black", "black", "black", "black", "black", "black", "black", "black")
+    )
+    rects$path_type <- ifelse(rects$fill == "white", "Followed Path", "Ignored Path")
+    plotWorkflow <- ggplot2::ggplot() +
+      ggplot2::geom_rect(data = rects, ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = path_type), color = "black") +
+      ggplot2::geom_text(data = rects, ggplot2::aes(x = (xmin + xmax) / 2, y = (ymin + ymax) / 2, label = label, color = text_color), size = 3.20) +
+      ggplot2::scale_fill_manual(values = c("Followed Path" = "white", "Ignored Path" = "lightgrey"), name = NULL, labels = c("Followed Path", "Ignored Path")) +
+      ggplot2::scale_color_identity() +
+      ggplot2::xlim(-23, 20) +
+      ggplot2::ylim(-28, 9) +
+      ggplot2::theme_void() +
+      ggplot2::geom_segment(ggplot2::aes(x = -0.8, xend = -3.1, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -1.95, y = 1, label = "YES (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 6.2, xend = 7.5, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.85, y = 1, label = "NO (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -6, xend = -7.7, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -6.85, y = -6, label = "CORRECT (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -2.6, xend = 3, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 0.2, y = -6, label = "INCORRECT (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 0.2, xend = 11.8, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.6375, y = -6, label = "CORRECT AND INCORRECT (3)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -11.4, xend = -15, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -13.2, y = -14, label = "POSITIVE (1)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -7.7, xend = -7.7, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -7.7, y = -14, label = "NEGATIVE (2)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -4, xend = 0, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -2, y = -14, label = "BOTH (3)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -10, xend = -10.7, y = -19, yend = -21.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -10.35, y = -20.5, label = "FP (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -4, xend = -3.4, y = -19, yend = -21.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -3.7, y = -20.5, label = "FN (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::theme(legend.position = c(.07, .95), legend.justification = c("left", "top"), legend.box.just = "left", legend.margin = ggplot2::margin(6, 6, 6, 6), legend.title = ggplot2::element_text(color = "black", size = 2)) +
+      ggplot2::guides(fill = ggplot2::guide_legend(title = "Legend", title.theme = ggplot2::element_text(size = 11)))
+  } else if (measure == "Negative Predictive Value Parity") {
+    rects <- data.frame(
+      xmin = c(-0.8, -6, 5.5, -11.4, 1, 9.8, -18, -10, -2, -13, -5.6),
+      xmax = c(6.2, 0.2, 9.5, -4, 7, 13.8, -12, -4, 2, -8.4, -1.2),
+      ymin = c(3, -4, -4, -8, -8, -8, -16, -16, -16, -22, -22),
+      ymax = c(7, -1, -1, -12, -12, -12, -19, -19, -19, -25, -25),
+      label = c("1. Is the ground \ntruth information on the true \nvalues of the classification \nrelevant in your context?", "2. In what type of \nclassification are you \ninterested?", "Disparate Impact", "3. What is more important: \na correct classification of the positive class, \n a correct classification of the negative class, \nor both?", "4. What are the errors \nwith the highest cost?", "Equalized Odds", "4. What are the errors \nwith the highest cost?", "4. What are the errors \nwith the highest cost?", "Accuracy Parity", "Specificity Parity", "Negative Predictive\n Value Parity"),
+      fill = c("white", "white", "lightgrey", "white", "lightgrey", "lightgrey", "lightgrey", "white", "lightgrey", "lightgrey", "white"),
+      text_color = c("black", "black", "black", "black", "black", "black", "black", "black", "black", "black", "black")
+    )
+    rects$path_type <- ifelse(rects$fill == "white", "Followed Path", "Ignored Path")
+    plotWorkflow <- ggplot2::ggplot() +
+      ggplot2::geom_rect(data = rects, ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = path_type), color = "black") +
+      ggplot2::geom_text(data = rects, ggplot2::aes(x = (xmin + xmax) / 2, y = (ymin + ymax) / 2, label = label, color = text_color), size = 3.20) +
+      ggplot2::scale_fill_manual(values = c("Followed Path" = "white", "Ignored Path" = "lightgrey"), name = NULL, labels = c("Followed Path", "Ignored Path")) +
+      ggplot2::scale_color_identity() +
+      ggplot2::xlim(-23, 20) +
+      ggplot2::ylim(-28, 9) +
+      ggplot2::theme_void() +
+      ggplot2::geom_segment(ggplot2::aes(x = -0.8, xend = -3.1, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -1.95, y = 1, label = "YES (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 6.2, xend = 7.5, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.85, y = 1, label = "NO (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -6, xend = -7.7, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -6.85, y = -6, label = "CORRECT (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -2.6, xend = 3, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 0.2, y = -6, label = "INCORRECT (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 0.2, xend = 11.8, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.6375, y = -6, label = "CORRECT AND INCORRECT (3)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -11.4, xend = -15, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -13.2, y = -14, label = "POSITIVE (1)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -7.7, xend = -7.7, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -7.7, y = -14, label = "NEGATIVE (2)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -4, xend = 0, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -2, y = -14, label = "BOTH (3)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -10, xend = -10.7, y = -19, yend = -21.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -10.35, y = -20.5, label = "FP (1)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -4, xend = -3.4, y = -19, yend = -21.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -3.7, y = -20.5, label = "FN (2)"), color = "black", size = 3) +
+      ggplot2::theme(legend.position = c(.07, .95), legend.justification = c("left", "top"), legend.box.just = "left", legend.margin = ggplot2::margin(6, 6, 6, 6), legend.title = ggplot2::element_text(color = "black", size = 2)) +
+      ggplot2::guides(fill = ggplot2::guide_legend(title = "Legend", title.theme = ggplot2::element_text(size = 11)))
+  } else if (measure == "Accuracy Parity") {
+    rects <- data.frame(
+      xmin = c(0, -4.2, 5.5, -10, -2, 5.5, -15, -9, -2),
+      xmax = c(5.5, 0, 9, -4, 3, 9, -10, -4, 3),
+      ymin = c(3, -4, -4, -8, -8, -8, -16, -16, -16),
+      ymax = c(7, -1, -1, -12, -12, -12, -19, -19, -19),
+      label = c("1. Is the ground truth \ninformation on the true values \nof the classification relevant \nin your context?", "2. In what type of \nclassification are you \ninterested?", "Disparate Impact", "3. What is more important: \na correct classification of the positive class, \na correct classification of the negative class, \nor both?", "4. What are the errors \nwith the highest cost?", "Equalized Odds", "4. What are the errors \nwith the highest cost?", "4. What are the errors \nwith the highest cost?", "Accuracy Parity"),
+      fill = c("white", "white", "lightgrey", "white", "lightgrey", "lightgrey", "lightgrey", "lightgrey", "white"),
+      text_color = c("black", "black", "black", "black", "black", "black", "black", "black", "black")
+    )
+    rects$path_type <- ifelse(rects$fill == "white", "Followed Path", "Ignored Path")
+    plotWorkflow <- ggplot2::ggplot() +
+      ggplot2::geom_rect(data = rects, ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = path_type), color = "black") +
+      ggplot2::geom_text(data = rects, ggplot2::aes(x = (xmin + xmax) / 2, y = (ymin + ymax) / 2, label = label, color = text_color), size = 3.20) +
+      ggplot2::scale_fill_manual(values = c("Followed Path" = "white", "Ignored Path" = "lightgrey"), name = NULL, labels = c("Followed Path", "Ignored Path")) +
+      ggplot2::scale_color_identity() +
+      ggplot2::xlim(-15, 13) +
+      ggplot2::ylim(-25, 9) +
+      ggplot2::theme_void() +
+      ggplot2::geom_segment(ggplot2::aes(x = 0, xend = -2, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -1, y = 1, label = "YES (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 5.5, xend = 7.25, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.375, y = 1, label = "NO (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -4.2, xend = -7, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -5.6, y = -6, label = "CORRECT (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -2.1, xend = 0.5, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -0.8, y = -6, label = "INCORRECT (2)"), fill = "lightgray", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 0, xend = 7.25, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 3.625, y = -6, label = "CORRECT AND INCORRECT (3)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -10, xend = -12.5, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -11.25, y = -14, label = "POSITIVE (1)"), fill = "lightgray", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -7, xend = -7, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -7, y = -14, label = "NEGATIVE (2)"), fill = "lightgray", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -4, xend = 0.5, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -1.75, y = -14, label = "BOTH (3)"), color = "black", size = 3) +
+      ggplot2::theme(legend.position = c(.07, .95), legend.justification = c("left", "top"), legend.box.just = "left", legend.margin = ggplot2::margin(6, 6, 6, 6), legend.title = ggplot2::element_text(color = "black", size = 2)) +
+      ggplot2::guides(fill = ggplot2::guide_legend(title = "Legend", title.theme = ggplot2::element_text(size = 11)))
+  } else if (measure == "False Positive Rate Parity") {
+    rects <- data.frame(
+      xmin = c(-0.8, -6, 5.5, -11.4, 1, 9.8, -18, -10, -2, 0, 5),
+      xmax = c(6.2, 0.2, 9.5, -4, 7, 13.8, -12, -4, 2, 4.4, 9.4),
+      ymin = c(3, -4, -4, -8, -8, -8, -22, -22, -22, -16, -16),
+      ymax = c(7, -1, -1, -12, -12, -12, -25, -25, -25, -19, -19),
+      label = c("1. Is the ground truth \ninformation on the true values \nof the classification relevant \nin your context?", "2. In what type of \nclassification are you \ninterested?", "Disparate Impact", "3.What is more important: \na correct classification of the positive class, \n a correct classification of the negative class, \nor both?", "4. What are the errors \nwith the highest cost?", "Equalized Odds", "4. What are the errors \nwith the highest cost?", "4. What are the errors \nwith the highest cost?", "Accuracy Parity", "False Positive \nRate Parity", "False Negative \nRate Parity"),
+      fill = c("white", "white", "lightgrey", "lightgrey", "white", "lightgrey", "lightgrey", "lightgrey", "lightgrey", "white", "lightgrey"),
+      text_color = c("black", "black", "black", "black", "black", "black", "black", "black", "black", "black", "black")
+    )
+    rects$path_type <- ifelse(rects$fill == "white", "Followed Path", "Ignored Path")
+    plotWorkflow <- ggplot2::ggplot() +
+      ggplot2::geom_rect(data = rects, ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = path_type), color = "black") +
+      ggplot2::geom_text(data = rects, ggplot2::aes(x = (xmin + xmax) / 2, y = (ymin + ymax) / 2, label = label, color = text_color), size = 3.20) +
+      ggplot2::scale_fill_manual(values = c("Followed Path" = "white", "Ignored Path" = "lightgrey"), name = NULL, labels = c("Followed Path", "Ignored Path")) +
+      ggplot2::scale_color_identity() +
+      ggplot2::xlim(-20, 20) +
+      ggplot2::ylim(-28, 9) +
+      ggplot2::theme_void() +
+      ggplot2::geom_segment(ggplot2::aes(x = -0.8, xend = -3.1, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -1.95, y = 1, label = "YES (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 6.2, xend = 7.5, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.85, y = 1, label = "NO (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -6, xend = -7.7, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -6.85, y = -6, label = "CORRECT (1)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -2.6, xend = 3, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 0.2, y = -6, label = "INCORRECT (2)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 0.2, xend = 11.8, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.6375, y = -6, label = "CORRECT AND INCORRECT (3)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -11.4, xend = -15, y = -12, yend = -21.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -13.2, y = -18, label = "POSITIVE (1)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -7.7, xend = -7.7, y = -12, yend = -21.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -7.7, y = -18, label = "NEGATIVE (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -4, xend = 0, y = -12, yend = -21.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -2, y = -18, label = "BOTH (3)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 1, xend = 1, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 1, y = -14, label = "FP (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 7, xend = 7, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 7, y = -14, label = "FN (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::theme(legend.position = c(.07, .95), legend.justification = c("left", "top"), legend.box.just = "left", legend.margin = ggplot2::margin(6, 6, 6, 6), legend.title = ggplot2::element_text(color = "black", size = 2)) +
+      ggplot2::guides(fill = ggplot2::guide_legend(title = "Legend", title.theme = ggplot2::element_text(size = 11)))
+  } else if (measure == "False Negative Rate Parity") {
+    rects <- data.frame(
+      xmin = c(-0.8, -6, 5.5, -11.4, 1, 9.8, -18, -10, -2, 0, 5),
+      xmax = c(6.2, 0.2, 9.5, -4, 7, 13.8, -12, -4, 2, 4.4, 9.4),
+      ymin = c(3, -4, -4, -8, -8, -8, -22, -22, -22, -16, -16),
+      ymax = c(7, -1, -1, -12, -12, -12, -25, -25, -25, -19, -19),
+      label = c("1. Is the ground truth \ninformation on the true values \nof the classification relevant \nin your context?", "2. In what type of \nclassification are you \ninterested?", "Disparate Impact", "3.What is more important: \na correct classification of the positive class, \n a correct classification of the negative class, \nor both?", "4. What are the errors \nwith the highest cost?", "Equalized Odds", "4. What are the errors \nwith the highest cost?", "4. What are the errors \nwith the highest cost?", "Accuracy Parity", "False Positive \nRate Parity", "False Negative \nRate Parity"),
+      fill = c("white", "white", "lightgrey", "lightgrey", "white", "lightgrey", "lightgrey", "lightgrey", "lightgrey", "lightgrey", "white"),
+      text_color = c("black", "black", "black", "black", "black", "black", "black", "black", "black", "black", "black")
+    )
+    rects$path_type <- ifelse(rects$fill == "white", "Followed Path", "Ignored Path")
+    plotWorkflow <- ggplot2::ggplot() +
+      ggplot2::geom_rect(data = rects, ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = path_type), color = "black") +
+      ggplot2::geom_text(data = rects, ggplot2::aes(x = (xmin + xmax) / 2, y = (ymin + ymax) / 2, label = label, color = text_color), size = 3.20) +
+      ggplot2::scale_fill_manual(values = c("Followed Path" = "white", "Ignored Path" = "lightgrey"), name = NULL, labels = c("Followed Path", "Ignored Path")) +
+      ggplot2::scale_color_identity() +
+      ggplot2::xlim(-20, 20) +
+      ggplot2::ylim(-28, 9) +
+      ggplot2::theme_void() +
+      ggplot2::geom_segment(ggplot2::aes(x = -0.8, xend = -3.1, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -1.95, y = 1, label = "YES (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 6.2, xend = 7.5, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.85, y = 1, label = "NO (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -6, xend = -7.7, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -6.85, y = -6, label = "CORRECT (1)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -2.6, xend = 3, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 0.2, y = -6, label = "INCORRECT (2)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 0.2, xend = 11.8, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.6375, y = -6, label = "CORRECT AND INCORRECT (3)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -11.4, xend = -15, y = -12, yend = -21.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -13.2, y = -18, label = "POSITIVE (1)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -7.7, xend = -7.7, y = -12, yend = -21.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -7.7, y = -18, label = "NEGATIVE (2)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -4, xend = 0, y = -12, yend = -21.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -2, y = -18, label = "BOTH (3)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 1, xend = 1, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 1, y = -14, label = "FP (1)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 7, xend = 7, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 7, y = -14, label = "FN (2)"), color = "black", size = 3) +
+      ggplot2::theme(legend.position = c(.07, .95), legend.justification = c("left", "top"), legend.box.just = "left", legend.margin = ggplot2::margin(6, 6, 6, 6), legend.title = ggplot2::element_text(color = "black", size = 2)) +
+      ggplot2::guides(fill = ggplot2::guide_legend(title = "Legend", title.theme = ggplot2::element_text(size = 11)))
+  } else if (measure == "Equalized Odds") {
+    rects <- data.frame(
+      xmin = c(0, -4.2, 5.5, -10, -2, 5.5, -15, -9, -2),
+      xmax = c(5.5, 0, 9, -4, 3, 9, -10, -4, 3),
+      ymin = c(3, -4, -4, -8, -8, -8, -16, -16, -16),
+      ymax = c(7, -1, -1, -12, -12, -12, -19, -19, -19),
+      label = c("1. Is the ground truth \ninformation on the true values \nof the classification relevant \nin your context?", "2. In what type of \nclassification are you \ninterested?", "Disparate Impact", "3.What is more important: \na correct classification of the positive class, \na correct classification of the negative class, \nor both?", "4. What are the errors \nwith the highest cost?", "Equalized Odds", "4. What are the errors \nwith the highest cost?", "4. What are the errors \nwith the highest cost?", "Accuracy Parity"),
+      fill = c("white", "white", "lightgrey", "lightgrey", "lightgrey", "white", "lightgrey", "lightgrey", "lightgrey"),
+      text_color = c("black", "black", "black", "black", "black", "black", "black", "black", "black")
+    )
+    rects$path_type <- ifelse(rects$fill == "white", "Followed Path", "Ignored Path")
+    plotWorkflow <- ggplot2::ggplot() +
+      ggplot2::geom_rect(data = rects, ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = path_type), color = "black") +
+      ggplot2::geom_text(data = rects, ggplot2::aes(x = (xmin + xmax) / 2, y = (ymin + ymax) / 2, label = label, color = text_color), size = 3.20) +
+      ggplot2::scale_fill_manual(values = c("Followed Path" = "white", "Ignored Path" = "lightgrey"), name = NULL, labels = c("Followed Path", "Ignored Path")) +
+      ggplot2::scale_color_identity() +
+      ggplot2::xlim(-15, 13) +
+      ggplot2::ylim(-25, 9) +
+      ggplot2::theme_void() +
+      ggplot2::geom_segment(ggplot2::aes(x = 0, xend = -2, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -1, y = 1, label = "YES (1)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 5.5, xend = 7.25, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.375, y = 1, label = "NO (2)"), fill = "lightgray", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -4.2, xend = -7, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -5.6, y = -6, label = "CORRECT (1)"), fill = "lightgray", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -2.1, xend = 0.5, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -0.8, y = -6, label = "INCORRECT (2)"), fill = "lightgray", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 0, xend = 7.25, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 3.625, y = -6, label = "CORRECT AND INCORRECT (3)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -10, xend = -12.5, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -11.25, y = -14, label = "POSITIVE (1)"), fill = "lightgray", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -7, xend = -7, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -7, y = -14, label = "NEGATIVE (2)"), fill = "lightgray", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -4, xend = 0.5, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -1.75, y = -14, label = "BOTH (3)"), fill = "lightgray", size = 3) +
+      ggplot2::theme(legend.position = c(.07, .95), legend.justification = c("left", "top"), legend.box.just = "left", legend.margin = ggplot2::margin(6, 6, 6, 6), legend.title = ggplot2::element_text(color = "black", size = 2)) +
+      ggplot2::guides(fill = ggplot2::guide_legend(title = "Legend", title.theme = ggplot2::element_text(size = 11)))
+  } else if (measure == "Disparate Impact") {
+    rects <- data.frame(
+      xmin = c(0, -4.2, 5.5, -10, -2, 5.5, -15, -9, -2),
+      xmax = c(5.5, 0, 9, -4, 3, 9, -10, -4, 3),
+      ymin = c(3, -4, -4, -8, -8, -8, -16, -16, -16),
+      ymax = c(7, -1, -1, -12, -12, -12, -19, -19, -19),
+      label = c("1. Is the ground truth \ninformation on the true values \nof the classification relevant \nin your context?", "2. In what type of \nclassification are you \ninterested?", "Disparate Impact", "3.What is more important: \na correct classification of the positive class, \na correct classification of the negative class, \nor both?", "4. What are the errors \nwith the highest cost?", "Equalized Odds", "4. What are the errors \nwith the highest cost?", "4. What are the errors \nwith the highest cost?", "Accuracy Parity"),
+      fill = c("white", "lightgrey", "white", "lightgrey", "lightgrey", "lightgrey", "lightgrey", "lightgrey", "lightgrey"),
+      text_color = c("black", "black", "black", "black", "black", "black", "black", "black", "black")
+    )
+    rects$path_type <- ifelse(rects$fill == "white", "Followed Path", "Ignored Path")
+    plotWorkflow <- ggplot2::ggplot() +
+      ggplot2::geom_rect(data = rects, ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = path_type), color = "black") +
+      ggplot2::geom_text(data = rects, ggplot2::aes(x = (xmin + xmax) / 2, y = (ymin + ymax) / 2, label = label, color = text_color), size = 3.20) +
+      ggplot2::scale_fill_manual(values = c("Followed Path" = "white", "Ignored Path" = "lightgrey"), name = NULL, labels = c("Followed Path", "Ignored Path")) +
+      ggplot2::scale_color_identity() +
+      ggplot2::xlim(-15, 13) +
+      ggplot2::ylim(-25, 9) +
+      ggplot2::theme_void() +
+      ggplot2::geom_segment(ggplot2::aes(x = 0, xend = -2, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -1, y = 1, label = "YES (1)"), fill = "lightgray", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 5.5, xend = 7.25, y = 3, yend = -0.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "black", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 6.375, y = 1, label = "NO (2)"), color = "black", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -4.2, xend = -7, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -5.6, y = -6, label = "CORRECT (1)"), fill = "lightgray", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -2.1, xend = 0.5, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -0.8, y = -6, label = "INCORRECT (2)"), fill = "lightgray", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = 0, xend = 7.25, y = -4, yend = -7.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgrey", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = 3.625, y = -6, label = "CORRECT AND INCORRECT (3)"), fill = "lightgrey", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -10, xend = -12.5, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -11.25, y = -14, label = "POSITIVE (1)"), fill = "lightgray", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -7, xend = -7, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -7, y = -14, label = "NEGATIVE (2)"), fill = "lightgray", size = 3) +
+      ggplot2::geom_segment(ggplot2::aes(x = -4, xend = 0.5, y = -12, yend = -15.87), arrow = ggplot2::arrow(length = ggplot2::unit(0.05, "inches")), color = "lightgray", linewidth = 1) +
+      ggplot2::geom_label(ggplot2::aes(x = -1.75, y = -14, label = "BOTH (3)"), fill = "lightgray", size = 3) +
+      ggplot2::theme(legend.position = c(.07, .95), legend.justification = c("left", "top"), legend.box.just = "left", legend.margin = ggplot2::margin(6, 6, 6, 6), legend.title = ggplot2::element_text(color = "black", size = 2)) +
+      ggplot2::guides(fill = ggplot2::guide_legend(title = "Legend", title.theme = ggplot2::element_text(size = 11)))
+  } else {
+    stop("No plot is available for the requested measure.")
+  }
+  return(plotWorkflow)
 }
