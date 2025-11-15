@@ -1,7 +1,7 @@
 Package: jfa
 Title: Statistical Methods for Auditing
-Version: 0.7.3
-Date: 2025-03-10
+Version: 0.7.4
+Date: 2025-11-14
 Authors@R: c(
     person("Koen", "Derks", email = "k.derks@nyenrode.nl", role = c("aut", "cre"),
            comment = c(ORCID = '0000-0002-5533-9349')),
@@ -43,12 +43,12 @@ LazyData: true
 NeedsCompilation: yes
 SystemRequirements: C++17, GNU make
 Language: en-US
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Biarch: true
-Packaged: 2025-03-10 09:44:28 UTC; koenderks
-Author: Koen Derks [aut, cre] (<https://orcid.org/0000-0002-5533-9349>),
-  Lotte Mensink [ctb] (<https://orcid.org/0009-0001-8321-4690>),
-  Federica Picogna [ctb] (<https://orcid.org/0009-0005-5587-6119>)
+Packaged: 2025-11-14 16:12:43 UTC; koenderks
+Author: Koen Derks [aut, cre] (ORCID: <https://orcid.org/0000-0002-5533-9349>),
+  Lotte Mensink [ctb] (ORCID: <https://orcid.org/0009-0001-8321-4690>),
+  Federica Picogna [ctb] (ORCID: <https://orcid.org/0009-0005-5587-6119>)
 Maintainer: Koen Derks <k.derks@nyenrode.nl>
 Repository: CRAN
-Date/Publication: 2025-03-10 10:10:07 UTC
+Date/Publication: 2025-11-15 12:00:02 UTC
