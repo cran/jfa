@@ -1,7 +1,7 @@
 Package: jfa
 Title: Statistical Methods for Auditing
-Version: 0.7.4
-Date: 2025-11-14
+Version: 0.7.5
+Date: 2026-11-02
 Authors@R: c(
     person("Koen", "Derks", email = "k.derks@nyenrode.nl", role = c("aut", "cre"),
            comment = c(ORCID = '0000-0002-5533-9349')),
@@ -21,8 +21,8 @@ Description: Provides statistical methods for auditing as implemented in JASP
     statistical methodology, the package implements Bayesian equivalents of
     these methods whose statistical underpinnings are described in Derks et al.
     (2021) <doi:10.1111/ijau.12240>, Derks et al. (2024)
-    <doi:10.2308/AJPT-2021-086>, Derks et al. (2022) <doi:10.31234/osf.io/8nf3e>
-    Derks et al. (2024) <doi:10.31234/osf.io/tgq5z>, and Derks et al. (2025)
+    <doi:10.2308/AJPT-2021-086>, Derks et al. (2026) <doi:10.1504/IJADS.2027.10078699>
+    Derks et al. (2026) <doi:10.1111/ijau.70027>, and Derks et al. (2025)
     <doi:10.31234/osf.io/b8tu2>.
 Depends: R (>= 3.5.0)
 Imports: bde (>= 1.0.1.1), extraDistr (>= 1.9.1), ggplot2 (>= 3.4.2),
@@ -43,12 +43,12 @@ LazyData: true
 NeedsCompilation: yes
 SystemRequirements: C++17, GNU make
 Language: en-US
-RoxygenNote: 7.3.3
 Biarch: true
-Packaged: 2025-11-14 16:12:43 UTC; koenderks
+Config/roxygen2/version: 8.1.1
+Packaged: 2026-11-02 16:41:48 UTC; koenderks
 Author: Koen Derks [aut, cre] (ORCID: <https://orcid.org/0000-0002-5533-9349>),
   Lotte Mensink [ctb] (ORCID: <https://orcid.org/0009-0001-8321-4690>),
   Federica Picogna [ctb] (ORCID: <https://orcid.org/0009-0005-5587-6119>)
 Maintainer: Koen Derks <k.derks@nyenrode.nl>
 Repository: CRAN
-Date/Publication: 2025-11-15 12:00:02 UTC
+Date/Publication: 2026-11-02 20:10:08 UTC
